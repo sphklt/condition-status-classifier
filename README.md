@@ -228,13 +228,6 @@ condition-status-classifier/
 
 ## Installation
 
-Clone the repository:
-
-```bash
-git clone https://github.com/YOUR_USERNAME/condition-status-classifier.git
-cd condition-status-classifier
-```
-
 Create a virtual environment:
 
 ```bash
@@ -251,26 +244,6 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
-```
-
----
-
-## Requirements
-
-The project uses:
-
-```text
-pandas
-pytest
-streamlit
-```
-
-A simple `requirements.txt` may look like:
-
-```text
-pandas>=2.0.0
-pytest>=8.0.0
-streamlit>=1.30.0
 ```
 
 ---
@@ -312,14 +285,6 @@ Expected output:
 
 ```text
 5 passed
-```
-
-If imports fail with `ModuleNotFoundError: No module named 'src'`, make sure `pytest.ini` exists in the project root:
-
-```ini
-[pytest]
-pythonpath = .
-testpaths = tests
 ```
 
 ---
@@ -486,16 +451,3 @@ Possible improvements include:
 
 ---
 
-## Example Interview Explanation
-
-I built an explainable clinical NLP baseline to classify whether a condition in a short clinical phrase is ongoing, resolved, negated, or ambiguous. I used a rule-based design because the task benefits from interpretability.
-
-The classifier checks for clinically meaningful cue groups such as negation, uncertainty, resolved or historical cues, and ongoing cues. It returns not only the predicted label but also the matched cue and reason, making the output easy to inspect.
-
-I also included a small labeled dataset, command-line evaluation, unit tests, and a Streamlit demo for interactive testing.
-
----
-
-## Disclaimer
-
-This project is for educational and demonstration purposes only. It is not intended for clinical decision-making or production medical use.
