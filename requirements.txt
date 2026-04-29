@@ -1,3 +1,10 @@
+# ── NER (optional — vocabulary fallback works without this) ──────────────────
+# scispacy==0.5.4
+# After installing scispacy, download the disease NER model:
+#   pip install https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
+# The app detects scispacy automatically and falls back to vocabulary matching
+# if the model is not available.
+
 altair==6.1.0
 attrs==26.1.0
 blinker==1.9.0

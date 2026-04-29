@@ -1,201 +1,187 @@
 # Clinical Condition Status Classifier
 
-A small, explainable clinical NLP project that classifies whether a medical condition mentioned in a short clinical phrase is **ongoing**, **resolved**, **negated**, or **ambiguous**.
+A clinical NLP system that classifies whether a medical condition mentioned in clinical text is **ongoing**, **resolved**, **negated**, or **ambiguous**.
 
-This project was built as a rule-based baseline for condition status detection in clinical text. The goal is to demonstrate clear clinical reasoning, reproducible code, evaluation, tests, and an optional Streamlit demo.
+The system operates at two levels:
 
----
+- **Phrase level** — classifies a single short clinical phrase with confidence score and reasoning
+- **Note level** — processes a full clinical note end-to-end: detects sections, extracts conditions via NER, and classifies each condition in its sentence context
 
-## Problem
-
-Clinical text often mentions conditions in different ways. A condition may be currently active, historical, denied by the patient, or uncertain.
-
-For example:
-
-| Clinical Phrase | Expected Status | Reason |
-|---|---|---|
-| `The patient has asthma` | `ongoing` | The condition appears currently active. |
-| `Asthma better today` | `ongoing` | The condition has improved but is not resolved. |
-| `Asthma resolved after treatment` | `resolved` | The phrase contains an explicit resolution cue. |
-| `Patient denies chest pain` | `negated` | The patient denies the symptom. |
-| `Possible pneumonia` | `ambiguous` | The diagnosis is uncertain. |
-
-The task is to infer condition status from the phrase.
-
----
-
-## Project Goal
-
-The goal of this project is to build a simple, interpretable baseline system that can:
-
-1. Read short clinical phrases.
-2. Detect clinical status cues.
-3. Classify each phrase into a condition status label.
-4. Provide the matched cue and explanation for the prediction.
-5. Evaluate predictions against a small labeled dataset.
-6. Provide a lightweight Streamlit interface for interactive testing.
+Both levels are fully rule-based and explainable. Every prediction returns the matched signal, the reason, and a confidence score.
 
 ---
 
 ## Status Labels
 
-This project uses four labels.
+| Label | Meaning | Examples |
+|---|---|---|
+| `ongoing` | Condition is active, persistent, stable, controlled, or currently changing | `"Persistent cough for 2 weeks"`, `"Diabetes is stable"`, `"Seizures controlled on medication"` |
+| `resolved` | Condition is historical, closed, or no longer active | `"History of asthma"`, `"Fever has resolved"`, `"s/p appendectomy"` |
+| `negated` | Condition is explicitly denied or absent | `"Patient denies chest pain"`, `"No evidence of pneumonia"`, `"Fever -ve"` |
+| `ambiguous` | Condition is uncertain, suspected, or unconfirmed | `"Possible pneumonia"`, `"Rule out sepsis"`, `"Concern for pulmonary embolism"` |
 
-### 1. `ongoing`
-
-The condition appears active, chronic, persistent, controlled, stable, improving, or worsening.
-
-Examples:
-
-```text
-The patient has asthma
-Asthma better today
-Diabetes is stable
-Persistent cough for 2 weeks
-Seizures controlled on medication
-```
-
-Important note:
+**Important nuance — "better" is ongoing, not resolved:**
 
 ```text
-Asthma better today
+Asthma better today  →  ongoing
 ```
 
-is classified as `ongoing`, not `resolved`, because “better” means the condition has improved, but it does not indicate that the condition is fully gone.
+"Better" means the condition has improved but is still present. Words like `stable`, `controlled`, `improving`, and `better` all signal an active condition being managed — not a resolved one.
 
 ---
 
-### 2. `resolved`
+## What Makes This System Non-Trivial
 
-The condition appears closed, historical, or no longer active.
+Most clinical condition classifiers use simple keyword lookup — scan for a word, return a label. This system addresses four failure modes that keyword lookup cannot handle.
 
-Examples:
+### 1. Pseudo-negation filtering (NegEx-inspired)
+
+Some phrases contain negation words that do **not** deny a condition. A keyword system classifies all of these as `negated`. This system does not.
+
+| Phrase | Naive system | This system | Why |
+|---|---|---|---|
+| `No longer has headache` | `negated` (sees "no") | `resolved` | "no longer" = condition ended, not denied |
+| `Not improving on current regimen` | `negated` (sees "not") | `ongoing` | condition still present, just not responding |
+| `No improvement noted` | `negated` (sees "no") | `ongoing` | condition persists unchanged |
+| `No change in diabetes status` | `negated` (sees "no") | `ongoing` | unchanged = still present |
+
+These patterns are detected before scoring and their spans are masked so the negation cue cannot fire on them. This is directly inspired by the **NegEx algorithm** (Chapman et al., 2001), a foundational method in clinical NLP.
+
+### 2. Adversative clause detection
+
+When a sentence has two clauses separated by an adversative conjunction ("But", "However") or a period, the **final clause carries the definitive status**. A bag-of-words system averages all signals equally.
 
 ```text
-Asthma resolved after treatment
-Fever has resolved
-History of asthma
-Previous fracture of left arm
-No longer has headache
+"I had severe flu which I think is getting better now.
+ But after a couple of days, it got completely over."
+```
+
+| System | Result | Why it fails |
+|---|---|---|
+| Keyword (original) | `ongoing` — sees "better", "now" | treats the whole sentence as one bag of words |
+| This system | `resolved` — reads "completely over" | splits on the period, classifies the final clause separately |
+
+The final clause rule reflects a real property of clinical language: clinicians and patients often state the *current* status last, after describing how things were before.
+
+### 3. Temporal signal detection
+
+Time expressions are a strong, underused classification signal. The system detects past and present temporal patterns independently from keyword cues and uses them to boost the relevant category score.
+
+| Phrase | Temporal signal | Effect |
+|---|---|---|
+| `"DM diagnosed 3 years ago"` | past (`"3 years ago"`) | boosts resolved score |
+| `"Chest pain since this morning"` | present (`"this morning"`) | boosts ongoing score |
+| `"Was treated for pneumonia last year"` | past (`"last year"` + `"was treated"`) | boosts resolved score |
+| `"Acute onset shortness of breath"` | present (`"acute"`) | boosts ongoing score |
+
+This handles cases where no explicit resolved/ongoing keyword exists — the time expression alone is sufficient evidence.
+
+### 4. Sentence-boundary-aware context windows
+
+When classifying an entity within a longer section of text, the context must not bleed across sentence boundaries.
+
+**The problem with fixed character windows:**
+
+```text
+"No fever.  Patient has diabetes."
+ ^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^
+ sentence 1   sentence 2
+```
+
+A 120-character window around "diabetes" would include "No fever", causing the negation cue "No" to pollute the diabetes classification.
+
+**This system's approach:**
+- Splits section text into sentences using a clinical sentence boundary detector
+- Protects abbreviations (`Dr.`, `b.i.d.`, `e.g.`) so they don't create false boundaries
+- Deliberately does NOT protect units (`mg`, `kg`) — when followed by a capital word, they reliably mark real sentence boundaries
+- Each entity is classified using only the sentence it appears in
+
+Result: "No fever" never contaminates "Patient has diabetes."
+
+---
+
+## Architecture
+
+The system operates as a two-level pipeline.
+
+### Level 1 — Phrase Classifier
+
+```
+Raw phrase
+    │
+    ▼
+Abbreviation normalizer     h/o → history of, -ve → negative for, s/p → status post
+    │
+    ▼
+Pseudo-negation masking     "no longer", "not improving" → masked before cue matching
+    │
+    ▼
+Multi-signal cue matching   word-boundary regex, weighted scores per category
+    │
+    ▼
+Temporal signal detection   past/present time expressions boost resolved/ongoing
+    │
+    ▼
+Adversative clause check    "But…" / "However…" / "." → classify final clause
+    │
+    ▼
+Conflict detection          competing signals → reduced confidence
+    │
+    ▼
+{status, confidence, cue, reason, signals}
+```
+
+### Level 2 — Full Note Pipeline
+
+```
+Raw clinical note
+    │
+    ▼
+Section detector            PMH → resolved prior | HPI → ongoing prior | Assessment → ongoing prior
+    │
+    ▼
+(per section)
+    │
+    ▼
+Abbreviation normalizer
+    │
+    ▼
+Sentence splitter           splits section into sentences with char offsets
+    │
+    ▼
+NER                         SciSpaCy (if installed) or vocabulary-based fallback
+    │
+    ▼
+Context extraction          finds the sentence containing each entity (not a fixed char window)
+    │
+    ▼
+Phrase classifier           classifies each entity in its sentence context
+    │
+    ▼
+Section prior override      low-confidence result? section prior takes over
+    │
+    ▼
+Deduplication               first mention of each condition wins
+    │
+    ▼
+[{condition, status, confidence, section, reason}, ...]
 ```
 
 ---
 
-### 3. `negated`
+## Module Reference
 
-The condition is explicitly denied or absent.
-
-Examples:
-
-```text
-Patient denies chest pain
-No evidence of pneumonia
-Negative for abdominal pain
-```
-
----
-
-### 4. `ambiguous`
-
-The condition is uncertain, suspected, or requires further review.
-
-Examples:
-
-```text
-Possible pneumonia
-Rule out sepsis
-Concern for infection
-Suspected asthma
-```
-
----
-
-## Approach
-
-This project uses a rule-based classifier.
-
-The system looks for cue phrases in the input text and assigns a label based on priority.
-
-Priority order:
-
-1. Negation cues
-2. Ambiguity cues
-3. Resolved or historical cues
-4. Ongoing or active cues
-5. Default to ongoing if no cue is found
-
-This priority is important because some clinical phrases can contain overlapping signals.
-
-Example:
-
-```text
-No evidence of active pneumonia
-```
-
-Even though the phrase contains the word `active`, the stronger cue is `no evidence of`, so the condition should be classified as `negated`.
-
----
-
-## Rule Categories
-
-### Negation cues
-
-Examples:
-
-```text
-denies
-no evidence of
-negative for
-without
-no signs of
-not present
-```
-
-### Resolved cues
-
-Examples:
-
-```text
-resolved
-no longer
-history of
-past history of
-previous
-prior
-status post
-s/p
-```
-
-### Ongoing cues
-
-Examples:
-
-```text
-has
-currently
-active
-persistent
-ongoing
-worsening
-stable
-controlled
-improving
-better
-```
-
-### Ambiguous cues
-
-Examples:
-
-```text
-possible
-rule out
-r/o
-suspected
-may have
-concern for
-question of
-```
+| Module | Role |
+|---|---|
+| `src/normalizer.py` | Expands clinical abbreviations before any matching |
+| `src/rules.py` | Weighted cue lists (100+ entries) + pseudo-negation registry |
+| `src/temporal.py` | Detects past/present temporal expressions |
+| `src/classifier.py` | Orchestrates phrase-level classification |
+| `src/section_detector.py` | Splits clinical notes into labeled sections |
+| `src/ner.py` | Named entity extraction (SciSpaCy primary, vocabulary fallback) |
+| `src/sentence_splitter.py` | Clinical sentence boundary detection |
+| `src/pipeline.py` | Orchestrates the full note-level pipeline |
+| `src/utils.py` | Dataset evaluation helper |
 
 ---
 
@@ -205,22 +191,28 @@ question of
 condition-status-classifier/
 │
 ├── data/
-│   └── clinical_phrases.csv
+│   └── clinical_phrases.csv          39-phrase labelled dataset (hard cases included)
 │
 ├── src/
 │   ├── __init__.py
-│   ├── rules.py
-│   ├── classifier.py
-│   └── utils.py
+│   ├── normalizer.py                 abbreviation expansion
+│   ├── rules.py                      weighted cues + pseudo-negation patterns
+│   ├── temporal.py                   temporal signal detection
+│   ├── classifier.py                 phrase-level classifier
+│   ├── section_detector.py           note section splitter
+│   ├── ner.py                        NER (SciSpaCy / vocabulary fallback)
+│   ├── sentence_splitter.py          sentence boundary detection
+│   ├── pipeline.py                   full note pipeline
+│   └── utils.py                      dataset evaluation
 │
 ├── tests/
-│   └── test_classifier.py
+│   ├── test_classifier.py            33 phrase-level tests
+│   └── test_pipeline.py              33 pipeline tests (section, NER, pipeline, sentence splitter)
 │
-├── app.py
-├── main.py
+├── app.py                            Streamlit app (phrase + note + evaluation tabs)
+├── main.py                           CLI evaluation entrypoint
 ├── pytest.ini
 ├── requirements.txt
-├── .gitignore
 └── README.md
 ```
 
@@ -228,226 +220,379 @@ condition-status-classifier/
 
 ## Installation
 
-Create a virtual environment:
-
 ```bash
 python3 -m venv venv
-```
-
-Activate the virtual environment:
-
-```bash
 source venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
 pip install -r requirements.txt
 ```
 
+**Optional — SciSpaCy NER (improves entity recall on real notes):**
+
+```bash
+pip install scispacy
+pip install https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
+```
+
+The system detects SciSpaCy automatically. If not installed, it falls back to a vocabulary-based NER covering ~80 common clinical conditions with no setup required.
+
 ---
 
-## Run the Classifier
+## Usage
 
-To run the command-line evaluation:
+### CLI — evaluate the labelled dataset
 
 ```bash
 python main.py
 ```
 
-Example output:
-
 ```text
-                              text gold_status predicted_status      matched_cue  is_correct
-0           The patient has asthma     ongoing          ongoing              has        True
-1              Asthma better today     ongoing          ongoing           better        True
-2  Asthma resolved after treatment    resolved         resolved         resolved        True
-3                History of asthma    resolved         resolved       history of        True
-4         No evidence of pneumonia     negated          negated  no evidence of        True
+                                           text gold_status predicted_status        matched_cue  confidence  is_correct
+                         The patient has asthma     ongoing          ongoing        patient has        0.78        True
+                            Asthma better today     ongoing          ongoing             better        0.82        True
+                Asthma resolved after treatment    resolved         resolved     resolved after        1.00        True
+                       No evidence of pneumonia     negated          negated     no evidence of        1.00        True
+                         No longer has headache    resolved         resolved      no longer has        1.00        True
+                                   h/o diabetes    resolved         resolved         history of        0.95        True
+                                 c/o chest pain     ongoing          ongoing       complains of        1.00        True
+                                      Fever -ve     negated          negated       negative for        1.00        True
+         History of asthma, currently worsening     ongoing          ongoing          worsening        0.80        True
 
-Accuracy: 100.0 %
+Accuracy: 97.44 %  (38/39 correct)
 ```
 
-The high accuracy is expected on this small demo dataset because the examples are designed to test the rule baseline directly. This should not be interpreted as production-level clinical performance.
+### CLI — process a full clinical note
 
----
+```python
+from src.pipeline import process_note, format_results
 
-## Run Tests
+note = """
+History of Present Illness:
+67-year-old female presenting with worsening dyspnea.
+She reports fatigue for 3 days. Denies chest pain or fever.
 
-Run:
+Past Medical History:
+Hypertension, type 2 diabetes mellitus (diagnosed 5 years ago),
+h/o pneumonia (resolved last year), atrial fibrillation controlled on medication.
+
+Assessment:
+Possible heart failure exacerbation. Rule out pulmonary embolism.
+Hypertension well-controlled. Diabetes stable.
+"""
+
+print(format_results(process_note(note)))
+```
+
+```text
+NER method : vocabulary
+Sections   : history_of_present_illness, past_medical_history, assessment
+
+CONDITION                           STATUS         CONF  SECTION
+----------------------------------------------------------------
+dyspnea                             ongoing        100%  history_of_present_illness
+shortness of breath                 ongoing        100%  history_of_present_illness
+chest pain                          negated        100%  history_of_present_illness
+fever                               negated        100%  history_of_present_illness
+Hypertension                        resolved       100%  past_medical_history
+type 2 diabetes mellitus            resolved       100%  past_medical_history
+pneumonia                           resolved       100%  past_medical_history
+atrial fibrillation                 resolved       100%  past_medical_history
+heart failure                       ambiguous       76%  assessment
+pulmonary embolism                  ambiguous       95%  assessment
+Diabetes                            ongoing         80%  assessment
+```
+
+### Run tests
 
 ```bash
 pytest
 ```
 
-Expected output:
-
 ```text
-5 passed
+66 passed in 0.04s
 ```
 
----
-
-## Run the Streamlit App
-
-Start the app:
+### Run the Streamlit app
 
 ```bash
 streamlit run app.py
 ```
 
-Then open the local URL shown in the terminal.
+The app has three tabs:
 
-Example input:
+| Tab | What it does |
+|---|---|
+| Single Phrase | Classify a phrase; shows confidence, signal scores, abbreviations expanded, clause used |
+| Full Clinical Note | Paste a clinical note; runs the full pipeline and returns a colour-coded condition table |
+| Evaluate Dataset | Runs the classifier over the labelled CSV and reports accuracy |
 
-```text
-Asthma better today
+---
+
+## Module Details
+
+### `src/normalizer.py` — Abbreviation expansion
+
+Real clinical notes are dense with shorthand. The normalizer expands abbreviations before any cue matching so the classifier sees full English phrases.
+
+| Input | Expanded | Effect on classification |
+|---|---|---|
+| `h/o diabetes` | `history of diabetes` | `history of` fires as resolved cue |
+| `c/o chest pain` | `complains of chest pain` | `complains of` fires as ongoing cue |
+| `s/p appendectomy` | `status post appendectomy` | `status post` fires as resolved cue |
+| `Fever -ve` | `Fever negative for` | `negative for` fires as negation cue |
+| `HTN well-controlled` | `hypertension well-controlled` | `well-controlled` fires as ongoing cue |
+| `PMH: diabetes` | `past medical history: diabetes` | `past medical history` fires as resolved cue |
+
+### `src/rules.py` — Weighted cues
+
+Each cue is a `(phrase, weight)` tuple. Weight reflects reliability — a 4-word phrase like `"no evidence of"` (weight 1.0) is a much stronger signal than bare `"no"` (weight 0.6).
+
+Cues are grouped into four categories, each with ~25 entries ordered from most specific to least specific:
+
+```python
+NEGATION_CUES = [
+    ("patient denies any", 1.0),
+    ("no evidence of",     1.0),
+    ("has no",             0.95),   # compound — handles "patient has no fever"
+    ("no active",          0.90),   # compound — handles "no active infection"
+    ("without",            0.70),
+    ("no",                 0.60),   # weakest — single word, many false positives
+    ...
+]
 ```
 
-Example output:
+**Compound negation cues** are the key addition over a simple keyword list. Without them:
 
 ```text
-Status: ongoing
-Matched cue: better
-Reason: Ongoing/active cue found: 'better'
+"Patient has no fever"
+```
+
+A naive system sees `"patient has"` (ongoing, strong) and `"no"` (negated, weak) and picks **ongoing**. This system includes `"has no"` (negated, weight 0.95) as a compound cue, which outscores `"patient has"` (ongoing, weight 0.70).
+
+**Pseudo-negation patterns** (in `PSEUDO_NEGATION_PATTERNS`) are phrases that syntactically look like negations but semantically are not:
+
+```python
+PSEUDO_NEGATION_PATTERNS = [
+    r"\bnot improving\b",      # condition persists — ongoing, not negated
+    r"\bno improvement\b",     # condition persists — ongoing, not negated
+    r"\bnot only\b",           # additive construction
+    r"\bnot fully\b",          # partial state — not a full negation
+    r"\bno change\b",          # condition unchanged — ongoing, not negated
+    ...
+]
+```
+
+### `src/temporal.py` — Temporal signal detection
+
+Temporal expressions give strong evidence about condition status independently from keyword cues. The module detects two signal types using regex:
+
+**Past signals** → boost `resolved` score:
+- Numeric: `"3 years ago"`, `"2 months ago"`
+- Relative: `"last year"`, `"last month"`
+- Absolute: `"in 2019"`, `"in 2020"`
+- Adverbial: `"previously"`, `"formerly"`, `"historically"`
+- Verb tense: `"was diagnosed with"`, `"was treated for"`, `"had an episode of"`
+
+**Present signals** → boost `ongoing` score:
+- Adverbial: `"currently"`, `"now"`, `"today"`
+- Relative: `"this week"`, `"this morning"`, `"since yesterday"`
+- Duration: `"for the past 3 days"`, `"over the last week"`
+- Presentation: `"presents with"`, `"complains of"`
+- Clinical: `"acute"`, `"acutely"`
+
+### `src/classifier.py` — Phrase-level classification
+
+**Scoring approach** — all matching cues contribute, not just the first match:
+
+```
+category_score = max_weight_found + multi_cue_bonus (capped at 1.0)
+```
+
+This means "History of asthma, currently worsening" is correctly classified as `ongoing`:
+
+```
+resolved: "history of" (0.95)  →  score 0.95
+ongoing:  "currently" (0.90) + "worsening" (0.95)  →  score 0.95 + 0.08 bonus = 1.0
+
+ongoing wins
+```
+
+The original first-match priority system returned `resolved` for this phrase.
+
+**Adversative clause detection:**
+
+When text contains multiple sentences or an adversative conjunction, the pipeline:
+1. Tries to split on a period + capital letter
+2. Falls back to splitting on `"but"`, `"however"`, `"although"` etc.
+3. Classifies the final clause separately
+4. If that clause has confidence ≥ 0.65, uses it (with a 8% confidence discount for ignoring earlier context)
+
+```text
+"Getting better now. But it got completely over."
+ ──────────────────  ──────────────────────────
+  clause 1: ongoing   clause 2: resolved (wins)
+```
+
+### `src/section_detector.py` — Note section detection
+
+Clinical note sections carry strong status priors:
+
+| Section | Status prior | Rationale |
+|---|---|---|
+| Past Medical History | `resolved` | Conditions listed here were active in the past |
+| Past Surgical History | `resolved` | Procedures are historical events |
+| Chief Complaint | `ongoing` | The reason for the visit — active by definition |
+| History of Present Illness | `ongoing` | Current presentation |
+| Assessment | `ongoing` | Active working diagnoses |
+| Family History | *(skipped)* | These are family members' conditions, not the patient's |
+
+Headers are detected via regex at the start of a line, accepting both full names (`"Past Medical History:"`) and abbreviations (`"PMH:"`).
+
+When the phrase classifier returns low confidence (< 0.55) and the section has a prior, the prior overrides. This handles bare condition lists like:
+
+```text
+Past Medical History:
+Hypertension, diabetes, atrial fibrillation.
+```
+
+No cue phrase appears with any of those conditions, but the section header makes the correct answer obvious: all three are `resolved`.
+
+### `src/sentence_splitter.py` — Sentence boundary detection
+
+Splits text into sentences with character offsets, solving the context-pollution problem.
+
+**Abbreviation protection:** periods in known abbreviations are temporarily replaced with a null-byte guard so the boundary regex ignores them.
+
+```text
+"Dr. Smith examined the patient. He has hypertension."
+ ─── protected                   ─── real boundary
+```
+
+**Key design decision — units are NOT protected:**
+
+`"mg"`, `"kg"`, `"ml"` are deliberately excluded from the protection list. When a unit abbreviation is followed by a capital word, it is almost always a real sentence boundary:
+
+```text
+"Patient takes 500 mg. She has diabetes."
+              ──────── real boundary → 2 sentences ✓
+```
+
+The only risk would be `"5-yr. history"` — but here `"history"` starts with lowercase, so the boundary regex (which requires a capital letter after the period) correctly ignores it.
+
+### `src/ner.py` — Named entity recognition
+
+Two paths, selected automatically:
+
+**Primary — SciSpaCy `en_ner_bc5cdr_md`:**
+- Trained on the BC5CDR corpus (disease and chemical entities)
+- Returns `DISEASE` entities with character offsets
+- Install: see Installation section above
+
+**Fallback — vocabulary matching:**
+- ~80 common clinical conditions compiled into a single alternation regex
+- Ordered longest-to-shortest so `"congestive heart failure"` matches before `"heart failure"` before `"failure"`
+- Works with zero setup — used automatically when SciSpaCy is not installed
+
+```python
+from src.ner import extract_entities, active_ner_method
+print(active_ner_method())          # "scispacy" or "vocabulary"
+entities = extract_entities("Patient has hypertension and no evidence of diabetes.")
+# → [MedicalEntity("hypertension", 12, 24, "CONDITION"),
+#    MedicalEntity("diabetes", 50, 58, "CONDITION")]
 ```
 
 ---
 
-## Sample Dataset
+## Dataset
 
-The dataset is stored in:
+`data/clinical_phrases.csv` contains 39 labelled phrases, expanded from the original 15 to include harder cases that expose common failure modes:
 
-```text
-data/clinical_phrases.csv
-```
-
-Each row contains:
-
-| Column | Description |
+| Category | Examples |
 |---|---|
-| `text` | Short clinical phrase |
-| `condition` | Condition or symptom being evaluated |
-| `gold_status` | Expected label |
-| `explanation` | Human-readable explanation |
+| Abbreviation cases | `"h/o diabetes"`, `"c/o chest pain"`, `"Fever -ve"`, `"HTN well-controlled"` |
+| Compound negation scope | `"Patient has no fever"`, `"No active infection"`, `"Imaging shows no evidence of fracture"` |
+| Pseudo-negation | `"No longer has headache"`, `"Hypertension not improving on current regimen"` |
+| Temporal signals | `"DM diagnosed 3 years ago"`, `"Chest pain since this morning"` |
+| Conflicting signals | `"History of asthma, currently worsening"`, `"Prior MI, presenting with chest pain"` |
 
-Example:
+---
 
-```csv
-text,condition,gold_status,explanation
-"The patient has asthma",asthma,ongoing,"Condition is currently present"
-"Asthma better today",asthma,ongoing,"Better means improved but not resolved"
-"Asthma resolved after treatment",asthma,resolved,"Explicit resolved cue"
-"Patient denies chest pain",chest pain,negated,"Denies is a negation cue"
-"Possible pneumonia",pneumonia,ambiguous,"Possible indicates uncertainty"
+## Classifier Output Schema
+
+Every classification returns a consistent dictionary:
+
+```python
+{
+    "status":     "ongoing",           # ongoing | resolved | negated | ambiguous
+    "confidence": 0.82,                # 0.0 – 1.0
+    "cue":        "worsening",         # highest-weight matched phrase
+    "reason":     "Ongoing/active cue found: 'worsening' | Temporal hint: present ('currently')",
+    "signals": {
+        "negated":          0.0,
+        "ambiguous":        0.0,
+        "resolved":         0.95,
+        "ongoing":          1.0,
+        "temporal":         "present",
+        "pseudo_negations": [],
+        "abbreviations":    ["htn → hypertension"],
+        "clause_used":      "full"     # or "final_clause"
+    }
+}
 ```
 
 ---
 
 ## Design Decisions
 
-### Why rule-based?
+### Why rule-based rather than ML?
 
-A rule-based approach was chosen because the project is small, explainable, and easy to inspect. In clinical NLP, interpretability is important, especially when the system is making decisions about condition status.
+Clinical NLP demands interpretability. Every prediction this system makes can be traced back to a specific cue, a temporal expression, or a section prior. A clinician or engineer auditing a prediction can see exactly why the label was assigned and correct the rules if they disagree.
 
-This baseline makes it clear why a prediction was made by returning:
+An ML model offers higher recall at the cost of opacity. For a system whose predictions could inform clinical decisions, a transparent rule system with known failure modes is a safer starting point.
 
-- predicted status
-- matched cue
-- explanation
+### Why weighted multi-signal scoring rather than priority order?
 
-Example:
-
-```json
-{
-  "status": "ongoing",
-  "cue": "better",
-  "reason": "Ongoing/active cue found: 'better'"
-}
-```
-
----
-
-### Why not full clinical NER?
-
-For this demo, the condition is assumed to already be present in the short phrase or provided in the dataset.
-
-A production system would likely add clinical Named Entity Recognition to first extract medical problems, symptoms, or diagnoses from longer notes.
-
-Possible future pipeline:
+The original system used a fixed priority order: negated → ambiguous → resolved → ongoing. This fails when two signals appear in the same phrase:
 
 ```text
-Clinical Note
-    ↓
-Condition / Symptom Extraction
-    ↓
-Context Window Around Each Entity
-    ↓
-Condition Status Classification
-    ↓
-Structured Output
+"History of asthma, currently worsening"
 ```
 
----
+- Priority order: `resolved` wins (first cue found)
+- Weighted scoring: `ongoing` wins (worsening 0.95 + currently 0.90 + multi-cue bonus > history of 0.95)
 
-### Why is “better” ongoing?
+Weighted scoring is better because it reflects how much evidence supports each label, not just which label had a cue appear first.
 
-Words like `better`, `improving`, `stable`, and `controlled` usually indicate that the condition still exists but has changed in severity or control.
+### Why a two-level pipeline rather than a single classifier?
 
-For example:
+The phrase classifier is designed for short, focused input — a clause or sentence about one condition. Real clinical notes are long and mention many conditions in different contexts and sections.
 
-```text
-Asthma better today
-```
-
-This does not mean asthma is gone. It means the asthma is improved. Therefore, the status is classified as `ongoing`.
+The pipeline feeds the phrase classifier exactly what it needs: a single sentence from the appropriate section. This separation of concerns means the classifier does not need to change as the pipeline becomes more sophisticated (e.g. adding NER models, section-specific logic, coreference resolution).
 
 ---
 
-## Limitations
+## Known Limitations
 
-This project is a baseline demo and is not intended for clinical use.
-
-Current limitations:
-
-- Small dataset
-- Limited cue list
-- No full clinical Named Entity Recognition
-- No long-note context handling
-- No section-aware logic
-- No temporal reasoning beyond simple cues
-- No handling of complex contradictions
-- No machine learning model
-- No clinical validation
-
-Example of a challenging phrase:
-
-```text
-History of asthma, currently worsening
-```
-
-This contains both historical and active cues. A more advanced system would need better context and priority handling.
+| Limitation | What it means in practice |
+|---|---|
+| No syntactic parsing | Cannot resolve which noun a modifier attaches to — "Atrial fibrillation, previously in sinus rhythm" misclassifies because "previously" modifies the rhythm, not the AF |
+| NER vocabulary ceiling | Rare conditions, specialist terms, and misspellings are missed by the fallback NER |
+| Sentence-level only | No coreference — "The patient had a cough. It resolved." requires knowing "It" = "the cough" |
+| Fixed section prior threshold | The 0.55 confidence threshold for section prior override is not empirically calibrated |
+| No list-scope negation | "Denies fever, chills, or chest pain" — the negation is correctly found for each, but only coincidentally; there is no explicit list parser |
+| Confidence is not calibrated | A confidence of 0.85 means "a strong cue was found", not "this prediction is correct 85% of the time" |
 
 ---
 
-## Future Improvements
+## What Comes Next
 
-Possible improvements include:
-
-1. Add more examples to the dataset.
-2. Add section-aware classification, such as:
-   - Past Medical History
-   - Assessment and Plan
-   - Review of Systems
-3. Add clinical NER for condition extraction.
-4. Add confidence scores.
-5. Add error analysis.
-6. Add support for longer clinical notes.
-7. Add ML-based classification.
-8. Add LLM-based classification with structured output.
-9. Add evaluation metrics such as precision, recall, and F1-score.
-10. Add more clinically realistic edge cases.
+| Step | Effort | Impact |
+|---|---|---|
+| Sentence-boundary-aware context | Done | Eliminates cross-sentence signal pollution |
+| Section detection | Done | Free confidence boost from note structure |
+| Clinical NER (SciSpaCy) | Done | Unlocks real note processing |
+| Dependency parsing | Medium | Fixes modifier-scope errors (requires spaCy) |
+| Calibrated confidence | Medium | Enables reliable downstream thresholds |
+| Annotated real-note evaluation | Medium | Shows true precision/recall on clinical data |
+| Fine-tuned BERT / LLM | High | Handles novel phrasing, rare conditions, implicit context |
 
 ---
-
