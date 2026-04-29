@@ -5,6 +5,8 @@ from src.classifier import classify_condition_status
 from src.utils import evaluate_dataset
 from src.pipeline import process_note, format_results
 from src.ner import active_ner_method
+from src.calibration import reliability_diagram
+from src.note_evaluator import evaluate_notes
 
 st.set_page_config(
     page_title="Clinical Condition Status Classifier",
@@ -204,7 +206,8 @@ with tab_eval:
     st.subheader("Evaluate sample dataset")
     st.caption("Runs the phrase classifier over the labelled CSV dataset.")
 
-    if st.button("Run evaluation", key="btn_eval"):
+    # ── Phrase-level evaluation ───────────────────────────────────────────────
+    if st.button("Run phrase evaluation", key="btn_eval"):
         df = evaluate_dataset("data/clinical_phrases.csv")
         accuracy = df["is_correct"].mean()
 
@@ -227,3 +230,103 @@ with tab_eval:
                     f"- **{row['text']}** → predicted `{row['predicted_status']}` "
                     f"(expected `{row['gold_status']}`): {row['prediction_reason']}"
                 )
+
+    st.divider()
+
+    # ── Calibration analysis ─────────────────────────────────────────────────
+    st.subheader("Confidence calibration")
+    st.caption(
+        "A well-calibrated model predicts confidence X% and is correct X% of the time. "
+        "The reliability diagram shows actual accuracy vs. predicted confidence per bin."
+    )
+
+    if st.button("Run calibration analysis", key="btn_cal"):
+        cal_df = reliability_diagram("data/clinical_phrases.csv")
+        ece = cal_df.attrs["ece"]
+        n_correct = cal_df.attrs["n_correct"]
+        n_total = cal_df.attrs["n_total"]
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Overall accuracy", f"{n_correct / n_total:.0%}")
+        col2.metric("ECE", f"{ece:.3f}", help="Expected Calibration Error — lower is better. 0 = perfect.")
+        col3.metric("Phrases evaluated", str(n_total))
+
+        filled = cal_df[cal_df["count"] > 0].copy()
+        filled["bin_label"] = filled["bin_lower"].apply(lambda x: f"{x:.1f}") + "–" + filled["bin_upper"].apply(lambda x: f"{x:.1f}")
+
+        chart_df = filled[["bin_label", "accuracy", "avg_confidence", "count"]].rename(
+            columns={"accuracy": "Actual accuracy", "avg_confidence": "Avg confidence"}
+        )
+        st.bar_chart(chart_df.set_index("bin_label")[["Actual accuracy", "Avg confidence"]])
+
+        st.dataframe(
+            filled[["bin_label", "count", "avg_confidence", "accuracy", "gap"]].rename(
+                columns={
+                    "bin_label": "confidence bin", "avg_confidence": "mean confidence",
+                    "gap": "calibration gap"
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
+        )
+
+        if ece < 0.05:
+            st.success(f"ECE = {ece:.3f} — well-calibrated. Confidence scores track actual accuracy closely.")
+        elif ece < 0.10:
+            st.info(f"ECE = {ece:.3f} — moderate calibration. Some bins over- or under-estimate accuracy.")
+        else:
+            st.warning(f"ECE = {ece:.3f} — notable miscalibration. Consider fitting a Platt scaler on a larger dataset.")
+
+        st.caption(
+            "Note: calibration estimated on 39 phrases. A statistically robust calibration "
+            "curve requires ≥500 labelled examples."
+        )
+
+    st.divider()
+
+    # ── Note-level evaluation ────────────────────────────────────────────────
+    st.subheader("Full note pipeline evaluation")
+    st.caption(
+        "Runs the full pipeline on 4 annotated clinical notes and reports "
+        "**precision / recall / F1** per note and in aggregate."
+    )
+
+    if st.button("Run note evaluation", key="btn_note_eval"):
+        with st.spinner("Processing 4 clinical notes…"):
+            note_eval = evaluate_notes("data/annotated_notes.json")
+
+        agg = note_eval["aggregate"]
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Precision", f"{agg['precision']:.0%}")
+        col2.metric("Recall",    f"{agg['recall']:.0%}")
+        col3.metric("F1",        f"{agg['f1']:.0%}")
+        col4.metric("Notes evaluated", str(agg["n_notes"]))
+
+        st.write(f"TP: **{agg['tp']}** · FP: **{agg['fp']}** · FN: **{agg['fn']}**")
+
+        for note in note_eval["notes"]:
+            with st.expander(f"{note['title']} — F1 {note['f1']:.0%}  (P {note['precision']:.0%} / R {note['recall']:.0%})"):
+                rows = []
+                for item in note["items"]:
+                    rows.append({
+                        "expected keyword":    item["keyword"],
+                        "expected status":     item["expected_status"],
+                        "found":               "✓" if item["found"] else "✗",
+                        "predicted condition": item["predicted_condition"] or "—",
+                        "predicted status":    item["predicted_status"] or "—",
+                        "section":             item["predicted_section"] or "—",
+                    })
+                st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+
+                fp_conditions = [
+                    c for c in note["pipeline_conditions"]
+                    if not any(
+                        item["keyword"].lower() in c["condition"].lower()
+                        for item in note["items"]
+                    )
+                ]
+                if fp_conditions:
+                    st.caption(
+                        "Pipeline also found (not in annotations): "
+                        + ", ".join(f"`{c['condition']}` ({c['status']})" for c in fp_conditions)
+                    )

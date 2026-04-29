@@ -180,8 +180,11 @@ Deduplication               first mention of each condition wins
 | `src/section_detector.py` | Splits clinical notes into labeled sections |
 | `src/ner.py` | Named entity extraction (SciSpaCy primary, vocabulary fallback) |
 | `src/sentence_splitter.py` | Clinical sentence boundary detection |
+| `src/coref.py` | Pronoun-to-entity coreference within sections |
 | `src/pipeline.py` | Orchestrates the full note-level pipeline |
-| `src/utils.py` | Dataset evaluation helper |
+| `src/calibration.py` | Confidence calibration analysis (reliability diagram + ECE) |
+| `src/note_evaluator.py` | Precision/recall/F1 evaluation on annotated clinical notes |
+| `src/utils.py` | Phrase-level dataset evaluation helper |
 
 ---
 
@@ -191,7 +194,8 @@ Deduplication               first mention of each condition wins
 condition-status-classifier/
 │
 ├── data/
-│   └── clinical_phrases.csv          39-phrase labelled dataset (hard cases included)
+│   ├── clinical_phrases.csv          39-phrase labelled dataset (hard cases included)
+│   └── annotated_notes.json          4 annotated clinical notes for pipeline P/R/F1 evaluation
 │
 ├── src/
 │   ├── __init__.py
@@ -202,12 +206,16 @@ condition-status-classifier/
 │   ├── section_detector.py           note section splitter
 │   ├── ner.py                        NER (SciSpaCy / vocabulary fallback)
 │   ├── sentence_splitter.py          sentence boundary detection
+│   ├── coref.py                      pronoun-to-entity coreference
 │   ├── pipeline.py                   full note pipeline
-│   └── utils.py                      dataset evaluation
+│   ├── calibration.py                confidence calibration analysis (reliability diagram + ECE)
+│   ├── note_evaluator.py             pipeline P/R/F1 evaluation on annotated notes
+│   └── utils.py                      phrase-level dataset evaluation
 │
 ├── tests/
 │   ├── test_classifier.py            33 phrase-level tests
-│   └── test_pipeline.py              33 pipeline tests (section, NER, pipeline, sentence splitter)
+│   ├── test_pipeline.py              33 pipeline tests (section, NER, pipeline, sentence splitter)
+│   └── test_coref.py                 21 tests (coref unit, pipeline integration, calibration, evaluator)
 │
 ├── app.py                            Streamlit app (phrase + note + evaluation tabs)
 ├── main.py                           CLI evaluation entrypoint
@@ -316,7 +324,7 @@ pytest
 ```
 
 ```text
-66 passed in 0.04s
+87 passed in 4.56s
 ```
 
 ### Run the Streamlit app
@@ -508,6 +516,51 @@ entities = extract_entities("Patient has hypertension and no evidence of diabete
 #    MedicalEntity("diabetes", 50, 58, "CONDITION")]
 ```
 
+### `src/coref.py` — Pronoun coreference
+
+When a sentence in a section has no NER entity but contains a pronoun (`it`, `this`, `they`, `the condition`…) and a confident status signal, the status is attributed to the most recently classified entity in the same section.
+
+```text
+"The patient had a cough. It resolved."
+ ─────────────────────── ────────────
+  entity: cough            pronoun + resolved signal
+  context: weak (0.35)     → coref fires → cough: resolved
+```
+
+**Coref guard rules** (to avoid bad overrides):
+- Pronoun sentence confidence must be ≥ 0.70
+- Existing entity confidence must be < 0.65 (entity's own sentence was uninformative)
+- A 0.92 confidence discount is applied to the pronoun sentence result (acknowledging lost context)
+- Coref is section-scoped — a pronoun in Assessment cannot update a PMH entity
+
+### `src/calibration.py` — Confidence calibration analysis
+
+Measures how well the raw confidence scores track actual accuracy.
+
+```python
+from src.calibration import reliability_diagram
+df = reliability_diagram("data/clinical_phrases.csv")
+print(f"ECE = {df.attrs['ece']}")   # Expected Calibration Error
+# df has columns: bin_center, count, accuracy, avg_confidence, gap
+```
+
+**Expected Calibration Error (ECE):** weighted average of |confidence − accuracy| per bin. ECE = 0 is perfect; ECE > 0.10 indicates notable miscalibration. The Streamlit Evaluate tab renders this as a bar chart with an ECE reading.
+
+> Note: Platt scaling (fitting a sigmoid scaler) requires ≥ 500 labelled phrases for stable parameters. With 39 phrases the reliability diagram is more informative than a fitted curve.
+
+### `src/note_evaluator.py` — Note-level evaluation
+
+Runs the full pipeline on `data/annotated_notes.json` (4 notes covering mixed PMH/HPI, negation-heavy ROS, pronoun coreference, and temporal signals) and computes precision/recall/F1.
+
+```python
+from src.note_evaluator import evaluate_notes
+result = evaluate_notes("data/annotated_notes.json")
+print(result["aggregate"])
+# → {'precision': 0.76, 'recall': 0.76, 'f1': 0.76, 'n_notes': 4, ...}
+```
+
+Matching strategy: a pipeline result is a **true positive** if its condition text contains the expected keyword (case-insensitive) AND its status matches. False positives are pipeline detections not matching any annotation; false negatives are expected items not found by the pipeline.
+
 ---
 
 ## Dataset
@@ -598,9 +651,11 @@ The pipeline feeds the phrase classifier exactly what it needs: a single sentenc
 | Sentence-boundary-aware context | Done | Eliminates cross-sentence signal pollution |
 | Section detection | Done | Free confidence boost from note structure |
 | Clinical NER (SciSpaCy) | Done | Unlocks real note processing |
-| Dependency parsing | Medium | Fixes modifier-scope errors (requires spaCy) |
-| Calibrated confidence | Medium | Enables reliable downstream thresholds |
-| Annotated real-note evaluation | Medium | Shows true precision/recall on clinical data |
+| Pronoun coreference | Done | "It resolved." updates the correct prior entity |
+| Confidence calibration analysis | Done | Reliability diagram + ECE quantify calibration quality |
+| Annotated real-note evaluation | Done | Precision/recall/F1 on 4 realistic clinical notes |
+| Full dependency parsing | High | Modifier-scope errors within a sentence (requires parser) |
+| Calibrated confidence (production) | Medium | Platt scaling on ≥500 labelled phrases for downstream thresholds |
 | Fine-tuned BERT / LLM | High | Handles novel phrasing, rare conditions, implicit context |
 
 ---

@@ -25,6 +25,7 @@ from src.ner import extract_entities, active_ner_method
 from src.classifier import classify_condition_status
 from src.normalizer import normalize
 from src.sentence_splitter import split_sentences, find_sentence_context
+from src.coref import apply_pronoun_coref
 
 # When classifier confidence is below this threshold, the section's
 # status prior (if any) overrides the classification.
@@ -145,6 +146,9 @@ def process_note(note_text: str) -> PipelineResult:
         sentences = split_sentences(normalized)
 
         # ── Steps 4 + 5: sentence context + classification ────────────────
+        section_results: list[ConditionResult] = []
+        entity_positions: list[tuple[int, int]] = []
+
         for entity in entities:
             context = _sentence_context(sentences, entity.start, entity.end, normalized)
             clf = classify_condition_status(context)
@@ -163,7 +167,8 @@ def process_note(note_text: str) -> PipelineResult:
                 )
                 overridden = True
 
-            raw_results.append(ConditionResult(
+            entity_positions.append((entity.start, entity.end))
+            section_results.append(ConditionResult(
                 condition=entity.text,
                 status=clf["status"],
                 confidence=clf["confidence"],
@@ -172,6 +177,14 @@ def process_note(note_text: str) -> PipelineResult:
                 reason=clf["reason"],
                 overridden_by_prior=overridden,
             ))
+
+        # ── Step 6: pronoun coreference within this section ───────────────
+        # Sentences with no entity (e.g. "It resolved.") may update the
+        # most recently classified entity if a pronoun + confident signal
+        # is found.
+        apply_pronoun_coref(entity_positions, section_results, sentences, classify_condition_status)
+
+        raw_results.extend(section_results)
 
     result.conditions = _deduplicate(raw_results)
     return result

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "note_001",
+    "title": "Internal Medicine — Mixed PMH and HPI",
+    "note": "Chief Complaint:\nChest pain and shortness of breath for 2 days.\n\nHistory of Present Illness:\n58-year-old male presenting with acute onset chest pain since yesterday morning.\nHe also reports worsening dyspnea. Denies fever or cough.\n\nPast Medical History:\nHypertension diagnosed 8 years ago. History of pneumonia (resolved 2 years ago).\nType 2 diabetes mellitus, well-controlled on metformin.\n\nAssessment:\nPossible angina. Rule out pulmonary embolism.\nHypertension stable. Diabetes controlled.\n",
+    "expected": [
+      {"keyword": "chest pain",       "status": "ongoing",   "note": "Chief complaint, actively presenting"},
+      {"keyword": "dyspnea",          "status": "ongoing",   "note": "Worsening, HPI"},
+      {"keyword": "fever",            "status": "negated",   "note": "Denies"},
+      {"keyword": "cough",            "status": "negated",   "note": "Denies"},
+      {"keyword": "hypertension",     "status": "resolved",  "note": "PMH — 8 years ago"},
+      {"keyword": "pneumonia",        "status": "resolved",  "note": "PMH — resolved 2 years ago"},
+      {"keyword": "diabetes",         "status": "resolved",  "note": "PMH prior override"},
+      {"keyword": "angina",           "status": "ambiguous", "note": "Possible"},
+      {"keyword": "pulmonary embolism","status": "ambiguous","note": "Rule out"}
+    ]
+  },
+  {
+    "id": "note_002",
+    "title": "Pulmonology — Negation-heavy ROS",
+    "note": "Review of Systems:\nPositive for fatigue and headache. Negative for chest pain, fever, nausea, or vomiting.\nNo shortness of breath at rest.\n\nAssessment:\nMigraine, ongoing. Patient denies any history of seizures.\nChronic obstructive pulmonary disease, stable.\n",
+    "expected": [
+      {"keyword": "fatigue",          "status": "ongoing",   "note": "Positive for"},
+      {"keyword": "headache",         "status": "ongoing",   "note": "Positive for"},
+      {"keyword": "chest pain",       "status": "negated",   "note": "Negative for"},
+      {"keyword": "fever",            "status": "negated",   "note": "Negative for"},
+      {"keyword": "nausea",           "status": "negated",   "note": "Negative for"},
+      {"keyword": "shortness of breath","status": "negated", "note": "No at rest"},
+      {"keyword": "migraine",         "status": "ongoing",   "note": "Explicitly ongoing"},
+      {"keyword": "seizure",          "status": "negated",   "note": "Denies history"},
+      {"keyword": "chronic obstructive pulmonary disease", "status": "ongoing", "note": "Stable = ongoing"}
+    ]
+  },
+  {
+    "id": "note_003",
+    "title": "Cardiology Follow-up — Pronoun Coreference",
+    "note": "History of Present Illness:\nPatient was admitted last month for atrial fibrillation with rapid ventricular response.\nIt was successfully cardioverted. She now reports palpitations returning.\n\nPast Medical History:\nCoronary artery disease. Deep vein thrombosis (prior episode, resolved).\nHyperlipidemia managed with statins.\n\nAssessment:\nAtrial fibrillation recurrence. Possible heart failure exacerbation.\n",
+    "expected": [
+      {"keyword": "atrial fibrillation","status": "ongoing", "note": "Recurrence noted in assessment"},
+      {"keyword": "palpitations",      "status": "ongoing",  "note": "Currently returning"},
+      {"keyword": "coronary artery disease","status": "resolved","note": "PMH prior"},
+      {"keyword": "deep vein thrombosis","status": "resolved","note": "PMH — resolved explicitly"},
+      {"keyword": "hyperlipidemia",    "status": "resolved", "note": "PMH prior override"},
+      {"keyword": "heart failure",     "status": "ambiguous","note": "Possible exacerbation"}
+    ]
+  },
+  {
+    "id": "note_004",
+    "title": "Discharge Summary — Temporal Signals",
+    "note": "History of Present Illness:\nPatient presents with acute onset shortness of breath this morning.\nShe had pneumonia 6 months ago which fully resolved.\nCurrently no chest pain. Fever is absent.\n\nPast Medical History:\nRheumatoid arthritis in remission. Osteoporosis diagnosed 3 years ago.\nPrior MI five years ago.\n\nAssessment:\nSuspected pulmonary embolism. Anxiety ruled out.\n",
+    "expected": [
+      {"keyword": "shortness of breath","status": "ongoing", "note": "Acute onset this morning"},
+      {"keyword": "pneumonia",         "status": "resolved", "note": "6 months ago, fully resolved"},
+      {"keyword": "chest pain",        "status": "negated",  "note": "No chest pain"},
+      {"keyword": "fever",             "status": "negated",  "note": "Absent"},
+      {"keyword": "rheumatoid arthritis","status": "resolved","note": "In remission"},
+      {"keyword": "osteoporosis",      "status": "resolved", "note": "3 years ago, PMH"},
+      {"keyword": "pulmonary embolism","status": "ambiguous","note": "Suspected"},
+      {"keyword": "anxiety",           "status": "negated",  "note": "Ruled out"}
+    ]
+  }
+]
