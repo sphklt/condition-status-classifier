@@ -228,9 +228,17 @@ pip install -r requirements.txt
 
 **Optional — SciSpaCy NER (improves entity recall on real notes):**
 
+> **Python version note:** SciSpaCy's dependencies do not have pre-built wheels for Python 3.13. Use Python 3.11 for the virtual environment.
+
 ```bash
-pip install scispacy
-pip install https://s3-us-west-2.amazonaws.com/ai2-s3-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
+# Create venv with Python 3.11 if needed (pyenv example)
+~/.pyenv/versions/3.11.8/bin/python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Then install SciSpaCy and the BC5CDR disease NER model
+pip install scispacy==0.5.4
+pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
 ```
 
 The system detects SciSpaCy automatically. If not installed, it falls back to a vocabulary-based NER covering ~80 common clinical conditions with no setup required.
