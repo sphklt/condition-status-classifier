@@ -32,7 +32,7 @@ Asthma better today  →  ongoing
 
 ## What Makes This System Non-Trivial
 
-Most clinical condition classifiers use simple keyword lookup — scan for a word, return a label. This system addresses four failure modes that keyword lookup cannot handle.
+Most clinical condition classifiers use simple keyword lookup — scan for a word, return a label. This system addresses five failure modes that keyword lookup cannot handle.
 
 ### 1. Pseudo-negation filtering (NegEx-inspired)
 
@@ -98,6 +98,23 @@ A 120-character window around "diabetes" would include "No fever", causing the n
 
 Result: "No fever" never contaminates "Patient has diabetes."
 
+### 5. Pronoun coreference within sections
+
+Clinical notes often describe a condition in one sentence and update its status in the next using a pronoun. A sentence-level classifier misses this entirely.
+
+```text
+"The patient had a cough. It resolved."
+ ─────────────────────── ────────────
+  entity sentence: weak   pronoun sentence: strong resolved signal
+```
+
+| Approach | Result for "cough" | Why |
+|---|---|---|
+| Sentence-only | `ongoing` (35% confidence) | "had a cough" has no explicit status cue |
+| With coreference | `resolved` (87% confidence) | "It resolved." is attributed to the most recent entity |
+
+The coref step fires only when the entity's own sentence is uninformative (confidence < 0.65), ensuring it never overrides a confident existing classification (e.g., `"No evidence of pneumonia"` stays `negated` even if followed by `"It appears resolved."`). Coreference is scoped to the current section — a pronoun in Assessment cannot overwrite a PMH classification.
+
 ---
 
 ## Architecture
@@ -159,6 +176,9 @@ Phrase classifier           classifies each entity in its sentence context
     │
     ▼
 Section prior override      low-confidence result? section prior takes over
+    │
+    ▼
+Pronoun coreference         "It resolved." → updates most recent weak-confidence entity
     │
     ▼
 Deduplication               first mention of each condition wins
@@ -339,7 +359,7 @@ The app has three tabs:
 |---|---|
 | Single Phrase | Classify a phrase; shows confidence, signal scores, abbreviations expanded, clause used |
 | Full Clinical Note | Paste a clinical note; runs the full pipeline and returns a colour-coded condition table |
-| Evaluate Dataset | Runs the classifier over the labelled CSV and reports accuracy |
+| Evaluate Dataset | Three sub-sections: (1) phrase accuracy over the 39-phrase CSV, (2) confidence reliability diagram + ECE, (3) precision/recall/F1 on 4 annotated clinical notes |
 
 ---
 
@@ -637,10 +657,11 @@ The pipeline feeds the phrase classifier exactly what it needs: a single sentenc
 |---|---|
 | No syntactic parsing | Cannot resolve which noun a modifier attaches to — "Atrial fibrillation, previously in sinus rhythm" misclassifies because "previously" modifies the rhythm, not the AF |
 | NER vocabulary ceiling | Rare conditions, specialist terms, and misspellings are missed by the fallback NER |
-| Sentence-level only | No coreference — "The patient had a cough. It resolved." requires knowing "It" = "the cough" |
+| Pronoun coreference is heuristic | Simple pronoun attribution (last entity before the pronoun sentence) handles common cases but not complex multi-entity notes where "it" is genuinely ambiguous |
+| Phrase-level coreference unsupported | The Single Phrase tab classifies the whole input as one unit — for "cough… cold… it resolved", it cannot separate which entity "it" refers to |
 | Fixed section prior threshold | The 0.55 confidence threshold for section prior override is not empirically calibrated |
-| No list-scope negation | "Denies fever, chills, or chest pain" — the negation is correctly found for each, but only coincidentally; there is no explicit list parser |
-| Confidence is not calibrated | A confidence of 0.85 means "a strong cue was found", not "this prediction is correct 85% of the time" |
+| No list-scope negation | "Denies fever, chills, or chest pain" — the negation is correctly found for each coincidentally; there is no explicit list parser |
+| Confidence calibration needs more data | The reliability diagram uses 39 phrases — robust Platt scaling requires ≥500 labelled examples |
 
 ---
 
