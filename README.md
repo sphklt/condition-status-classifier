@@ -723,18 +723,14 @@ The pipeline feeds the phrase classifier exactly what it needs: a single sentenc
 
 ---
 
-## What Comes Next
+## Future Directions
 
-| Step | Effort | Impact |
-|---|---|---|
-| Sentence-boundary-aware context | Done | Eliminates cross-sentence signal pollution |
-| Section detection | Done | Free confidence boost from note structure |
-| Clinical NER (SciSpaCy) | Done | Unlocks real note processing |
-| Pronoun coreference | Done | "It resolved." updates the correct prior entity |
-| Confidence calibration analysis | Done | Reliability diagram + ECE quantify calibration quality |
-| Annotated real-note evaluation | Done | Precision/recall/F1 on 4 realistic clinical notes |
-| Full dependency parsing | Done | Negation/temporal scope via spaCy dep tree; list negation extraction (`src/dep_parser.py`, wired into pipeline) |
-| Calibrated confidence (production) | Done | Platt scaler fitted on 2,850 phrases (88.4% accuracy); `calibrate()` maps raw → P(correct); `calibrated_confidence` in every prediction |
-| Fine-tuned BERT / LLM | High | Handles novel phrasing, rare conditions, implicit context |
+| Direction | Why it matters |
+|---|---|
+| Fine-tuned BERT / clinical LLM | Rule systems plateau on novel phrasing, implicit context, and conditions not in the vocabulary — a model trained on de-identified clinical notes would generalise far better |
+| Real-world calibration dataset | The Platt scaler was fitted on 2,850 synthetic template phrases; naturally occurring clinical notes have a different confidence distribution and would produce more reliable calibration at the tails |
+| Relation extraction | In complex sentences, dep-tree heuristics can still mis-scope a modifier; a dedicated RE model would link negation and temporality directly to the correct entity span |
+| Active learning loop | Flag low-confidence predictions (calibrated confidence < 0.60) for clinician review, feed confirmed labels back into the calibration dataset, and iterate — a practical path to improving accuracy without full retraining |
+| Broader NER coverage | The SciSpaCy BC5CDR model targets diseases and chemicals; symptoms, procedures, and medications are partially handled by the supplemental vocabulary but would benefit from a dedicated clinical NER model (e.g. `en_ner_bc5cdr_md` + custom rules or a fine-tuned token classifier) |
 
 ---
