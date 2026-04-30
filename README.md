@@ -710,27 +710,18 @@ The pipeline feeds the phrase classifier exactly what it needs: a single sentenc
 
 ---
 
-## Known Limitations
+## Limitations and Future Directions
 
-| Limitation | What it means in practice |
+| Limitation | Potential improvement |
 |---|---|
-| NER vocabulary ceiling | Rare conditions, specialist terminology, and misspellings are missed; colloquial terms (`"cold"`, `"flu"`) are now covered by a supplemental pass but the gap remains for uncommon diagnoses |
-| Pronoun coreference is heuristic | Simple pronoun attribution (last entity before the pronoun sentence) handles common cases but not complex multi-entity notes where "it" is genuinely ambiguous |
-| Phrase-level coreference unsupported | The Single Phrase tab classifies the whole input as one unit — for "cough… cold… it resolved", it cannot separate which entity "it" refers to |
-| Fixed section prior threshold | The 0.55 confidence threshold for section prior override is not empirically calibrated |
-| Dep parser requires `en_core_web_sm` | If the spaCy model is not installed, negation scope and temporal modifier checks are silently skipped — classification degrades to regex-only behaviour |
-| Platt scaler fitted on synthetic data | The 2,850-phrase calibration set uses template-generated phrases; a real-world set with naturally occurring clinical notes would give more reliable calibration at the tails |
-
----
-
-## Future Directions
-
-| Direction | Why it matters |
-|---|---|
-| Fine-tuned BERT / clinical LLM | Rule systems plateau on novel phrasing, implicit context, and conditions not in the vocabulary — a model trained on de-identified clinical notes would generalise far better |
-| Real-world calibration dataset | The Platt scaler was fitted on 2,850 synthetic template phrases; naturally occurring clinical notes have a different confidence distribution and would produce more reliable calibration at the tails |
-| Relation extraction | In complex sentences, dep-tree heuristics can still mis-scope a modifier; a dedicated RE model would link negation and temporality directly to the correct entity span |
-| Active learning loop | Flag low-confidence predictions (calibrated confidence < 0.60) for clinician review, feed confirmed labels back into the calibration dataset, and iterate — a practical path to improving accuracy without full retraining |
-| Broader NER coverage | The SciSpaCy BC5CDR model targets diseases and chemicals; symptoms, procedures, and medications are partially handled by the supplemental vocabulary but would benefit from a dedicated clinical NER model (e.g. `en_ner_bc5cdr_md` + custom rules or a fine-tuned token classifier) |
+| NER misses rare conditions, specialist terminology, and misspellings; colloquial terms (`"cold"`, `"flu"`) are covered by a supplemental pass but uncommon diagnoses are not | Fine-tuned clinical NER model or BERT-based token classifier trained on de-identified notes; broader supplemental vocabulary for common colloquialisms |
+| Rule-based classification plateaus on novel phrasing, implicit context, and conditions outside the cue vocabulary | Fine-tuned BERT / clinical LLM — a model trained on labelled clinical notes would generalise far better than hand-crafted rules |
+| Platt scaler fitted on 2,850 synthetic phrases — calibration less reliable at the tails | Collect real-world labelled clinical phrases and refit on ≥500 naturally occurring examples |
+| Dep-tree heuristics can still mis-scope modifiers in complex multi-clause sentences | Dedicated relation extraction model to link negation and temporality directly to entity spans |
+| Pronoun coreference is heuristic — "it" attribution fails when multiple entities are plausible antecedents | Neural coreference resolution (e.g. SpanBERT-based) to handle genuinely ambiguous pronoun references |
+| Phrase-level classifier treats multi-entity input as one unit | Sentence-level entity isolation before classification — classify each entity in its own extracted clause |
+| Section prior threshold (0.55) is not empirically calibrated | Tune threshold on a held-out annotated note set |
+| Low-confidence predictions have no escalation path | Active learning loop — flag predictions below 60% calibrated confidence for clinician review and feed confirmed labels back into the calibration dataset |
+| Dep parser silently degrades to regex-only if `en_core_web_sm` is not installed | Surface a clear warning in the UI and CLI when dep parsing is unavailable |
 
 ---
