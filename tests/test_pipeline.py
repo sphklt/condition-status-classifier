@@ -125,6 +125,39 @@ class TestNER:
         assert any("hypertension" in t for t in terms)
         assert any("diabetes" in t for t in terms)
 
+    def test_extracts_cold(self):
+        """'cold' is a colloquial term added to the vocabulary and supplemental list."""
+        entities = extract_entities("I had cold last week.")
+        terms = [e.text.lower() for e in entities]
+        assert any("cold" in t for t in terms)
+
+    def test_extracts_common_cold(self):
+        entities = extract_entities("Diagnosed with common cold.")
+        terms = [e.text.lower() for e in entities]
+        assert any("cold" in t for t in terms)
+
+    def test_cold_and_current_condition_both_found(self):
+        """Pipeline finds both the past 'cold' and the current 'nasal allergies'."""
+        from src.pipeline import process_note
+        result = process_note(
+            "I had cold which got healed. Now, I just have nasal allergies"
+        )
+        names = [c.condition.lower() for c in result.conditions]
+        assert any("cold" in n for n in names)
+        assert any("nasal allergies" in n or "allerg" in n for n in names)
+
+    def test_cold_classified_resolved(self):
+        """In the multi-sentence note, 'cold' should be resolved (got healed)."""
+        from src.pipeline import process_note
+        result = process_note(
+            "I had cold which got healed. Now, I just have nasal allergies"
+        )
+        cold = next(
+            (c for c in result.conditions if "cold" in c.condition.lower()), None
+        )
+        if cold:
+            assert cold.status == "resolved"
+
 
 # ---------------------------------------------------------------------------
 # Full pipeline tests

@@ -74,11 +74,16 @@ with tab_phrase:
             colour = STATUS_COLOURS.get(result["status"], "#888")
 
             st.markdown("### Prediction")
+            cal_conf = result.get("calibrated_confidence", result["confidence"])
             st.markdown(
                 f"<span style='font-size:1.4rem; font-weight:bold; color:{colour};'>"
                 f"{result['status'].upper()}</span> &nbsp; "
-                f"<span style='color:#888'>confidence: {result['confidence']:.0%}</span>",
+                f"<span style='color:#888'>calibrated confidence: {cal_conf:.0%}</span>",
                 unsafe_allow_html=True,
+            )
+            st.caption(
+                f"Raw cue score: {result['confidence']:.0%} → "
+                f"calibrated probability of being correct: {cal_conf:.0%}"
             )
             st.write(f"**Key signal:** `{result['cue']}`")
             st.write(f"**Reason:** {result['reason']}")

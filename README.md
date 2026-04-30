@@ -175,6 +175,9 @@ Context extraction          finds the sentence containing each entity (not a fix
 Phrase classifier           classifies each entity in its sentence context
     │
     ▼
+Dep parser refinement       negation/temporal scope via spaCy parse tree; corrects out-of-scope signals
+    │
+    ▼
 Section prior override      low-confidence result? section prior takes over
     │
     ▼
@@ -196,13 +199,14 @@ Deduplication               first mention of each condition wins
 | `src/normalizer.py` | Expands clinical abbreviations before any matching |
 | `src/rules.py` | Weighted cue lists (100+ entries) + pseudo-negation registry |
 | `src/temporal.py` | Detects past/present temporal expressions |
-| `src/classifier.py` | Orchestrates phrase-level classification |
+| `src/classifier.py` | Orchestrates phrase-level classification; emits `calibrated_confidence` |
+| `src/dep_parser.py` | spaCy dependency parsing: negation scope, list negation, temporal modifier scope |
 | `src/section_detector.py` | Splits clinical notes into labeled sections |
 | `src/ner.py` | Named entity extraction (SciSpaCy primary, vocabulary fallback) |
 | `src/sentence_splitter.py` | Clinical sentence boundary detection |
 | `src/coref.py` | Pronoun-to-entity coreference within sections |
-| `src/pipeline.py` | Orchestrates the full note-level pipeline |
-| `src/calibration.py` | Confidence calibration analysis (reliability diagram + ECE) |
+| `src/pipeline.py` | Orchestrates the full note-level pipeline; wires dep parser refinement |
+| `src/calibration.py` | Platt scaler (`calibrate()`) + reliability diagram + ECE |
 | `src/note_evaluator.py` | Precision/recall/F1 evaluation on annotated clinical notes |
 | `src/utils.py` | Phrase-level dataset evaluation helper |
 
@@ -215,27 +219,32 @@ condition-status-classifier/
 │
 ├── data/
 │   ├── clinical_phrases.csv          39-phrase labelled dataset (hard cases included)
-│   └── annotated_notes.json          4 annotated clinical notes for pipeline P/R/F1 evaluation
+│   ├── annotated_notes.json          4 annotated clinical notes for pipeline P/R/F1 evaluation
+│   ├── calibration.json              fitted Platt scaler parameters (a, b)
+│   ├── calibration_phrases.csv       2,850 synthetic phrases used to fit the Platt scaler
+│   └── generate_calibration_dataset.py  script that produced calibration_phrases.csv
 │
 ├── src/
 │   ├── __init__.py
 │   ├── normalizer.py                 abbreviation expansion
 │   ├── rules.py                      weighted cues + pseudo-negation patterns
 │   ├── temporal.py                   temporal signal detection
-│   ├── classifier.py                 phrase-level classifier
+│   ├── classifier.py                 phrase-level classifier (emits calibrated_confidence)
+│   ├── dep_parser.py                 spaCy dep-tree: negation scope, list negation, temporal scope
 │   ├── section_detector.py           note section splitter
 │   ├── ner.py                        NER (SciSpaCy / vocabulary fallback)
 │   ├── sentence_splitter.py          sentence boundary detection
 │   ├── coref.py                      pronoun-to-entity coreference
-│   ├── pipeline.py                   full note pipeline
-│   ├── calibration.py                confidence calibration analysis (reliability diagram + ECE)
+│   ├── pipeline.py                   full note pipeline (dep parser refinement wired in)
+│   ├── calibration.py                Platt scaler + reliability diagram + ECE
 │   ├── note_evaluator.py             pipeline P/R/F1 evaluation on annotated notes
 │   └── utils.py                      phrase-level dataset evaluation
 │
 ├── tests/
 │   ├── test_classifier.py            33 phrase-level tests
-│   ├── test_pipeline.py              33 pipeline tests (section, NER, pipeline, sentence splitter)
-│   └── test_coref.py                 21 tests (coref unit, pipeline integration, calibration, evaluator)
+│   ├── test_pipeline.py              44 pipeline tests (section, NER, pipeline, sentence splitter)
+│   ├── test_coref.py                 21 tests (coref unit, pipeline integration, calibration, evaluator)
+│   └── test_dep_and_calibration.py   23 tests (dep parser + Platt calibration)
 │
 ├── app.py                            Streamlit app (phrase + note + evaluation tabs)
 ├── main.py                           CLI evaluation entrypoint
@@ -269,7 +278,7 @@ pip install scispacy==0.5.4
 pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
 ```
 
-The system detects SciSpaCy automatically. If not installed, it falls back to a vocabulary-based NER covering ~80 common clinical conditions with no setup required.
+The system detects SciSpaCy automatically. If not installed, it falls back to a vocabulary-based NER covering ~85 common clinical conditions (including colloquial terms like `"cold"` and `"flu"`) with no setup required.
 
 ---
 
@@ -344,7 +353,7 @@ pytest
 ```
 
 ```text
-87 passed in 4.56s
+110 passed in 5.34s
 ```
 
 ### Run the Streamlit app
@@ -521,10 +530,11 @@ Two paths, selected automatically:
 **Primary — SciSpaCy `en_ner_bc5cdr_md`:**
 - Trained on the BC5CDR corpus (disease and chemical entities)
 - Returns `DISEASE` entities with character offsets
+- After SciSpaCy extraction, a supplemental pass adds colloquial terms BC5CDR commonly misses (`"cold"`, `"flu"`, `"common cold"`, `"nasal allergies"`, `"allergies"`) without overwriting any span SciSpaCy already returned
 - Install: see Installation section above
 
 **Fallback — vocabulary matching:**
-- ~80 common clinical conditions compiled into a single alternation regex
+- ~85 common clinical conditions compiled into a single alternation regex (includes colloquial terms like `"cold"`, `"flu"`, `"common cold"`)
 - Ordered longest-to-shortest so `"congestive heart failure"` matches before `"heart failure"` before `"failure"`
 - Works with zero setup — used automatically when SciSpaCy is not installed
 
@@ -553,9 +563,59 @@ When a sentence in a section has no NER entity but contains a pronoun (`it`, `th
 - A 0.92 confidence discount is applied to the pronoun sentence result (acknowledging lost context)
 - Coref is section-scoped — a pronoun in Assessment cannot update a PMH entity
 
-### `src/calibration.py` — Confidence calibration analysis
+### `src/dep_parser.py` — Dependency-tree parsing
 
-Measures how well the raw confidence scores track actual accuracy.
+Uses spaCy's `en_core_web_sm` parse tree to answer three questions that regex cannot:
+
+**1. Is this entity inside the negation's governing subtree?**
+
+```text
+"Patient has no fever but has hypertension."
+```
+
+The `no` token governs `fever` (its head's subtree). It does NOT govern `hypertension`. Without dep parsing, a 120-character window around "hypertension" would see "no" and misclassify. With dep parsing, `check_negation_scope(sentence, "hypertension")` returns `False` → the pipeline re-classifies without the negation cue → `ongoing`.
+
+**2. Which conditions were explicitly denied in a list?**
+
+```text
+"Patient denies fever, chills, or chest pain."
+```
+
+`extract_list_negated(sentence)` finds the denial verb (`denies`), then walks its direct object and all conjuncts to return `["fever", "chills", "chest pain"]` — each marked `negated` individually.
+
+**3. Does a temporal modifier attach to this entity or a subordinate clause?**
+
+```text
+"Atrial fibrillation, previously in sinus rhythm."
+```
+
+`temporal_modifies_entity(sentence, "atrial fibrillation")` returns `False` — `previously` is inside the `in sinus rhythm` subordinate clause, not attached to the AF noun chunk. The pipeline discards the temporal modifier for AF and re-classifies without it.
+
+All three functions return `None` (not `False`) when the parser is unavailable or the entity is not found in the parse, so they degrade gracefully without spaCy.
+
+### `src/calibration.py` — Platt scaling and calibration analysis
+
+Two capabilities:
+
+**`calibrate(raw_confidence)`** — maps a raw cue-score to an estimated probability of being correct, using a Platt scaler fitted on 2,850 synthetic clinical phrases (88.4% accuracy):
+
+```python
+from src.calibration import calibrate
+calibrate(0.35)   # → 0.71  (raw 35% → actually correct 71% of the time)
+calibrate(0.70)   # → 0.92
+calibrate(1.00)   # → 0.97
+```
+
+Parameters (`a = 4.1885`, `b = −0.5508`) are stored in `data/calibration.json` and loaded once at first call. Every `classify_condition_status()` call now emits `calibrated_confidence` alongside the raw score. The Streamlit Single Phrase tab displays both.
+
+To re-fit on new data:
+
+```bash
+python data/generate_calibration_dataset.py   # regenerates calibration_phrases.csv
+# then fit a new logistic regression on (confidence, is_correct) and update calibration.json
+```
+
+**`reliability_diagram(csv_path)`** — computes calibration quality over any labelled CSV:
 
 ```python
 from src.calibration import reliability_diagram
@@ -565,8 +625,6 @@ print(f"ECE = {df.attrs['ece']}")   # Expected Calibration Error
 ```
 
 **Expected Calibration Error (ECE):** weighted average of |confidence − accuracy| per bin. ECE = 0 is perfect; ECE > 0.10 indicates notable miscalibration. The Streamlit Evaluate tab renders this as a bar chart with an ECE reading.
-
-> Note: Platt scaling (fitting a sigmoid scaler) requires ≥ 500 labelled phrases for stable parameters. With 39 phrases the reliability diagram is more informative than a fitted curve.
 
 ### `src/note_evaluator.py` — Note-level evaluation
 
@@ -603,10 +661,11 @@ Every classification returns a consistent dictionary:
 
 ```python
 {
-    "status":     "ongoing",           # ongoing | resolved | negated | ambiguous
-    "confidence": 0.82,                # 0.0 – 1.0
-    "cue":        "worsening",         # highest-weight matched phrase
-    "reason":     "Ongoing/active cue found: 'worsening' | Temporal hint: present ('currently')",
+    "status":               "ongoing",   # ongoing | resolved | negated | ambiguous
+    "confidence":           0.82,        # raw cue-score, 0.0 – 1.0
+    "calibrated_confidence": 0.95,       # P(correct) from Platt scaler
+    "cue":                  "worsening", # highest-weight matched phrase
+    "reason":               "Ongoing/active cue found: 'worsening' | Temporal hint: present ('currently')",
     "signals": {
         "negated":          0.0,
         "ambiguous":        0.0,
@@ -615,7 +674,7 @@ Every classification returns a consistent dictionary:
         "temporal":         "present",
         "pseudo_negations": [],
         "abbreviations":    ["htn → hypertension"],
-        "clause_used":      "full"     # or "final_clause"
+        "clause_used":      "full"       # or "final_clause"
     }
 }
 ```
@@ -655,13 +714,12 @@ The pipeline feeds the phrase classifier exactly what it needs: a single sentenc
 
 | Limitation | What it means in practice |
 |---|---|
-| No syntactic parsing | Cannot resolve which noun a modifier attaches to — "Atrial fibrillation, previously in sinus rhythm" misclassifies because "previously" modifies the rhythm, not the AF |
-| NER vocabulary ceiling | Rare conditions, specialist terms, and misspellings are missed by the fallback NER |
+| NER vocabulary ceiling | Rare conditions, specialist terminology, and misspellings are missed; colloquial terms (`"cold"`, `"flu"`) are now covered by a supplemental pass but the gap remains for uncommon diagnoses |
 | Pronoun coreference is heuristic | Simple pronoun attribution (last entity before the pronoun sentence) handles common cases but not complex multi-entity notes where "it" is genuinely ambiguous |
 | Phrase-level coreference unsupported | The Single Phrase tab classifies the whole input as one unit — for "cough… cold… it resolved", it cannot separate which entity "it" refers to |
 | Fixed section prior threshold | The 0.55 confidence threshold for section prior override is not empirically calibrated |
-| No list-scope negation | "Denies fever, chills, or chest pain" — the negation is correctly found for each coincidentally; there is no explicit list parser |
-| Confidence calibration needs more data | The reliability diagram uses 39 phrases — robust Platt scaling requires ≥500 labelled examples |
+| Dep parser requires `en_core_web_sm` | If the spaCy model is not installed, negation scope and temporal modifier checks are silently skipped — classification degrades to regex-only behaviour |
+| Platt scaler fitted on synthetic data | The 2,850-phrase calibration set uses template-generated phrases; a real-world set with naturally occurring clinical notes would give more reliable calibration at the tails |
 
 ---
 
@@ -675,8 +733,8 @@ The pipeline feeds the phrase classifier exactly what it needs: a single sentenc
 | Pronoun coreference | Done | "It resolved." updates the correct prior entity |
 | Confidence calibration analysis | Done | Reliability diagram + ECE quantify calibration quality |
 | Annotated real-note evaluation | Done | Precision/recall/F1 on 4 realistic clinical notes |
-| Full dependency parsing | High | Modifier-scope errors within a sentence (requires parser) |
-| Calibrated confidence (production) | Medium | Platt scaling on ≥500 labelled phrases for downstream thresholds |
+| Full dependency parsing | Done | Negation/temporal scope via spaCy dep tree; list negation extraction (`src/dep_parser.py`, wired into pipeline) |
+| Calibrated confidence (production) | Done | Platt scaler fitted on 2,850 phrases (88.4% accuracy); `calibrate()` maps raw → P(correct); `calibrated_confidence` in every prediction |
 | Fine-tuned BERT / LLM | High | Handles novel phrasing, rare conditions, implicit context |
 
 ---

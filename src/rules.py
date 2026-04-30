@@ -90,7 +90,10 @@ RESOLVED_CUES: list[tuple[str, float]] = [
     ("gotten over", 0.90),
     ("got over", 0.90),
     ("get over it", 0.85),
-    ("completely over", 0.90),  # matches "got completely over" where words split "got over"
+    ("now over", 0.85),        # "I had fever, now over" — condition has ended
+    ("is over", 0.85),         # "the fever is over"
+    ("been over", 0.85),       # "has been over for a week"
+    ("completely over", 0.90),
     ("fully over", 0.90),
     ("all better", 0.85),
     ("back to normal", 0.85),
@@ -140,6 +143,7 @@ ONGOING_CUES: list[tuple[str, float]] = [
     ("currently active", 1.0),
     ("currently experiencing", 1.0),
     ("currently has", 0.95),
+    ("currently have", 0.90),
     ("continues to have", 0.95),
     ("continues to experience", 0.95),
     ("presents with", 0.95),
@@ -147,6 +151,7 @@ ONGOING_CUES: list[tuple[str, float]] = [
     ("complains of", 0.95),
     ("complaints of", 0.95),
     ("still has", 0.95),
+    ("still have", 0.95),
     ("still present", 0.95),
     ("at this time", 0.85),
     ("at present", 0.85),
@@ -181,6 +186,11 @@ ONGOING_CUES: list[tuple[str, float]] = [
     ("recurrent", 0.85),
     ("recurring", 0.85),
     # --- weak / generic (high false-positive risk → low weight) ---
+    # "Now, I just have X" / "Now I have X" — present-tense possession without
+    # a specific status keyword; weaker than "currently has" but sufficient to
+    # push the clause override above the 0.65 confidence threshold.
+    ("just have", 0.65),
+    ("now have", 0.65),
     ("reports", 0.65),
     ("patient has", 0.70),
     ("has", 0.50),

@@ -56,11 +56,12 @@ def _try_load_scispacy() -> bool:
 
 def _extract_scispacy(text: str) -> list[MedicalEntity]:
     doc = _nlp(text)
-    return [
+    entities = [
         MedicalEntity(ent.text, ent.start_char, ent.end_char, ent.label_)
         for ent in doc.ents
         if ent.label_ in ("DISEASE", "CHEMICAL")
     ]
+    return _apply_supplemental(text, entities)
 
 
 # ---------------------------------------------------------------------------
@@ -104,8 +105,9 @@ _VOCAB: list[str] = [
     "syncope", "vertigo",
     # Infectious
     "urinary tract infection", "upper respiratory infection",
+    "common cold",
     "sepsis", "cellulitis", "pneumonia", "meningitis",
-    "covid-19", "influenza", "fever", "infection",
+    "covid-19", "influenza", "cold", "flu", "fever", "infection",
     # Oncology
     "non-hodgkin lymphoma", "hodgkin lymphoma", "chronic lymphocytic leukemia",
     "breast cancer", "lung cancer", "colon cancer", "prostate cancer",
@@ -129,6 +131,30 @@ _FALLBACK_RE = re.compile(
     r"\b(?:" + "|".join(re.escape(t) for t in sorted(_VOCAB, key=len, reverse=True)) + r")\b",
     re.IGNORECASE,
 )
+
+# ---------------------------------------------------------------------------
+# Supplemental vocabulary — colloquial terms SciSpaCy's BC5CDR model misses.
+# Applied after SciSpaCy extraction; skipped if the span is already covered.
+# ---------------------------------------------------------------------------
+_SUPPLEMENTAL: list[str] = [
+    "common cold", "cold", "flu",
+    "nasal allergies", "allergies",
+]
+
+_SUPPLEMENTAL_RE = re.compile(
+    r"\b(?:" + "|".join(re.escape(t) for t in sorted(_SUPPLEMENTAL, key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+
+
+def _apply_supplemental(text: str, existing: list[MedicalEntity]) -> list[MedicalEntity]:
+    """Add supplemental matches for spans not already covered by *existing* entities."""
+    extras = []
+    for m in _SUPPLEMENTAL_RE.finditer(text):
+        overlaps = any(m.start() < e.end and m.end() > e.start for e in existing)
+        if not overlaps:
+            extras.append(MedicalEntity(m.group(), m.start(), m.end(), "CONDITION"))
+    return existing + extras
 
 
 def _extract_vocab(text: str) -> list[MedicalEntity]:

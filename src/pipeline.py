@@ -20,12 +20,19 @@ window eliminates this by classifying each entity within its own sentence only.
 import re
 from dataclasses import dataclass, field
 
+
 from src.section_detector import detect_sections, NoteSection
 from src.ner import extract_entities, active_ner_method
 from src.classifier import classify_condition_status
 from src.normalizer import normalize
 from src.sentence_splitter import split_sentences, find_sentence_context
 from src.coref import apply_pronoun_coref
+from src.dep_parser import (
+    dep_parser_available,
+    check_negation_scope,
+    extract_list_negated,
+    temporal_modifies_entity,
+)
 
 # When classifier confidence is below this threshold, the section's
 # status prior (if any) overrides the classification.
@@ -74,6 +81,50 @@ def _sentence_context(
     """
     ctx = find_sentence_context(sentences, entity_start, entity_end)
     return ctx if ctx else fallback_text.strip()
+
+
+def _dep_refine(clf: dict, context: str, entity_text: str) -> dict:
+    """
+    Use dependency parsing to verify and optionally correct the classifier result.
+
+    1. Negation scope — if classified as negated, confirm the negation actually
+       governs this entity; if not, reclassify without the negation signal.
+    2. Temporal modifier scope — if resolved due to a temporal modifier like
+       "previously", confirm it attaches to this entity (not a subordinate clause).
+
+    Returns clf unchanged when the parser is unavailable or the result is confirmed.
+    """
+    if not dep_parser_available():
+        return clf
+
+    # ── 1. Negation scope ────────────────────────────────────────────────────
+    if clf["status"] == "negated":
+        in_scope = check_negation_scope(context, entity_text)
+        if in_scope is False:
+            # Negation doesn't govern this entity — reclassify with negation masked
+            masked = re.sub(
+                r"\b(no|not|without|denies?|negative|absent)\b",
+                " ", context, flags=re.IGNORECASE
+            )
+            fallback = classify_condition_status(masked)
+            fallback["reason"] = (
+                f"[Dep-parse: negation out-of-scope] {fallback['reason']}"
+            )
+            return fallback
+
+    # ── 2. Temporal modifier scope ───────────────────────────────────────────
+    if clf["status"] == "resolved" and "previously" in context.lower():
+        attaches = temporal_modifies_entity(context, entity_text)
+        if attaches is False:
+            # "Previously" modifies something else (e.g. "previously in sinus rhythm")
+            masked = re.sub(r"\bpreviously\b", " ", context, flags=re.IGNORECASE)
+            fallback = classify_condition_status(masked)
+            fallback["reason"] = (
+                f"[Dep-parse: 'previously' out-of-scope] {fallback['reason']}"
+            )
+            return fallback
+
+    return clf
 
 
 def _deduplicate(results: list[ConditionResult]) -> list[ConditionResult]:
@@ -153,6 +204,11 @@ def process_note(note_text: str) -> PipelineResult:
             context = _sentence_context(sentences, entity.start, entity.end, normalized)
             clf = classify_condition_status(context)
 
+            # ── Step 4b: dependency-parse refinement ──────────────────────
+            # Verify negation scope and temporal modifier attachment using
+            # the parse tree. No-op when en_core_web_sm is not installed.
+            clf = _dep_refine(clf, context, entity.text)
+
             overridden = False
 
             # ── Step 5: section prior override ────────────────────────────
@@ -177,6 +233,26 @@ def process_note(note_text: str) -> PipelineResult:
                 reason=clf["reason"],
                 overridden_by_prior=overridden,
             ))
+
+        # ── Step 5b: list negation via dep parser ─────────────────────────
+        # "Denies fever, chills, or chest pain." — dep parser enumerates ALL
+        # objects so even items NER might miss are marked negated.
+        if dep_parser_available():
+            already_found = {r.condition.lower() for r in section_results}
+            for sent in sentences:
+                negated_items = extract_list_negated(sent.text)
+                for item in negated_items:
+                    if item.lower() not in already_found and len(item.split()) >= 1:
+                        section_results.append(ConditionResult(
+                            condition=item,
+                            status="negated",
+                            confidence=0.90,
+                            section=section.name,
+                            context=sent.text,
+                            reason=f"[Dep-parse list negation] '{item}' is an object of a denial verb.",
+                        ))
+                        already_found.add(item.lower())
+                        entity_positions.append((sent.start, sent.start))  # placeholder
 
         # ── Step 6: pronoun coreference within this section ───────────────
         # Sentences with no entity (e.g. "It resolved.") may update the

@@ -1,0 +1,2851 @@
+text,gold_status
+Working diagnosis of chest pain,ambiguous
+migraine not detected,negated
+nausea for the past 3 days,ongoing
+pneumonia not detected,negated
+asthma has resolved,resolved
+pneumonia in the past,resolved
+Denies heart failure,negated
+? obesity,ambiguous
+edema worsening,ongoing
+Could represent vertigo,ambiguous
+Managed pneumonia,ongoing
+heart failure worsening,ongoing
+seizures resolved after treatment,resolved
+Presenting with hypertension,ongoing
+Stable sepsis,ongoing
+Suspected stroke,ambiguous
+pneumonia last year,resolved
+Past history of nausea,resolved
+fever resolved,resolved
+asthma continues,ongoing
+No evidence of migraine,negated
+hypertension ongoing,ongoing
+Could represent pulmonary embolism,ambiguous
+rheumatoid arthritis in the past,resolved
+osteoporosis has resolved,resolved
+heart failure in remission,resolved
+Past history of sepsis,resolved
+No evidence of chest pain,negated
+Active coronary artery disease,ongoing
+No complaints of obesity,negated
+anxiety previously diagnosed,resolved
+Questionable anxiety,ambiguous
+pneumonia in remission,resolved
+Patient has sepsis,ongoing
+Symptoms consistent with hypertension,ambiguous
+headache fully resolved,resolved
+insomnia worsening,ongoing
+vertigo not improving on current regimen,ongoing
+pneumonia has resolved,resolved
+Could represent insomnia,ambiguous
+Imaging shows no evidence of nausea,negated
+nausea -ve,negated
+edema -ve,negated
+headache ruled out,negated
+stroke ongoing,ongoing
+atrial fibrillation active,ongoing
+No active vertigo,negated
+Considering insomnia,ambiguous
+Free of edema,negated
+Working diagnosis of headache,ambiguous
+Denies rheumatoid arthritis,negated
+insomnia for the past 3 days,ongoing
+insomnia last year,resolved
+Prior diabetes,resolved
+Acute coronary artery disease,ongoing
+headache was treated,resolved
+hypertension not detected,negated
+Recovered from depression,resolved
+seizures ruled out,negated
+obesity previously diagnosed,resolved
+Suspected migraine,ambiguous
+pneumonia controlled on medication,ongoing
+rheumatoid arthritis not detected,negated
+Worsening rheumatoid arthritis,ongoing
+depression in remission,resolved
+May have gout,ambiguous
+Symptoms consistent with headache,ambiguous
+edema no longer present,resolved
+No current seizures,negated
+Active osteoporosis,ongoing
+No documented atrial fibrillation,negated
+Possible new asthma,ambiguous
+shortness of breath for the past 3 days,ongoing
+Denies cough,negated
+s/p treatment for coronary artery disease,resolved
+Possible history of pulmonary embolism,ambiguous
+Denies any history of pneumonia,negated
+Possible history of gout,ambiguous
+Had osteoporosis last year,resolved
+anxiety ruled out,negated
+deep vein thrombosis continues,ongoing
+sepsis worsening,ongoing
+obesity treated successfully,resolved
+To rule out fever,ambiguous
+heart failure cleared 6 months ago,resolved
+deep vein thrombosis controlled on medication,ongoing
+gout since this morning,ongoing
+Possible heart failure,ambiguous
+Could represent asthma,ambiguous
+Status post migraine,resolved
+Patient has anemia,ongoing
+Concern for seizures,ambiguous
+Possible headache,ambiguous
+depression ongoing,ongoing
+Differential includes shortness of breath,ambiguous
+Had vertigo last year,resolved
+Could represent obesity,ambiguous
+seizures in remission,resolved
+Possible new migraine,ambiguous
+pulmonary embolism last year,resolved
+Patient has no coronary artery disease,negated
+No history of depression,negated
+Chronic cough,ongoing
+Status post headache,resolved
+chest pain not present,negated
+Patient has no shortness of breath,negated
+obesity cleared 6 months ago,resolved
+anemia ongoing,ongoing
+stroke not improving on current regimen,ongoing
+No documented heart failure,negated
+Managed shortness of breath,ongoing
+edema since this morning,ongoing
+No documented stroke,negated
+? depression,ambiguous
+No documented shortness of breath,negated
+asthma remains present,ongoing
+Denies atrial fibrillation,negated
+vertigo worsening,ongoing
+Questionable vertigo,ambiguous
+atrial fibrillation ruled out,negated
+Currently has sepsis,ongoing
+anemia 2 months ago,resolved
+? migraine,ambiguous
+fever treated successfully,resolved
+Imaging shows no evidence of shortness of breath,negated
+seizures currently present,ongoing
+No signs of stroke,negated
+sepsis for the past 3 days,ongoing
+sepsis fully resolved,resolved
+No longer has fatigue,resolved
+Imaging shows no evidence of osteoporosis,negated
+Chronic heart failure,ongoing
+Unlikely but possible chest pain,ambiguous
+sepsis was treated,resolved
+Differential includes anemia,ambiguous
+Could represent fatigue,ambiguous
+No evidence of fever,negated
+shortness of breath improving,ongoing
+fatigue not detected,negated
+To rule out deep vein thrombosis,ambiguous
+Atypical presentation of atrial fibrillation,ambiguous
+May have headache,ambiguous
+Presenting with asthma,ongoing
+h/o cough,resolved
+No known anxiety,negated
+hypertension not present,negated
+Query gout,ambiguous
+gout in the past,resolved
+Previous episode of edema,resolved
+Patient denies osteoporosis,negated
+Suspected osteoporosis,ambiguous
+? sepsis,ambiguous
+No documented pulmonary embolism,negated
+Persistent diabetes,ongoing
+? chest pain,ambiguous
+vertigo fully resolved,resolved
+anemia 3 years ago,resolved
+migraine worsening,ongoing
+fatigue well-controlled,ongoing
+chest pain remains present,ongoing
+No current anemia,negated
+Does not have cough,negated
+chest pain for the past 3 days,ongoing
+Does not have rheumatoid arthritis,negated
+Recovered from diabetes,resolved
+No active deep vein thrombosis,negated
+cough negative,negated
+Currently has fever,ongoing
+No active pulmonary embolism,negated
+Former fatigue,resolved
+Does not have fatigue,negated
+Patient denies chest pain,negated
+gout improving,ongoing
+Acute shortness of breath,ongoing
+Recovered from edema,resolved
+deep vein thrombosis fully resolved,resolved
+atrial fibrillation no longer present,resolved
+Denies any history of depression,negated
+Active fatigue,ongoing
+Cannot rule out hypertension,ambiguous
+rheumatoid arthritis fully resolved,resolved
+heart failure not detected,negated
+rheumatoid arthritis remains present,ongoing
+Complains of nausea,ongoing
+Possible coronary artery disease,ambiguous
+Possible new seizures,ambiguous
+Free of cough,negated
+Differential includes osteoporosis,ambiguous
+May have cough,ambiguous
+Status post pulmonary embolism,resolved
+Questionable obesity,ambiguous
+stroke controlled on medication,ongoing
+stroke cleared 6 months ago,resolved
+s/p treatment for anemia,resolved
+Previous episode of chest pain,resolved
+Possible history of insomnia,ambiguous
+Suspected coronary artery disease,ambiguous
+No complaints of depression,negated
+edema negative,negated
+Former migraine,resolved
+hypertension well-controlled,ongoing
+fatigue absent,negated
+headache in remission,resolved
+Probable shortness of breath,ambiguous
+Probable fatigue,ambiguous
+depression not detected,negated
+headache 2 months ago,resolved
+Working diagnosis of fatigue,ambiguous
+Without anemia,negated
+Probable obesity,ambiguous
+To rule out diabetes,ambiguous
+Absence of chest pain,negated
+Currently has insomnia,ongoing
+Worsening seizures,ongoing
+Could represent rheumatoid arthritis,ambiguous
+deep vein thrombosis 3 years ago,resolved
+deep vein thrombosis was treated,resolved
+No signs of sepsis,negated
+Concern for deep vein thrombosis,ambiguous
+h/o chest pain,resolved
+pulmonary embolism active,ongoing
+May have atrial fibrillation,ambiguous
+heart failure for the past 3 days,ongoing
+Absence of obesity,negated
+No current gout,negated
+Possible cough,ambiguous
+No known headache,negated
+Questionable atrial fibrillation,ambiguous
+No coronary artery disease,negated
+rheumatoid arthritis ongoing,ongoing
+Acute osteoporosis,ongoing
+Patient has no depression,negated
+Denies any history of atrial fibrillation,negated
+History of seizures,resolved
+No longer has stroke,resolved
+vertigo continues,ongoing
+Imaging shows no evidence of diabetes,negated
+vertigo not present,negated
+History of hypertension,resolved
+gout has resolved,resolved
+Past history of fever,resolved
+Absence of coronary artery disease,negated
+sepsis well-controlled,ongoing
+Symptoms consistent with chest pain,ambiguous
+Presenting with atrial fibrillation,ongoing
+Chronic sepsis,ongoing
+migraine no longer present,resolved
+pulmonary embolism well-controlled,ongoing
+No longer has gout,resolved
+May have migraine,ambiguous
+coronary artery disease previously diagnosed,resolved
+? coronary artery disease,ambiguous
+Possible history of diabetes,ambiguous
+Absence of gout,negated
+vertigo stable,ongoing
+Probable edema,ambiguous
+Atypical presentation of coronary artery disease,ambiguous
+cough last year,resolved
+hypertension currently present,ongoing
+Had atrial fibrillation last year,resolved
+May have seizures,ambiguous
+Without sepsis,negated
+depression improving,ongoing
+May have depression,ambiguous
+No pneumonia,negated
+shortness of breath is stable,ongoing
+Denies any history of pulmonary embolism,negated
+Recovered from migraine,resolved
+fatigue ruled out,negated
+migraine 2 months ago,resolved
+coronary artery disease not detected,negated
+Atypical presentation of stroke,ambiguous
+Could represent heart failure,ambiguous
+anemia was treated,resolved
+Absence of pneumonia,negated
+Former sepsis,resolved
+Patient has nausea,ongoing
+migraine ruled out,negated
+Rule out gout,ambiguous
+Complains of insomnia,ongoing
+Differential includes obesity,ambiguous
+Possible shortness of breath,ambiguous
+Possible new deep vein thrombosis,ambiguous
+Without hypertension,negated
+nausea negative,negated
+To rule out osteoporosis,ambiguous
+Negative for fatigue,negated
+obesity continues,ongoing
+migraine has resolved,resolved
+Denies seizures,negated
+Rule out obesity,ambiguous
+anxiety remains present,ongoing
+Complains of deep vein thrombosis,ongoing
+Atypical presentation of sepsis,ambiguous
+To rule out seizures,ambiguous
+Possible new sepsis,ambiguous
+Patient denies vertigo,negated
+Possible new diabetes,ambiguous
+anemia continues,ongoing
+Without depression,negated
+Rule out seizures,ambiguous
+rheumatoid arthritis was treated,resolved
+Complains of asthma,ongoing
+No active shortness of breath,negated
+shortness of breath active,ongoing
+gout controlled on medication,ongoing
+fatigue stable,ongoing
+cough ongoing,ongoing
+stroke fully resolved,resolved
+Possible new atrial fibrillation,ambiguous
+atrial fibrillation has resolved,resolved
+insomnia previously diagnosed,resolved
+History of pneumonia,resolved
+Worsening insomnia,ongoing
+anxiety is stable,ongoing
+Unlikely but possible coronary artery disease,ambiguous
+Past history of seizures,resolved
+Query anxiety,ambiguous
+Persistent osteoporosis,ongoing
+fever ruled out,negated
+Cannot rule out osteoporosis,ambiguous
+Active gout,ongoing
+Possible history of asthma,ambiguous
+Negative for sepsis,negated
+insomnia not detected,negated
+Currently has atrial fibrillation,ongoing
+chest pain last year,resolved
+No evidence of cough,negated
+sepsis active,ongoing
+No signs of nausea,negated
+? rheumatoid arthritis,ambiguous
+History of headache,resolved
+Rule out fever,ambiguous
+Patient has no insomnia,negated
+Query chest pain,ambiguous
+osteoporosis not improving on current regimen,ongoing
+heart failure continues,ongoing
+No signs of seizures,negated
+No fever,negated
+rheumatoid arthritis well-controlled,ongoing
+rheumatoid arthritis active,ongoing
+? headache,ambiguous
+cough remains present,ongoing
+Possible history of headache,ambiguous
+sepsis resolved after treatment,resolved
+Managed insomnia,ongoing
+Denies any history of obesity,negated
+Concern for gout,ambiguous
+anxiety continues,ongoing
+Imaging shows no evidence of pulmonary embolism,negated
+Presenting with headache,ongoing
+Currently has vertigo,ongoing
+nausea not detected,negated
+Worsening coronary artery disease,ongoing
+Possible new anxiety,ambiguous
+History of chest pain,resolved
+Atypical presentation of pulmonary embolism,ambiguous
+Possible new gout,ambiguous
+Status post heart failure,resolved
+Possible new obesity,ambiguous
+pulmonary embolism treated successfully,resolved
+History of stroke,resolved
+Prior hypertension,resolved
+Possible gout,ambiguous
+Without pneumonia,negated
+No signs of vertigo,negated
+migraine negative,negated
+To rule out migraine,ambiguous
+pneumonia cleared 6 months ago,resolved
+Unlikely but possible headache,ambiguous
+Free of heart failure,negated
+rheumatoid arthritis continues,ongoing
+Denies diabetes,negated
+seizures is stable,ongoing
+May have diabetes,ambiguous
+asthma in remission,resolved
+To rule out insomnia,ambiguous
+pneumonia 2 months ago,resolved
+Worsening hypertension,ongoing
+atrial fibrillation currently present,ongoing
+chest pain 2 months ago,resolved
+coronary artery disease worsening,ongoing
+Status post obesity,resolved
+Considering anxiety,ambiguous
+gout not detected,negated
+Considering nausea,ambiguous
+pulmonary embolism ongoing,ongoing
+Concern for heart failure,ambiguous
+sepsis no longer present,resolved
+headache last year,resolved
+anemia resolved,resolved
+No active obesity,negated
+Suspected deep vein thrombosis,ambiguous
+atrial fibrillation cleared 6 months ago,resolved
+Prior gout,resolved
+No longer has insomnia,resolved
+Had asthma last year,resolved
+No longer has shortness of breath,resolved
+sepsis 2 months ago,resolved
+History of nausea,resolved
+pneumonia worsening,ongoing
+anemia since this morning,ongoing
+? fatigue,ambiguous
+Patient denies anemia,negated
+Patient denies diabetes,negated
+h/o nausea,resolved
+No signs of edema,negated
+No history of heart failure,negated
+Could represent coronary artery disease,ambiguous
+To rule out asthma,ambiguous
+coronary artery disease is stable,ongoing
+Previous episode of fever,resolved
+Complains of heart failure,ongoing
+Rule out nausea,ambiguous
+Complains of headache,ongoing
+cough active,ongoing
+osteoporosis treated successfully,resolved
+asthma cleared 6 months ago,resolved
+atrial fibrillation fully resolved,resolved
+Unlikely but possible pulmonary embolism,ambiguous
+h/o depression,resolved
+No active stroke,negated
+sepsis not improving on current regimen,ongoing
+History of rheumatoid arthritis,resolved
+obesity in the past,resolved
+osteoporosis not present,negated
+No active diabetes,negated
+Concern for stroke,ambiguous
+Patient has deep vein thrombosis,ongoing
+Patient has vertigo,ongoing
+Active pulmonary embolism,ongoing
+Imaging shows no evidence of pneumonia,negated
+Query anemia,ambiguous
+No current rheumatoid arthritis,negated
+Former gout,resolved
+Probable cough,ambiguous
+Atypical presentation of shortness of breath,ambiguous
+Status post stroke,resolved
+Unlikely but possible insomnia,ambiguous
+pneumonia not improving on current regimen,ongoing
+Does not have obesity,negated
+Managed fatigue,ongoing
+pneumonia improving,ongoing
+Query seizures,ambiguous
+Active heart failure,ongoing
+Cannot rule out anemia,ambiguous
+shortness of breath not detected,negated
+Stable nausea,ongoing
+chest pain ongoing,ongoing
+deep vein thrombosis treated successfully,resolved
+Recovered from chest pain,resolved
+coronary artery disease -ve,negated
+sepsis controlled on medication,ongoing
+Patient denies coronary artery disease,negated
+anxiety stable,ongoing
+anemia cleared 6 months ago,resolved
+Active stroke,ongoing
+Prior migraine,resolved
+Worsening heart failure,ongoing
+No known deep vein thrombosis,negated
+coronary artery disease in the past,resolved
+diabetes was treated,resolved
+No known chest pain,negated
+Cannot rule out rheumatoid arthritis,ambiguous
+seizures worsening,ongoing
+Presenting with pulmonary embolism,ongoing
+Free of stroke,negated
+Complains of obesity,ongoing
+Unlikely but possible sepsis,ambiguous
+Concern for pulmonary embolism,ambiguous
+Persistent anemia,ongoing
+Denies any history of asthma,negated
+Previous episode of asthma,resolved
+Chronic atrial fibrillation,ongoing
+Managed headache,ongoing
+headache cleared 6 months ago,resolved
+fatigue no longer present,resolved
+Atypical presentation of fatigue,ambiguous
+shortness of breath continues,ongoing
+No stroke,negated
+May have nausea,ambiguous
+depression active,ongoing
+Previous episode of heart failure,resolved
+Rule out heart failure,ambiguous
+nausea resolved after treatment,resolved
+Free of nausea,negated
+No documented chest pain,negated
+Working diagnosis of stroke,ambiguous
+Managed depression,ongoing
+Persistent asthma,ongoing
+nausea well-controlled,ongoing
+vertigo in remission,resolved
+Does not have sepsis,negated
+Free of depression,negated
+anxiety negative,negated
+stroke stable,ongoing
+rheumatoid arthritis is stable,ongoing
+cough ruled out,negated
+Prior deep vein thrombosis,resolved
+pneumonia not present,negated
+shortness of breath controlled on medication,ongoing
+Symptoms consistent with rheumatoid arthritis,ambiguous
+anxiety absent,negated
+depression resolved,resolved
+Questionable pulmonary embolism,ambiguous
+History of anxiety,resolved
+Prior headache,resolved
+Could represent headache,ambiguous
+No active osteoporosis,negated
+fatigue cleared 6 months ago,resolved
+asthma for the past 3 days,ongoing
+atrial fibrillation continues,ongoing
+Patient has no stroke,negated
+Acute diabetes,ongoing
+Cannot rule out seizures,ambiguous
+Possible edema,ambiguous
+Does not have pneumonia,negated
+Symptoms consistent with migraine,ambiguous
+No current nausea,negated
+chest pain absent,negated
+fatigue -ve,negated
+History of insomnia,resolved
+Former obesity,resolved
+rheumatoid arthritis controlled on medication,ongoing
+sepsis improving,ongoing
+Persistent heart failure,ongoing
+sepsis cleared 6 months ago,resolved
+History of heart failure,resolved
+Symptoms consistent with anxiety,ambiguous
+No longer has edema,resolved
+rheumatoid arthritis no longer present,resolved
+sepsis treated successfully,resolved
+obesity absent,negated
+Imaging shows no evidence of edema,negated
+cough 3 years ago,resolved
+coronary artery disease ruled out,negated
+No signs of deep vein thrombosis,negated
+atrial fibrillation is stable,ongoing
+headache previously diagnosed,resolved
+fatigue in the past,resolved
+coronary artery disease was treated,resolved
+asthma resolved,resolved
+Atypical presentation of pneumonia,ambiguous
+hypertension was treated,resolved
+Concern for sepsis,ambiguous
+seizures 2 months ago,resolved
+Patient denies anxiety,negated
+Questionable gout,ambiguous
+Former pneumonia,resolved
+cough not detected,negated
+No complaints of headache,negated
+Denies pulmonary embolism,negated
+Rule out fatigue,ambiguous
+Working diagnosis of coronary artery disease,ambiguous
+fever well-controlled,ongoing
+Possible new pulmonary embolism,ambiguous
+Could represent hypertension,ambiguous
+edema ongoing,ongoing
+Could represent anemia,ambiguous
+deep vein thrombosis previously diagnosed,resolved
+Patient denies edema,negated
+diabetes in the past,resolved
+No evidence of pulmonary embolism,negated
+Had seizures last year,resolved
+Patient has no headache,negated
+anemia for the past 3 days,ongoing
+edema was treated,resolved
+Differential includes chest pain,ambiguous
+Possible insomnia,ambiguous
+Denies gout,negated
+No complaints of heart failure,negated
+fatigue continues,ongoing
+Recovered from osteoporosis,resolved
+Worsening migraine,ongoing
+Former cough,resolved
+Recovered from shortness of breath,resolved
+deep vein thrombosis last year,resolved
+Denies sepsis,negated
+Unlikely but possible shortness of breath,ambiguous
+insomnia improving,ongoing
+Working diagnosis of osteoporosis,ambiguous
+? anemia,ambiguous
+anxiety treated successfully,resolved
+Concern for hypertension,ambiguous
+obesity ongoing,ongoing
+vertigo no longer present,resolved
+Patient denies insomnia,negated
+Absence of anxiety,negated
+h/o anemia,resolved
+Without fatigue,negated
+diabetes improving,ongoing
+depression ruled out,negated
+Chronic coronary artery disease,ongoing
+No current deep vein thrombosis,negated
+Recovered from sepsis,resolved
+No evidence of sepsis,negated
+History of fatigue,resolved
+Presenting with chest pain,ongoing
+Without cough,negated
+asthma previously diagnosed,resolved
+Concern for obesity,ambiguous
+Possible fatigue,ambiguous
+? cough,ambiguous
+migraine previously diagnosed,resolved
+Negative for gout,negated
+No documented obesity,negated
+Working diagnosis of vertigo,ambiguous
+deep vein thrombosis well-controlled,ongoing
+Working diagnosis of sepsis,ambiguous
+Differential includes sepsis,ambiguous
+migraine in remission,resolved
+No known gout,negated
+anxiety ongoing,ongoing
+Does not have heart failure,negated
+Prior anxiety,resolved
+edema in the past,resolved
+Patient denies pulmonary embolism,negated
+fatigue was treated,resolved
+gout well-controlled,ongoing
+Patient has stroke,ongoing
+No documented vertigo,negated
+nausea active,ongoing
+s/p treatment for hypertension,resolved
+To rule out anxiety,ambiguous
+gout not improving on current regimen,ongoing
+Negative for nausea,negated
+rheumatoid arthritis stable,ongoing
+pulmonary embolism in the past,resolved
+Free of obesity,negated
+Possible history of anxiety,ambiguous
+Could represent nausea,ambiguous
+Imaging shows no evidence of gout,negated
+fatigue active,ongoing
+Does not have nausea,negated
+No active rheumatoid arthritis,negated
+May have pulmonary embolism,ambiguous
+cough controlled on medication,ongoing
+No documented osteoporosis,negated
+fever in remission,resolved
+Managed sepsis,ongoing
+Active headache,ongoing
+Past history of diabetes,resolved
+Past history of deep vein thrombosis,resolved
+Had deep vein thrombosis last year,resolved
+Does not have coronary artery disease,negated
+No known anemia,negated
+deep vein thrombosis since this morning,ongoing
+Free of headache,negated
+anemia controlled on medication,ongoing
+Unlikely but possible heart failure,ambiguous
+Acute rheumatoid arthritis,ongoing
+s/p treatment for sepsis,resolved
+heart failure remains present,ongoing
+gout not present,negated
+Could represent atrial fibrillation,ambiguous
+hypertension worsening,ongoing
+Imaging shows no evidence of stroke,negated
+Symptoms consistent with depression,ambiguous
+fever fully resolved,resolved
+Symptoms consistent with osteoporosis,ambiguous
+Considering stroke,ambiguous
+Active vertigo,ongoing
+h/o atrial fibrillation,resolved
+Possible asthma,ambiguous
+Differential includes edema,ambiguous
+pulmonary embolism remains present,ongoing
+To rule out depression,ambiguous
+coronary artery disease 2 months ago,resolved
+chest pain active,ongoing
+Questionable coronary artery disease,ambiguous
+nausea resolved,resolved
+edema stable,ongoing
+Former edema,resolved
+Questionable osteoporosis,ambiguous
+nausea controlled on medication,ongoing
+s/p treatment for vertigo,resolved
+pneumonia currently present,ongoing
+Prior fever,resolved
+seizures -ve,negated
+obesity is stable,ongoing
+depression 3 years ago,resolved
+Working diagnosis of diabetes,ambiguous
+Denies shortness of breath,negated
+No evidence of coronary artery disease,negated
+Negative for edema,negated
+vertigo ongoing,ongoing
+Absence of heart failure,negated
+atrial fibrillation resolved after treatment,resolved
+Does not have migraine,negated
+Acute obesity,ongoing
+No current pulmonary embolism,negated
+edema not detected,negated
+osteoporosis fully resolved,resolved
+Possible obesity,ambiguous
+No documented seizures,negated
+No documented anemia,negated
+Concern for fatigue,ambiguous
+pneumonia continues,ongoing
+Presenting with rheumatoid arthritis,ongoing
+Persistent coronary artery disease,ongoing
+h/o vertigo,resolved
+No longer has chest pain,resolved
+fatigue in remission,resolved
+anxiety cleared 6 months ago,resolved
+Query edema,ambiguous
+diabetes previously diagnosed,resolved
+Atypical presentation of anemia,ambiguous
+Cannot rule out headache,ambiguous
+Symptoms consistent with edema,ambiguous
+shortness of breath 2 months ago,resolved
+No longer has anemia,resolved
+No history of obesity,negated
+headache negative,negated
+To rule out stroke,ambiguous
+fever for the past 3 days,ongoing
+seizures absent,negated
+Patient has no seizures,negated
+Differential includes stroke,ambiguous
+No signs of asthma,negated
+Denies chest pain,negated
+To rule out shortness of breath,ambiguous
+Atypical presentation of gout,ambiguous
+Denies migraine,negated
+Currently has obesity,ongoing
+sepsis stable,ongoing
+No history of atrial fibrillation,negated
+No deep vein thrombosis,negated
+insomnia remains present,ongoing
+Patient has fatigue,ongoing
+sepsis in the past,resolved
+edema treated successfully,resolved
+Patient denies hypertension,negated
+heart failure last year,resolved
+osteoporosis negative,negated
+migraine not present,negated
+Query sepsis,ambiguous
+cough stable,ongoing
+nausea no longer present,resolved
+asthma resolved after treatment,resolved
+Rule out anxiety,ambiguous
+? atrial fibrillation,ambiguous
+deep vein thrombosis remains present,ongoing
+Symptoms consistent with vertigo,ambiguous
+No active headache,negated
+Denies any history of diabetes,negated
+obesity resolved,resolved
+Unlikely but possible obesity,ambiguous
+osteoporosis not detected,negated
+Patient has cough,ongoing
+migraine cleared 6 months ago,resolved
+Complains of anemia,ongoing
+No history of headache,negated
+Possible history of edema,ambiguous
+No complaints of seizures,negated
+? hypertension,ambiguous
+Imaging shows no evidence of rheumatoid arthritis,negated
+cough cleared 6 months ago,resolved
+stroke since this morning,ongoing
+No known fatigue,negated
+insomnia 3 years ago,resolved
+Complains of osteoporosis,ongoing
+? stroke,ambiguous
+Had fever last year,resolved
+depression cleared 6 months ago,resolved
+vertigo resolved,resolved
+Patient denies nausea,negated
+headache not present,negated
+May have rheumatoid arthritis,ambiguous
+fever in the past,resolved
+Does not have headache,negated
+shortness of breath no longer present,resolved
+osteoporosis was treated,resolved
+Patient denies gout,negated
+No documented fever,negated
+Does not have vertigo,negated
+depression not improving on current regimen,ongoing
+seizures controlled on medication,ongoing
+rheumatoid arthritis since this morning,ongoing
+Worsening deep vein thrombosis,ongoing
+hypertension in the past,resolved
+Former fever,resolved
+nausea ongoing,ongoing
+No longer has osteoporosis,resolved
+Symptoms consistent with seizures,ambiguous
+Symptoms consistent with gout,ambiguous
+Presenting with nausea,ongoing
+Unlikely but possible gout,ambiguous
+Symptoms consistent with shortness of breath,ambiguous
+Presenting with anxiety,ongoing
+Previous episode of coronary artery disease,resolved
+Managed chest pain,ongoing
+Symptoms consistent with deep vein thrombosis,ambiguous
+Possible hypertension,ambiguous
+Presenting with edema,ongoing
+Without heart failure,negated
+Unlikely but possible pneumonia,ambiguous
+No signs of fatigue,negated
+Active cough,ongoing
+Negative for depression,negated
+chest pain well-controlled,ongoing
+osteoporosis last year,resolved
+Unlikely but possible osteoporosis,ambiguous
+Patient has no chest pain,negated
+Free of hypertension,negated
+Negative for anxiety,negated
+anemia previously diagnosed,resolved
+h/o pneumonia,resolved
+rheumatoid arthritis improving,ongoing
+Recovered from asthma,resolved
+Rule out insomnia,ambiguous
+coronary artery disease last year,resolved
+No known osteoporosis,negated
+Questionable seizures,ambiguous
+Differential includes rheumatoid arthritis,ambiguous
+Denies edema,negated
+No evidence of rheumatoid arthritis,negated
+h/o fever,resolved
+Working diagnosis of depression,ambiguous
+osteoporosis stable,ongoing
+seizures not improving on current regimen,ongoing
+fever -ve,negated
+osteoporosis -ve,negated
+Concern for cough,ambiguous
+Questionable deep vein thrombosis,ambiguous
+Stable anemia,ongoing
+Currently has heart failure,ongoing
+Acute pneumonia,ongoing
+Working diagnosis of shortness of breath,ambiguous
+Atypical presentation of edema,ambiguous
+Recovered from nausea,resolved
+No current pneumonia,negated
+Denies any history of chest pain,negated
+No evidence of seizures,negated
+h/o obesity,resolved
+No anxiety,negated
+Possible history of seizures,ambiguous
+Currently has depression,ongoing
+nausea in remission,resolved
+Probable migraine,ambiguous
+stroke active,ongoing
+seizures since this morning,ongoing
+No fatigue,negated
+Had headache last year,resolved
+Cannot rule out cough,ambiguous
+sepsis not present,negated
+Concern for rheumatoid arthritis,ambiguous
+osteoporosis resolved,resolved
+Suspected headache,ambiguous
+No diabetes,negated
+No active atrial fibrillation,negated
+Atypical presentation of asthma,ambiguous
+Rule out chest pain,ambiguous
+Imaging shows no evidence of fever,negated
+No complaints of osteoporosis,negated
+Denies any history of vertigo,negated
+Currently has diabetes,ongoing
+Cannot rule out gout,ambiguous
+Presenting with depression,ongoing
+Cannot rule out deep vein thrombosis,ambiguous
+Presenting with fever,ongoing
+Probable chest pain,ambiguous
+asthma well-controlled,ongoing
+atrial fibrillation previously diagnosed,resolved
+Acute fatigue,ongoing
+Active seizures,ongoing
+Complains of shortness of breath,ongoing
+fatigue currently present,ongoing
+sepsis -ve,negated
+No known nausea,negated
+Previous episode of pneumonia,resolved
+No longer has rheumatoid arthritis,resolved
+Could represent migraine,ambiguous
+Persistent pulmonary embolism,ongoing
+gout no longer present,resolved
+stroke was treated,resolved
+obesity no longer present,resolved
+Active rheumatoid arthritis,ongoing
+Rule out diabetes,ambiguous
+Recovered from fever,resolved
+Had hypertension last year,resolved
+Query shortness of breath,ambiguous
+Possible history of osteoporosis,ambiguous
+Possible new anemia,ambiguous
+atrial fibrillation last year,resolved
+migraine is stable,ongoing
+Symptoms consistent with fever,ambiguous
+No signs of cough,negated
+Worsening anxiety,ongoing
+Absence of insomnia,negated
+Free of diabetes,negated
+To rule out nausea,ambiguous
+anemia stable,ongoing
+Absence of hypertension,negated
+No current coronary artery disease,negated
+Could represent depression,ambiguous
+coronary artery disease has resolved,resolved
+rheumatoid arthritis ruled out,negated
+Could represent sepsis,ambiguous
+Probable rheumatoid arthritis,ambiguous
+Could represent edema,ambiguous
+chest pain no longer present,resolved
+atrial fibrillation treated successfully,resolved
+edema is stable,ongoing
+Negative for coronary artery disease,negated
+vertigo remains present,ongoing
+Worsening shortness of breath,ongoing
+Negative for insomnia,negated
+Working diagnosis of edema,ambiguous
+Acute chest pain,ongoing
+Free of vertigo,negated
+pulmonary embolism negative,negated
+insomnia ongoing,ongoing
+vertigo has resolved,resolved
+Possible history of anemia,ambiguous
+No history of fever,negated
+headache currently present,ongoing
+No evidence of anxiety,negated
+osteoporosis continues,ongoing
+anemia improving,ongoing
+stroke in the past,resolved
+osteoporosis is stable,ongoing
+Patient denies depression,negated
+Possible history of migraine,ambiguous
+Patient has no pulmonary embolism,negated
+deep vein thrombosis absent,negated
+No active depression,negated
+seizures was treated,resolved
+heart failure stable,ongoing
+Denies coronary artery disease,negated
+gout resolved,resolved
+Acute deep vein thrombosis,ongoing
+May have stroke,ambiguous
+atrial fibrillation 2 months ago,resolved
+Symptoms consistent with heart failure,ambiguous
+hypertension last year,resolved
+h/o coronary artery disease,resolved
+atrial fibrillation in the past,resolved
+Absence of seizures,negated
+Patient has edema,ongoing
+fever negative,negated
+Former nausea,resolved
+Patient denies deep vein thrombosis,negated
+Presenting with deep vein thrombosis,ongoing
+s/p treatment for pulmonary embolism,resolved
+Negative for obesity,negated
+Patient has hypertension,ongoing
+Possible history of stroke,ambiguous
+Active sepsis,ongoing
+stroke not present,negated
+Concern for insomnia,ambiguous
+fever last year,resolved
+Rule out atrial fibrillation,ambiguous
+chest pain worsening,ongoing
+sepsis continues,ongoing
+Suspected insomnia,ambiguous
+Unlikely but possible stroke,ambiguous
+s/p treatment for osteoporosis,resolved
+Query heart failure,ambiguous
+diabetes no longer present,resolved
+migraine since this morning,ongoing
+Recovered from anxiety,resolved
+History of osteoporosis,resolved
+Free of coronary artery disease,negated
+No evidence of gout,negated
+nausea stable,ongoing
+No longer has anxiety,resolved
+Possible history of nausea,ambiguous
+No longer has obesity,resolved
+Past history of anxiety,resolved
+Suspected gout,ambiguous
+Patient denies headache,negated
+Past history of insomnia,resolved
+Status post edema,resolved
+No history of migraine,negated
+cough worsening,ongoing
+cough in remission,resolved
+Former deep vein thrombosis,resolved
+Does not have seizures,negated
+diabetes last year,resolved
+atrial fibrillation -ve,negated
+Rule out deep vein thrombosis,ambiguous
+anemia in remission,resolved
+Working diagnosis of cough,ambiguous
+Managed rheumatoid arthritis,ongoing
+Negative for migraine,negated
+headache resolved after treatment,resolved
+? deep vein thrombosis,ambiguous
+No longer has heart failure,resolved
+osteoporosis controlled on medication,ongoing
+Possible new rheumatoid arthritis,ambiguous
+migraine treated successfully,resolved
+No history of osteoporosis,negated
+Unlikely but possible depression,ambiguous
+Chronic vertigo,ongoing
+atrial fibrillation well-controlled,ongoing
+anemia currently present,ongoing
+Past history of chest pain,resolved
+No known coronary artery disease,negated
+s/p treatment for headache,resolved
+No documented nausea,negated
+s/p treatment for edema,resolved
+anxiety in remission,resolved
+chest pain resolved after treatment,resolved
+h/o stroke,resolved
+Patient has no osteoporosis,negated
+diabetes for the past 3 days,ongoing
+pneumonia resolved after treatment,resolved
+Without edema,negated
+deep vein thrombosis stable,ongoing
+Cannot rule out diabetes,ambiguous
+pulmonary embolism in remission,resolved
+hypertension treated successfully,resolved
+No evidence of depression,negated
+deep vein thrombosis not detected,negated
+coronary artery disease absent,negated
+rheumatoid arthritis treated successfully,resolved
+Imaging shows no evidence of coronary artery disease,negated
+fatigue not improving on current regimen,ongoing
+depression fully resolved,resolved
+Working diagnosis of asthma,ambiguous
+Possible new vertigo,ambiguous
+No known edema,negated
+Chronic insomnia,ongoing
+History of depression,resolved
+cough continues,ongoing
+depression continues,ongoing
+Cannot rule out migraine,ambiguous
+No signs of heart failure,negated
+asthma controlled on medication,ongoing
+Past history of stroke,resolved
+Rule out cough,ambiguous
+Stable chest pain,ongoing
+Status post vertigo,resolved
+No anemia,negated
+Cannot rule out nausea,ambiguous
+No current osteoporosis,negated
+Negative for asthma,negated
+Absence of diabetes,negated
+Negative for fever,negated
+obesity not detected,negated
+asthma no longer present,resolved
+Patient has coronary artery disease,ongoing
+No documented migraine,negated
+diabetes is stable,ongoing
+Prior anemia,resolved
+heart failure ruled out,negated
+h/o edema,resolved
+Stable anxiety,ongoing
+Chronic fatigue,ongoing
+Had chest pain last year,resolved
+Acute nausea,ongoing
+To rule out pulmonary embolism,ambiguous
+diabetes 3 years ago,resolved
+Query migraine,ambiguous
+Suspected edema,ambiguous
+Possible new fever,ambiguous
+Query fatigue,ambiguous
+Questionable heart failure,ambiguous
+Worsening asthma,ongoing
+Possible deep vein thrombosis,ambiguous
+Presenting with cough,ongoing
+stroke continues,ongoing
+Atypical presentation of deep vein thrombosis,ambiguous
+Concern for depression,ambiguous
+Prior atrial fibrillation,resolved
+Negative for stroke,negated
+Working diagnosis of nausea,ambiguous
+Recovered from stroke,resolved
+diabetes 2 months ago,resolved
+heart failure well-controlled,ongoing
+Free of anxiety,negated
+chest pain not detected,negated
+Former headache,resolved
+Negative for headache,negated
+Denies vertigo,negated
+Patient has pneumonia,ongoing
+Stable depression,ongoing
+shortness of breath -ve,negated
+Questionable cough,ambiguous
+obesity not present,negated
+Had gout last year,resolved
+fatigue controlled on medication,ongoing
+Former pulmonary embolism,resolved
+Chronic anxiety,ongoing
+cough no longer present,resolved
+vertigo cleared 6 months ago,resolved
+pulmonary embolism since this morning,ongoing
+rheumatoid arthritis not present,negated
+Patient has no gout,negated
+stroke -ve,negated
+depression last year,resolved
+asthma 2 months ago,resolved
+Could represent osteoporosis,ambiguous
+depression worsening,ongoing
+Patient has no edema,negated
+Status post gout,resolved
+No edema,negated
+No complaints of insomnia,negated
+Possible migraine,ambiguous
+Possible new pneumonia,ambiguous
+Suspected pneumonia,ambiguous
+Cannot rule out shortness of breath,ambiguous
+Probable fever,ambiguous
+headache improving,ongoing
+No active coronary artery disease,negated
+Recovered from pneumonia,resolved
+Differential includes fever,ambiguous
+anxiety was treated,resolved
+May have vertigo,ambiguous
+No evidence of atrial fibrillation,negated
+Considering migraine,ambiguous
+No headache,negated
+h/o headache,resolved
+Managed diabetes,ongoing
+Currently has rheumatoid arthritis,ongoing
+To rule out rheumatoid arthritis,ambiguous
+seizures has resolved,resolved
+Considering vertigo,ambiguous
+rheumatoid arthritis resolved after treatment,resolved
+Complains of fever,ongoing
+Patient has rheumatoid arthritis,ongoing
+Considering rheumatoid arthritis,ambiguous
+Acute sepsis,ongoing
+Managed obesity,ongoing
+shortness of breath stable,ongoing
+No known seizures,negated
+vertigo was treated,resolved
+Previous episode of anemia,resolved
+Does not have fever,negated
+Does not have deep vein thrombosis,negated
+headache 3 years ago,resolved
+Imaging shows no evidence of asthma,negated
+Former seizures,resolved
+Cannot rule out sepsis,ambiguous
+pulmonary embolism has resolved,resolved
+No active chest pain,negated
+headache remains present,ongoing
+Status post nausea,resolved
+Unlikely but possible anxiety,ambiguous
+asthma was treated,resolved
+insomnia is stable,ongoing
+pulmonary embolism stable,ongoing
+No history of shortness of breath,negated
+asthma -ve,negated
+nausea cleared 6 months ago,resolved
+nausea 3 years ago,resolved
+Presenting with osteoporosis,ongoing
+Probable depression,ambiguous
+No complaints of nausea,negated
+No known insomnia,negated
+insomnia no longer present,resolved
+Denies obesity,negated
+fatigue 2 months ago,resolved
+Denies any history of insomnia,negated
+shortness of breath resolved,resolved
+pulmonary embolism was treated,resolved
+diabetes fully resolved,resolved
+Imaging shows no evidence of vertigo,negated
+cough in the past,resolved
+Questionable insomnia,ambiguous
+Currently has cough,ongoing
+Differential includes deep vein thrombosis,ambiguous
+s/p treatment for obesity,resolved
+nausea last year,resolved
+Chronic rheumatoid arthritis,ongoing
+Past history of edema,resolved
+Complains of depression,ongoing
+Possible nausea,ambiguous
+diabetes not detected,negated
+Currently has stroke,ongoing
+Patient denies stroke,negated
+headache resolved,resolved
+Former heart failure,resolved
+No current fever,negated
+Prior vertigo,resolved
+Past history of heart failure,resolved
+Absence of deep vein thrombosis,negated
+Patient has no diabetes,negated
+Complains of pneumonia,ongoing
+Negative for vertigo,negated
+edema continues,ongoing
+diabetes absent,negated
+Prior nausea,resolved
+Negative for hypertension,negated
+osteoporosis previously diagnosed,resolved
+Probable coronary artery disease,ambiguous
+Suspected hypertension,ambiguous
+anemia in the past,resolved
+Chronic hypertension,ongoing
+anxiety 3 years ago,resolved
+Considering gout,ambiguous
+May have chest pain,ambiguous
+Patient denies fatigue,negated
+Chronic anemia,ongoing
+No history of insomnia,negated
+May have shortness of breath,ambiguous
+Could represent pneumonia,ambiguous
+No known obesity,negated
+asthma last year,resolved
+anemia negative,negated
+pulmonary embolism 3 years ago,resolved
+Does not have asthma,negated
+Recovered from deep vein thrombosis,resolved
+No longer has deep vein thrombosis,resolved
+Previous episode of gout,resolved
+No current chest pain,negated
+No migraine,negated
+Complains of chest pain,ongoing
+gout was treated,resolved
+nausea was treated,resolved
+Differential includes hypertension,ambiguous
+Currently has edema,ongoing
+Concern for headache,ambiguous
+Imaging shows no evidence of headache,negated
+Currently has nausea,ongoing
+Concern for nausea,ambiguous
+deep vein thrombosis 2 months ago,resolved
+sepsis absent,negated
+Imaging shows no evidence of atrial fibrillation,negated
+anemia not detected,negated
+s/p treatment for fever,resolved
+Negative for diabetes,negated
+Unlikely but possible asthma,ambiguous
+Presenting with fatigue,ongoing
+No asthma,negated
+Stable cough,ongoing
+osteoporosis absent,negated
+Complains of coronary artery disease,ongoing
+cough fully resolved,resolved
+Persistent edema,ongoing
+No complaints of anemia,negated
+fever continues,ongoing
+Differential includes insomnia,ambiguous
+rheumatoid arthritis 2 months ago,resolved
+cough -ve,negated
+No known migraine,negated
+anemia is stable,ongoing
+fatigue for the past 3 days,ongoing
+Acute migraine,ongoing
+coronary artery disease well-controlled,ongoing
+stroke is stable,ongoing
+chest pain controlled on medication,ongoing
+Persistent anxiety,ongoing
+anxiety controlled on medication,ongoing
+s/p treatment for seizures,resolved
+anxiety resolved,resolved
+Cannot rule out obesity,ambiguous
+Possible history of fatigue,ambiguous
+Persistent fatigue,ongoing
+Working diagnosis of hypertension,ambiguous
+Patient denies rheumatoid arthritis,negated
+Questionable edema,ambiguous
+Questionable pneumonia,ambiguous
+Active chest pain,ongoing
+No documented hypertension,negated
+Cannot rule out chest pain,ambiguous
+Worsening depression,ongoing
+Without migraine,negated
+edema resolved after treatment,resolved
+Denies deep vein thrombosis,negated
+shortness of breath not improving on current regimen,ongoing
+Possible new stroke,ambiguous
+seizures negative,negated
+fever resolved after treatment,resolved
+Suspected cough,ambiguous
+Former shortness of breath,resolved
+No longer has pulmonary embolism,resolved
+Denies any history of fatigue,negated
+No documented anxiety,negated
+edema remains present,ongoing
+Unlikely but possible rheumatoid arthritis,ambiguous
+History of coronary artery disease,resolved
+Prior shortness of breath,resolved
+No signs of depression,negated
+gout stable,ongoing
+Had diabetes last year,resolved
+Prior pneumonia,resolved
+s/p treatment for diabetes,resolved
+Presenting with gout,ongoing
+Free of osteoporosis,negated
+Stable deep vein thrombosis,ongoing
+Former depression,resolved
+heart failure fully resolved,resolved
+No current cough,negated
+Rule out headache,ambiguous
+fatigue fully resolved,resolved
+Cannot rule out pneumonia,ambiguous
+rheumatoid arthritis in remission,resolved
+Symptoms consistent with insomnia,ambiguous
+migraine well-controlled,ongoing
+hypertension ruled out,negated
+stroke negative,negated
+No documented fatigue,negated
+Negative for osteoporosis,negated
+Free of shortness of breath,negated
+diabetes -ve,negated
+heart failure resolved,resolved
+Questionable diabetes,ambiguous
+fever improving,ongoing
+Negative for rheumatoid arthritis,negated
+stroke 3 years ago,resolved
+Possible history of vertigo,ambiguous
+fatigue resolved,resolved
+Stable rheumatoid arthritis,ongoing
+Rule out hypertension,ambiguous
+Possible pneumonia,ambiguous
+s/p treatment for migraine,resolved
+Patient has headache,ongoing
+Working diagnosis of obesity,ambiguous
+migraine was treated,resolved
+No complaints of fatigue,negated
+anemia well-controlled,ongoing
+Patient has osteoporosis,ongoing
+Free of sepsis,negated
+Imaging shows no evidence of sepsis,negated
+Could represent stroke,ambiguous
+Past history of asthma,resolved
+Possible history of depression,ambiguous
+Differential includes atrial fibrillation,ambiguous
+No signs of chest pain,negated
+hypertension absent,negated
+Rule out vertigo,ambiguous
+No active seizures,negated
+shortness of breath absent,negated
+History of sepsis,resolved
+obesity was treated,resolved
+Rule out asthma,ambiguous
+No signs of diabetes,negated
+No signs of rheumatoid arthritis,negated
+anxiety last year,resolved
+To rule out chest pain,ambiguous
+No history of nausea,negated
+Managed heart failure,ongoing
+h/o fatigue,resolved
+Possible new depression,ambiguous
+Acute vertigo,ongoing
+Managed vertigo,ongoing
+pulmonary embolism improving,ongoing
+Active migraine,ongoing
+Persistent migraine,ongoing
+Had pulmonary embolism last year,resolved
+Rule out sepsis,ambiguous
+Former hypertension,resolved
+Denies hypertension,negated
+? nausea,ambiguous
+osteoporosis since this morning,ongoing
+insomnia was treated,resolved
+coronary artery disease remains present,ongoing
+Had anxiety last year,resolved
+insomnia active,ongoing
+Differential includes vertigo,ambiguous
+No shortness of breath,negated
+Considering shortness of breath,ambiguous
+May have hypertension,ambiguous
+pulmonary embolism controlled on medication,ongoing
+asthma fully resolved,resolved
+Suspected chest pain,ambiguous
+s/p treatment for anxiety,resolved
+Stable gout,ongoing
+seizures not present,negated
+Patient has no obesity,negated
+No complaints of chest pain,negated
+chest pain cleared 6 months ago,resolved
+shortness of breath not present,negated
+Complains of vertigo,ongoing
+Denies any history of nausea,negated
+heart failure since this morning,ongoing
+Active depression,ongoing
+Stable diabetes,ongoing
+No complaints of gout,negated
+Denies any history of gout,negated
+gout continues,ongoing
+Patient has pulmonary embolism,ongoing
+heart failure has resolved,resolved
+No known shortness of breath,negated
+Suspected atrial fibrillation,ambiguous
+edema resolved,resolved
+Differential includes cough,ambiguous
+heart failure in the past,resolved
+seizures active,ongoing
+sepsis 3 years ago,resolved
+Patient has atrial fibrillation,ongoing
+No active fever,negated
+sepsis since this morning,ongoing
+cough not improving on current regimen,ongoing
+Persistent chest pain,ongoing
+s/p treatment for depression,resolved
+deep vein thrombosis has resolved,resolved
+Does not have anxiety,negated
+Concern for anxiety,ambiguous
+Chronic obesity,ongoing
+chest pain was treated,resolved
+Questionable rheumatoid arthritis,ambiguous
+No current diabetes,negated
+Does not have stroke,negated
+Persistent depression,ongoing
+osteoporosis in remission,resolved
+anemia worsening,ongoing
+pulmonary embolism for the past 3 days,ongoing
+No known sepsis,negated
+? asthma,ambiguous
+No cough,negated
+Unlikely but possible fatigue,ambiguous
+Could represent anxiety,ambiguous
+Currently has coronary artery disease,ongoing
+No evidence of asthma,negated
+Suspected shortness of breath,ambiguous
+Possible history of coronary artery disease,ambiguous
+Possible fever,ambiguous
+Patient denies fever,negated
+Questionable chest pain,ambiguous
+No current stroke,negated
+rheumatoid arthritis absent,negated
+Acute cough,ongoing
+stroke improving,ongoing
+fatigue treated successfully,resolved
+cough not present,negated
+deep vein thrombosis in the past,resolved
+Probable osteoporosis,ambiguous
+Managed coronary artery disease,ongoing
+No history of asthma,negated
+coronary artery disease resolved,resolved
+hypertension resolved,resolved
+Denies any history of fever,negated
+deep vein thrombosis currently present,ongoing
+No history of cough,negated
+nausea not improving on current regimen,ongoing
+Possible history of heart failure,ambiguous
+sepsis is stable,ongoing
+Considering asthma,ambiguous
+No hypertension,negated
+Past history of pneumonia,resolved
+Acute insomnia,ongoing
+Symptoms consistent with nausea,ambiguous
+? pulmonary embolism,ambiguous
+Presenting with heart failure,ongoing
+gout for the past 3 days,ongoing
+Past history of obesity,resolved
+Considering pneumonia,ambiguous
+No evidence of fatigue,negated
+Currently has seizures,ongoing
+Chronic nausea,ongoing
+Cannot rule out fever,ambiguous
+? anxiety,ambiguous
+Presenting with diabetes,ongoing
+rheumatoid arthritis cleared 6 months ago,resolved
+Denies any history of osteoporosis,negated
+coronary artery disease active,ongoing
+To rule out atrial fibrillation,ambiguous
+No complaints of pneumonia,negated
+Without obesity,negated
+May have osteoporosis,ambiguous
+anemia resolved after treatment,resolved
+Prior heart failure,resolved
+pneumonia treated successfully,resolved
+To rule out anemia,ambiguous
+Possible history of pneumonia,ambiguous
+Status post pneumonia,resolved
+Free of fatigue,negated
+headache no longer present,resolved
+pulmonary embolism cleared 6 months ago,resolved
+h/o hypertension,resolved
+Denies osteoporosis,negated
+No known heart failure,negated
+Differential includes heart failure,ambiguous
+coronary artery disease fully resolved,resolved
+insomnia 2 months ago,resolved
+No history of anemia,negated
+No insomnia,negated
+vertigo resolved after treatment,resolved
+Probable deep vein thrombosis,ambiguous
+insomnia treated successfully,resolved
+No history of fatigue,negated
+Stable osteoporosis,ongoing
+asthma 3 years ago,resolved
+No signs of hypertension,negated
+Had insomnia last year,resolved
+Denies any history of hypertension,negated
+Unlikely but possible cough,ambiguous
+Possible history of hypertension,ambiguous
+Probable seizures,ambiguous
+Absence of vertigo,negated
+No current sepsis,negated
+Active atrial fibrillation,ongoing
+heart failure resolved after treatment,resolved
+stroke no longer present,resolved
+Status post fatigue,resolved
+Prior pulmonary embolism,resolved
+h/o pulmonary embolism,resolved
+Considering osteoporosis,ambiguous
+Probable hypertension,ambiguous
+Acute edema,ongoing
+deep vein thrombosis in remission,resolved
+headache since this morning,ongoing
+No known atrial fibrillation,negated
+Working diagnosis of gout,ambiguous
+depression resolved after treatment,resolved
+obesity last year,resolved
+No signs of pneumonia,negated
+Query coronary artery disease,ambiguous
+chest pain in the past,resolved
+No known pulmonary embolism,negated
+vertigo not detected,negated
+obesity -ve,negated
+Patient has asthma,ongoing
+No known fever,negated
+fatigue has resolved,resolved
+shortness of breath cleared 6 months ago,resolved
+pneumonia no longer present,resolved
+Chronic depression,ongoing
+Concern for atrial fibrillation,ambiguous
+Symptoms consistent with pneumonia,ambiguous
+Free of pneumonia,negated
+Possible anemia,ambiguous
+Past history of headache,resolved
+Former asthma,resolved
+Patient has no cough,negated
+hypertension improving,ongoing
+Possible new cough,ambiguous
+shortness of breath has resolved,resolved
+rheumatoid arthritis for the past 3 days,ongoing
+No history of gout,negated
+Without rheumatoid arthritis,negated
+Complains of stroke,ongoing
+No osteoporosis,negated
+No history of stroke,negated
+Could represent deep vein thrombosis,ambiguous
+Working diagnosis of heart failure,ambiguous
+atrial fibrillation remains present,ongoing
+No rheumatoid arthritis,negated
+fatigue since this morning,ongoing
+Patient has anxiety,ongoing
+atrial fibrillation not detected,negated
+No current vertigo,negated
+Previous episode of headache,resolved
+Worsening osteoporosis,ongoing
+Absence of nausea,negated
+anemia has resolved,resolved
+osteoporosis ruled out,negated
+Query deep vein thrombosis,ambiguous
+fatigue previously diagnosed,resolved
+Past history of atrial fibrillation,resolved
+Prior asthma,resolved
+Concern for fever,ambiguous
+obesity fully resolved,resolved
+pulmonary embolism absent,negated
+anxiety for the past 3 days,ongoing
+gout ruled out,negated
+nausea remains present,ongoing
+osteoporosis ongoing,ongoing
+Acute seizures,ongoing
+anxiety in the past,resolved
+No signs of gout,negated
+Had pneumonia last year,resolved
+Managed anemia,ongoing
+Status post seizures,resolved
+Active anxiety,ongoing
+migraine improving,ongoing
+Considering seizures,ambiguous
+fever active,ongoing
+nausea not present,negated
+No complaints of diabetes,negated
+Possible new edema,ambiguous
+Patient has depression,ongoing
+Acute heart failure,ongoing
+No complaints of vertigo,negated
+insomnia controlled on medication,ongoing
+Possible history of obesity,ambiguous
+No documented deep vein thrombosis,negated
+deep vein thrombosis -ve,negated
+stroke not detected,negated
+Patient has chest pain,ongoing
+nausea ruled out,negated
+pulmonary embolism resolved after treatment,resolved
+Worsening stroke,ongoing
+Imaging shows no evidence of anxiety,negated
+Patient has no migraine,negated
+obesity stable,ongoing
+Denies anemia,negated
+Without stroke,negated
+Differential includes gout,ambiguous
+pneumonia is stable,ongoing
+Symptoms consistent with cough,ambiguous
+Atypical presentation of seizures,ambiguous
+fever not improving on current regimen,ongoing
+Had sepsis last year,resolved
+No evidence of deep vein thrombosis,negated
+Previous episode of stroke,resolved
+chest pain resolved,resolved
+headache -ve,negated
+gout -ve,negated
+migraine absent,negated
+No signs of migraine,negated
+Denies stroke,negated
+Considering hypertension,ambiguous
+No longer has atrial fibrillation,resolved
+cough 2 months ago,resolved
+stroke treated successfully,resolved
+Currently has headache,ongoing
+No active insomnia,negated
+gout cleared 6 months ago,resolved
+Worsening edema,ongoing
+Previous episode of hypertension,resolved
+No current insomnia,negated
+gout 2 months ago,resolved
+No signs of osteoporosis,negated
+No evidence of hypertension,negated
+Could represent chest pain,ambiguous
+Negative for chest pain,negated
+chest pain has resolved,resolved
+gout resolved after treatment,resolved
+Complains of gout,ongoing
+insomnia cleared 6 months ago,resolved
+atrial fibrillation controlled on medication,ongoing
+Past history of migraine,resolved
+Differential includes nausea,ambiguous
+Denies nausea,negated
+s/p treatment for asthma,resolved
+Possible depression,ambiguous
+pneumonia for the past 3 days,ongoing
+Concern for pneumonia,ambiguous
+stroke has resolved,resolved
+Query asthma,ambiguous
+Query rheumatoid arthritis,ambiguous
+anxiety not detected,negated
+hypertension since this morning,ongoing
+Patient denies seizures,negated
+Complains of cough,ongoing
+No evidence of heart failure,negated
+migraine not improving on current regimen,ongoing
+No longer has pneumonia,resolved
+Suspected nausea,ambiguous
+gout last year,resolved
+Acute pulmonary embolism,ongoing
+obesity in remission,resolved
+No documented pneumonia,negated
+Managed pulmonary embolism,ongoing
+Had rheumatoid arthritis last year,resolved
+Patient has no deep vein thrombosis,negated
+fatigue not present,negated
+Former atrial fibrillation,resolved
+insomnia currently present,ongoing
+No vertigo,negated
+Managed seizures,ongoing
+Rule out stroke,ambiguous
+anemia not present,negated
+Denies pneumonia,negated
+May have anemia,ambiguous
+No active nausea,negated
+History of atrial fibrillation,resolved
+shortness of breath treated successfully,resolved
+hypertension is stable,ongoing
+obesity for the past 3 days,ongoing
+h/o deep vein thrombosis,resolved
+Suspected anxiety,ambiguous
+Cannot rule out heart failure,ambiguous
+fever previously diagnosed,resolved
+headache controlled on medication,ongoing
+coronary artery disease cleared 6 months ago,resolved
+insomnia not present,negated
+diabetes stable,ongoing
+Does not have osteoporosis,negated
+migraine fully resolved,resolved
+gout active,ongoing
+Unlikely but possible diabetes,ambiguous
+Recovered from heart failure,resolved
+stroke previously diagnosed,resolved
+Without insomnia,negated
+No known stroke,negated
+pneumonia remains present,ongoing
+sepsis not detected,negated
+Acute stroke,ongoing
+sepsis previously diagnosed,resolved
+Stable pneumonia,ongoing
+heart failure was treated,resolved
+Chronic chest pain,ongoing
+diabetes resolved,resolved
+fatigue 3 years ago,resolved
+anxiety worsening,ongoing
+headache not improving on current regimen,ongoing
+Considering heart failure,ambiguous
+To rule out sepsis,ambiguous
+insomnia negative,negated
+History of anemia,resolved
+coronary artery disease since this morning,ongoing
+No complaints of stroke,negated
+seizures ongoing,ongoing
+No longer has depression,resolved
+Acute atrial fibrillation,ongoing
+Free of migraine,negated
+Had nausea last year,resolved
+Previous episode of fatigue,resolved
+edema controlled on medication,ongoing
+gout currently present,ongoing
+pulmonary embolism no longer present,resolved
+anemia not improving on current regimen,ongoing
+anxiety improving,ongoing
+pneumonia stable,ongoing
+Managed stroke,ongoing
+seizures resolved,resolved
+gout absent,negated
+Does not have shortness of breath,negated
+migraine last year,resolved
+pulmonary embolism not detected,negated
+atrial fibrillation not improving on current regimen,ongoing
+No current obesity,negated
+fever absent,negated
+Concern for vertigo,ambiguous
+osteoporosis no longer present,resolved
+Suspected heart failure,ambiguous
+Persistent sepsis,ongoing
+Patient has heart failure,ongoing
+No current shortness of breath,negated
+hypertension previously diagnosed,resolved
+Prior edema,resolved
+depression negative,negated
+Status post chest pain,resolved
+Prior chest pain,resolved
+Possible history of shortness of breath,ambiguous
+pulmonary embolism previously diagnosed,resolved
+seizures remains present,ongoing
+depression 2 months ago,resolved
+Chronic migraine,ongoing
+No history of deep vein thrombosis,negated
+Free of pulmonary embolism,negated
+Acute headache,ongoing
+obesity ruled out,negated
+rheumatoid arthritis has resolved,resolved
+Persistent stroke,ongoing
+fever has resolved,resolved
+Working diagnosis of anxiety,ambiguous
+Had coronary artery disease last year,resolved
+Former stroke,resolved
+rheumatoid arthritis not improving on current regimen,ongoing
+Atypical presentation of chest pain,ambiguous
+hypertension no longer present,resolved
+osteoporosis in the past,resolved
+chest pain improving,ongoing
+Past history of pulmonary embolism,resolved
+Worsening obesity,ongoing
+Suspected depression,ambiguous
+No evidence of nausea,negated
+Complains of diabetes,ongoing
+fatigue improving,ongoing
+s/p treatment for stroke,resolved
+Questionable shortness of breath,ambiguous
+Cannot rule out vertigo,ambiguous
+diabetes not improving on current regimen,ongoing
+Without fever,negated
+Status post sepsis,resolved
+Without chest pain,negated
+No known vertigo,negated
+depression for the past 3 days,ongoing
+Considering atrial fibrillation,ambiguous
+migraine remains present,ongoing
+Working diagnosis of seizures,ambiguous
+pneumonia was treated,resolved
+Possible history of deep vein thrombosis,ambiguous
+Denies depression,negated
+diabetes active,ongoing
+Does not have hypertension,negated
+atrial fibrillation 3 years ago,resolved
+Possible history of cough,ambiguous
+gout is stable,ongoing
+Previous episode of nausea,resolved
+Complains of anxiety,ongoing
+h/o diabetes,resolved
+Does not have atrial fibrillation,negated
+Presenting with insomnia,ongoing
+edema has resolved,resolved
+Chronic diabetes,ongoing
+Absence of osteoporosis,negated
+No complaints of migraine,negated
+Status post anemia,resolved
+Stable migraine,ongoing
+May have deep vein thrombosis,ambiguous
+stroke resolved after treatment,resolved
+vertigo ruled out,negated
+pneumonia absent,negated
+No documented edema,negated
+coronary artery disease for the past 3 days,ongoing
+No history of edema,negated
+asthma negative,negated
+anxiety since this morning,ongoing
+depression stable,ongoing
+hypertension stable,ongoing
+Negative for seizures,negated
+No signs of shortness of breath,negated
+? gout,ambiguous
+No nausea,negated
+Probable atrial fibrillation,ambiguous
+Past history of gout,resolved
+diabetes well-controlled,ongoing
+Patient denies obesity,negated
+Without pulmonary embolism,negated
+Atypical presentation of nausea,ambiguous
+Free of asthma,negated
+diabetes controlled on medication,ongoing
+Free of chest pain,negated
+stroke remains present,ongoing
+Differential includes diabetes,ambiguous
+Suspected asthma,ambiguous
+s/p treatment for gout,resolved
+Cannot rule out coronary artery disease,ambiguous
+Patient has shortness of breath,ongoing
+Probable asthma,ambiguous
+No known diabetes,negated
+Does not have diabetes,negated
+Status post osteoporosis,resolved
+atrial fibrillation was treated,resolved
+diabetes currently present,ongoing
+Worsening fatigue,ongoing
+To rule out edema,ambiguous
+chest pain 3 years ago,resolved
+asthma not present,negated
+Suspected anemia,ambiguous
+diabetes since this morning,ongoing
+heart failure controlled on medication,ongoing
+No current migraine,negated
+Absence of fever,negated
+Does not have edema,negated
+Considering chest pain,ambiguous
+Imaging shows no evidence of heart failure,negated
+Imaging shows no evidence of obesity,negated
+No active hypertension,negated
+headache treated successfully,resolved
+Currently has anemia,ongoing
+Imaging shows no evidence of migraine,negated
+cough was treated,resolved
+anxiety well-controlled,ongoing
+Without anxiety,negated
+Denies insomnia,negated
+anemia ruled out,negated
+nausea treated successfully,resolved
+shortness of breath in the past,resolved
+Without gout,negated
+Previous episode of anxiety,resolved
+No history of hypertension,negated
+No obesity,negated
+Currently has osteoporosis,ongoing
+Stable insomnia,ongoing
+Recovered from hypertension,resolved
+Rule out shortness of breath,ambiguous
+Previous episode of vertigo,resolved
+Probable insomnia,ambiguous
+fever ongoing,ongoing
+anemia no longer present,resolved
+headache active,ongoing
+asthma not detected,negated
+No active gout,negated
+depression well-controlled,ongoing
+anemia treated successfully,resolved
+chest pain continues,ongoing
+Currently has shortness of breath,ongoing
+Former insomnia,resolved
+insomnia continues,ongoing
+Imaging shows no evidence of depression,negated
+coronary artery disease 3 years ago,resolved
+Query obesity,ambiguous
+vertigo -ve,negated
+? shortness of breath,ambiguous
+coronary artery disease ongoing,ongoing
+Query nausea,ambiguous
+Absence of pulmonary embolism,negated
+No documented depression,negated
+depression has resolved,resolved
+nausea is stable,ongoing
+No documented asthma,negated
+History of obesity,resolved
+stroke worsening,ongoing
+Working diagnosis of atrial fibrillation,ambiguous
+edema 3 years ago,resolved
+Query cough,ambiguous
+depression no longer present,resolved
+Suspected seizures,ambiguous
+Managed atrial fibrillation,ongoing
+Acute hypertension,ongoing
+h/o gout,resolved
+Possible new shortness of breath,ambiguous
+asthma currently present,ongoing
+osteoporosis remains present,ongoing
+No history of pneumonia,negated
+Persistent insomnia,ongoing
+Former anemia,resolved
+obesity resolved after treatment,resolved
+Probable headache,ambiguous
+Possible history of rheumatoid arthritis,ambiguous
+Recovered from vertigo,resolved
+No documented gout,negated
+Could represent shortness of breath,ambiguous
+nausea absent,negated
+Imaging shows no evidence of cough,negated
+Probable gout,ambiguous
+No evidence of anemia,negated
+coronary artery disease improving,ongoing
+osteoporosis cleared 6 months ago,resolved
+Questionable migraine,ambiguous
+edema last year,resolved
+Questionable nausea,ambiguous
+cough well-controlled,ongoing
+atrial fibrillation ongoing,ongoing
+diabetes worsening,ongoing
+Atypical presentation of hypertension,ambiguous
+vertigo for the past 3 days,ongoing
+Considering depression,ambiguous
+No active anxiety,negated
+Presenting with pneumonia,ongoing
+diabetes not present,negated
+heart failure is stable,ongoing
+Patient denies shortness of breath,negated
+Considering diabetes,ambiguous
+Status post asthma,resolved
+No longer has cough,resolved
+Query vertigo,ambiguous
+May have anxiety,ambiguous
+Concern for anemia,ambiguous
+Past history of coronary artery disease,resolved
+To rule out vertigo,ambiguous
+No evidence of insomnia,negated
+Negative for atrial fibrillation,negated
+depression is stable,ongoing
+Cannot rule out asthma,ambiguous
+Imaging shows no evidence of anemia,negated
+edema currently present,ongoing
+depression remains present,ongoing
+pneumonia well-controlled,ongoing
+Status post coronary artery disease,resolved
+gout 3 years ago,resolved
+Does not have pulmonary embolism,negated
+chest pain fully resolved,resolved
+Differential includes migraine,ambiguous
+s/p treatment for insomnia,resolved
+Status post shortness of breath,resolved
+Imaging shows no evidence of insomnia,negated
+Rule out anemia,ambiguous
+Imaging shows no evidence of fatigue,negated
+Atypical presentation of vertigo,ambiguous
+heart failure currently present,ongoing
+Differential includes pneumonia,ambiguous
+Acute depression,ongoing
+Denies any history of migraine,negated
+obesity controlled on medication,ongoing
+seizures last year,resolved
+gout treated successfully,resolved
+Patient has no atrial fibrillation,negated
+Chronic fever,ongoing
+deep vein thrombosis for the past 3 days,ongoing
+Presenting with sepsis,ongoing
+Query stroke,ambiguous
+obesity 2 months ago,resolved
+No evidence of stroke,negated
+Patient denies asthma,negated
+Past history of shortness of breath,resolved
+depression controlled on medication,ongoing
+seizures treated successfully,resolved
+No active asthma,negated
+No complaints of shortness of breath,negated
+Cannot rule out fatigue,ambiguous
+h/o sepsis,resolved
+insomnia absent,negated
+Atypical presentation of diabetes,ambiguous
+migraine controlled on medication,ongoing
+Without shortness of breath,negated
+Absence of asthma,negated
+hypertension not improving on current regimen,ongoing
+Atypical presentation of cough,ambiguous
+Could represent gout,ambiguous
+h/o shortness of breath,resolved
+No longer has asthma,resolved
+Managed cough,ongoing
+Status post hypertension,resolved
+No chest pain,negated
+Persistent deep vein thrombosis,ongoing
+No history of rheumatoid arthritis,negated
+Past history of rheumatoid arthritis,resolved
+Stable edema,ongoing
+Differential includes depression,ambiguous
+Query headache,ambiguous
+rheumatoid arthritis currently present,ongoing
+Could represent diabetes,ambiguous
+Currently has chest pain,ongoing
+heart failure treated successfully,resolved
+depression absent,negated
+deep vein thrombosis is stable,ongoing
+Denies any history of rheumatoid arthritis,negated
+shortness of breath previously diagnosed,resolved
+hypertension remains present,ongoing
+gout ongoing,ongoing
+deep vein thrombosis resolved after treatment,resolved
+Symptoms consistent with obesity,ambiguous
+Former rheumatoid arthritis,resolved
+Patient has no vertigo,negated
+Active nausea,ongoing
+Questionable asthma,ambiguous
+No evidence of pneumonia,negated
+Stable stroke,ongoing
+gout previously diagnosed,resolved
+pneumonia negative,negated
+anxiety 2 months ago,resolved
+To rule out coronary artery disease,ambiguous
+vertigo in the past,resolved
+Previous episode of rheumatoid arthritis,resolved
+No active sepsis,negated
+chest pain treated successfully,resolved
+Patient has no hypertension,negated
+fever 3 years ago,resolved
+cough for the past 3 days,ongoing
+Had depression last year,resolved
+May have fatigue,ambiguous
+nausea fully resolved,resolved
+Symptoms consistent with atrial fibrillation,ambiguous
+Recovered from coronary artery disease,resolved
+Possible new nausea,ambiguous
+vertigo negative,negated
+Free of deep vein thrombosis,negated
+Stable headache,ongoing
+osteoporosis improving,ongoing
+Symptoms consistent with pulmonary embolism,ambiguous
+No complaints of coronary artery disease,negated
+To rule out gout,ambiguous
+asthma ruled out,negated
+Had obesity last year,resolved
+insomnia not improving on current regimen,ongoing
+nausea in the past,resolved
+Chronic gout,ongoing
+Rule out depression,ambiguous
+gout remains present,ongoing
+Former anxiety,resolved
+headache continues,ongoing
+Former osteoporosis,resolved
+Had edema last year,resolved
+Past history of cough,resolved
+Former vertigo,resolved
+Suspected vertigo,ambiguous
+Stable atrial fibrillation,ongoing
+diabetes remains present,ongoing
+Chronic shortness of breath,ongoing
+Query pneumonia,ambiguous
+History of fever,resolved
+osteoporosis 3 years ago,resolved
+pneumonia resolved,resolved
+osteoporosis worsening,ongoing
+nausea 2 months ago,resolved
+Query atrial fibrillation,ambiguous
+rheumatoid arthritis 3 years ago,resolved
+atrial fibrillation resolved,resolved
+Concern for chest pain,ambiguous
+May have obesity,ambiguous
+Symptoms consistent with anemia,ambiguous
+seizures well-controlled,ongoing
+Recovered from atrial fibrillation,resolved
+cough resolved after treatment,resolved
+Cannot rule out atrial fibrillation,ambiguous
+Without atrial fibrillation,negated
+Stable heart failure,ongoing
+No history of pulmonary embolism,negated
+No signs of coronary artery disease,negated
+May have asthma,ambiguous
+Chronic edema,ongoing
+No active edema,negated
+fever no longer present,resolved
+Cannot rule out insomnia,ambiguous
+stroke 2 months ago,resolved
+Rule out pulmonary embolism,ambiguous
+seizures previously diagnosed,resolved
+rheumatoid arthritis previously diagnosed,resolved
+anxiety fully resolved,resolved
+pneumonia 3 years ago,resolved
+Imaging shows no evidence of chest pain,negated
+rheumatoid arthritis negative,negated
+insomnia resolved after treatment,resolved
+Had heart failure last year,resolved
+No known cough,negated
+Currently has deep vein thrombosis,ongoing
+hypertension fully resolved,resolved
+Patient has fever,ongoing
+coronary artery disease not improving on current regimen,ongoing
+No history of chest pain,negated
+No known depression,negated
+asthma absent,negated
+Active edema,ongoing
+h/o osteoporosis,resolved
+hypertension in remission,resolved
+Free of insomnia,negated
+Denies any history of seizures,negated
+vertigo controlled on medication,ongoing
+pulmonary embolism fully resolved,resolved
+cough has resolved,resolved
+pulmonary embolism worsening,ongoing
+No longer has migraine,resolved
+h/o insomnia,resolved
+Managed migraine,ongoing
+Questionable hypertension,ambiguous
+Complains of migraine,ongoing
+diabetes ongoing,ongoing
+Stable pulmonary embolism,ongoing
+coronary artery disease stable,ongoing
+Recovered from rheumatoid arthritis,resolved
+Active anemia,ongoing
+shortness of breath worsening,ongoing
+pneumonia -ve,negated
+Persistent atrial fibrillation,ongoing
+Possible new heart failure,ambiguous
+Patient has migraine,ongoing
+anxiety no longer present,resolved
+Symptoms consistent with fatigue,ambiguous
+migraine stable,ongoing
+deep vein thrombosis no longer present,resolved
+deep vein thrombosis ongoing,ongoing
+Atypical presentation of depression,ambiguous
+Managed nausea,ongoing
+Worsening gout,ongoing
+Considering obesity,ambiguous
+diabetes continues,ongoing
+chest pain since this morning,ongoing
+Without asthma,negated
+Unlikely but possible atrial fibrillation,ambiguous
+Rule out pneumonia,ambiguous
+No seizures,negated
+Managed edema,ongoing
+cough currently present,ongoing
+No complaints of rheumatoid arthritis,negated
+Chronic headache,ongoing
+Stable fever,ongoing
+rheumatoid arthritis last year,resolved
+Past history of depression,resolved
+No signs of fever,negated
+Imaging shows no evidence of hypertension,negated
+No known hypertension,negated
+edema active,ongoing
+May have coronary artery disease,ambiguous
+Query osteoporosis,ambiguous
+obesity active,ongoing
+Working diagnosis of insomnia,ambiguous
+asthma stable,ongoing
+Free of atrial fibrillation,negated
+h/o seizures,resolved
+rheumatoid arthritis worsening,ongoing
+Active fever,ongoing
+deep vein thrombosis not improving on current regimen,ongoing
+Presenting with migraine,ongoing
+pulmonary embolism continues,ongoing
+obesity well-controlled,ongoing
+heart failure -ve,negated
+No complaints of anxiety,negated
+seizures for the past 3 days,ongoing
+Suspected sepsis,ambiguous
+Prior insomnia,resolved
+insomnia since this morning,ongoing
+? fever,ambiguous
+Probable nausea,ambiguous
+migraine currently present,ongoing
+No signs of atrial fibrillation,negated
+Active asthma,ongoing
+edema 2 months ago,resolved
+coronary artery disease currently present,ongoing
+hypertension for the past 3 days,ongoing
+Worsening anemia,ongoing
+deep vein thrombosis not present,negated
+Denies any history of headache,negated
+hypertension -ve,negated
+Worsening vertigo,ongoing
+headache not detected,negated
+diabetes cleared 6 months ago,resolved
+pulmonary embolism not present,negated
+Considering coronary artery disease,ambiguous
+Patient has no fatigue,negated
+Complains of pulmonary embolism,ongoing
+fever not present,negated
+sepsis in remission,resolved
+insomnia -ve,negated
+Possible sepsis,ambiguous
+h/o rheumatoid arthritis,resolved
+heart failure not improving on current regimen,ongoing
+Possible history of atrial fibrillation,ambiguous
+Previous episode of sepsis,resolved
+No heart failure,negated
+Symptoms consistent with asthma,ambiguous
+sepsis remains present,ongoing
+stroke resolved,resolved
+Working diagnosis of fever,ambiguous
+Managed fever,ongoing
+Recovered from insomnia,resolved
+chest pain currently present,ongoing
+seizures 3 years ago,resolved
+asthma is stable,ongoing
+chest pain negative,negated
+No evidence of headache,negated
+heart failure improving,ongoing
+Prior coronary artery disease,resolved
+Cannot rule out edema,ambiguous
+deep vein thrombosis improving,ongoing
+Status post depression,resolved
+Atypical presentation of headache,ambiguous
+Status post insomnia,resolved
+No depression,negated
+Currently has gout,ongoing
+Rule out migraine,ambiguous
+Persistent shortness of breath,ongoing
+Had stroke last year,resolved
+anemia absent,negated
+No longer has headache,resolved
+Query diabetes,ambiguous
+edema previously diagnosed,resolved
+Past history of fatigue,resolved
+cough is stable,ongoing
+Probable sepsis,ambiguous
+headache in the past,resolved
+deep vein thrombosis resolved,resolved
+Possible history of sepsis,ambiguous
+Chronic stroke,ongoing
+fatigue remains present,ongoing
+pneumonia fully resolved,resolved
+Considering sepsis,ambiguous
+Considering cough,ambiguous
+cough absent,negated
+Query depression,ambiguous
+Currently has pulmonary embolism,ongoing
+Absence of atrial fibrillation,negated
+To rule out hypertension,ambiguous
+No complaints of cough,negated
+asthma not improving on current regimen,ongoing
+stroke for the past 3 days,ongoing
+Patient has no asthma,negated
+vertigo well-controlled,ongoing
+osteoporosis for the past 3 days,ongoing
+Considering anemia,ambiguous
+Presenting with coronary artery disease,ongoing
+Suspected diabetes,ambiguous
+edema cleared 6 months ago,resolved
+diabetes ruled out,negated
+coronary artery disease treated successfully,resolved
+Without coronary artery disease,negated
+pulmonary embolism 2 months ago,resolved
+Prior rheumatoid arthritis,resolved
+Denies fatigue,negated
+Prior osteoporosis,resolved
+Could represent cough,ambiguous
+Questionable stroke,ambiguous
+edema ruled out,negated
+Working diagnosis of anemia,ambiguous
+Negative for cough,negated
+vertigo since this morning,ongoing
+Denies asthma,negated
+Prior obesity,resolved
+? vertigo,ambiguous
+coronary artery disease not present,negated
+headache worsening,ongoing
+Atypical presentation of obesity,ambiguous
+anemia -ve,negated
+Chronic pneumonia,ongoing
+No complaints of atrial fibrillation,negated
+Denies any history of deep vein thrombosis,negated
+Absence of cough,negated
+Denies headache,negated
+Stable fatigue,ongoing
+hypertension continues,ongoing
+History of edema,resolved
+No known pneumonia,negated
+No evidence of obesity,negated
+Past history of osteoporosis,resolved
+Denies fever,negated
+Absence of depression,negated
+headache well-controlled,ongoing
+coronary artery disease resolved after treatment,resolved
+No active fatigue,negated
+stroke ruled out,negated
+No complaints of asthma,negated
+fever since this morning,ongoing
+Negative for anemia,negated
+No active anemia,negated
+fatigue resolved after treatment,resolved
+Persistent cough,ongoing
+nausea previously diagnosed,resolved
+Patient denies migraine,negated
+heart failure ongoing,ongoing
+heart failure previously diagnosed,resolved
+Atypical presentation of insomnia,ambiguous
+hypertension 2 months ago,resolved
+Denies any history of shortness of breath,negated
+Acute anemia,ongoing
+nausea since this morning,ongoing
+asthma worsening,ongoing
+hypertension active,ongoing
+hypertension controlled on medication,ongoing
+heart failure 3 years ago,resolved
+No history of diabetes,negated
+deep vein thrombosis worsening,ongoing
+anemia active,ongoing
+chest pain -ve,negated
+fever not detected,negated
+nausea worsening,ongoing
+shortness of breath currently present,ongoing
+Presenting with seizures,ongoing
+No signs of pulmonary embolism,negated
+edema absent,negated
+s/p treatment for rheumatoid arthritis,resolved
+No history of vertigo,negated
+Rule out coronary artery disease,ambiguous
+Without headache,negated
+Does not have insomnia,negated
+No history of sepsis,negated
+Acute anxiety,ongoing
+Probable anxiety,ambiguous
+Query insomnia,ambiguous
+pulmonary embolism ruled out,negated
+cough treated successfully,resolved
+Patient has no anxiety,negated
+heart failure no longer present,resolved
+Currently has hypertension,ongoing
+Probable pneumonia,ambiguous
+? diabetes,ambiguous
+sepsis ruled out,negated
+Free of rheumatoid arthritis,negated
+hypertension cleared 6 months ago,resolved
+Persistent vertigo,ongoing
+Without diabetes,negated
+atrial fibrillation in remission,resolved
+History of shortness of breath,resolved
+chest pain previously diagnosed,resolved
+anxiety currently present,ongoing
+atrial fibrillation negative,negated
+Imaging shows no evidence of deep vein thrombosis,negated
+Patient denies sepsis,negated
+atrial fibrillation stable,ongoing
+No active heart failure,negated
+Patient has no fever,negated
+Previous episode of obesity,resolved
+To rule out cough,ambiguous
+Could represent fever,ambiguous
+anxiety has resolved,resolved
+Prior depression,resolved
+pneumonia previously diagnosed,resolved
+fever is stable,ongoing
+Working diagnosis of pneumonia,ambiguous
+seizures improving,ongoing
+asthma active,ongoing
+Possible new hypertension,ambiguous
+shortness of breath since this morning,ongoing
+Free of seizures,negated
+Active shortness of breath,ongoing
+heart failure 2 months ago,resolved
+fever was treated,resolved
+stroke absent,negated
+No current fatigue,negated
+Unlikely but possible fever,ambiguous
+No history of seizures,negated
+May have pneumonia,ambiguous
+deep vein thrombosis ruled out,negated
+Acute gout,ongoing
+Questionable anemia,ambiguous
+Atypical presentation of heart failure,ambiguous
+fever controlled on medication,ongoing
+Managed deep vein thrombosis,ongoing
+History of diabetes,resolved
+No complaints of edema,negated
+Negative for pulmonary embolism,negated
+Managed asthma,ongoing
+Suspected rheumatoid arthritis,ambiguous
+shortness of breath was treated,resolved
+Atypical presentation of osteoporosis,ambiguous
+Absence of sepsis,negated
+fever stable,ongoing
+No longer has seizures,resolved
+Possible osteoporosis,ambiguous
+Stable seizures,ongoing
+obesity negative,negated
+atrial fibrillation for the past 3 days,ongoing
+Negative for shortness of breath,negated
+cough improving,ongoing
+No current headache,negated
+Managed hypertension,ongoing
+No longer has hypertension,resolved
+nausea improving,ongoing
+asthma since this morning,ongoing
+Previous episode of atrial fibrillation,resolved
+Without vertigo,negated
+Complains of rheumatoid arthritis,ongoing
+insomnia stable,ongoing
+Denies any history of coronary artery disease,negated
+Free of gout,negated
+History of cough,resolved
+atrial fibrillation not present,negated
+diabetes has resolved,resolved
+Currently has fatigue,ongoing
+Patient has obesity,ongoing
+Rule out rheumatoid arthritis,ambiguous
+Patient denies heart failure,negated
+Had fatigue last year,resolved
+No current edema,negated
+heart failure not present,negated
+? pneumonia,ambiguous
+fever remains present,ongoing
+anxiety not present,negated
+edema in remission,resolved
+cough resolved,resolved
+Query hypertension,ambiguous
+Concern for migraine,ambiguous
+Considering edema,ambiguous
+Presenting with anemia,ongoing
+May have insomnia,ambiguous
+Prior fatigue,resolved
+cough since this morning,ongoing
+Possible new coronary artery disease,ambiguous
+heart failure negative,negated
+No current atrial fibrillation,negated
+obesity remains present,ongoing
+Active pneumonia,ongoing
+Unlikely but possible hypertension,ambiguous
+Active diabetes,ongoing
+edema for the past 3 days,ongoing
+sepsis negative,negated
+seizures stable,ongoing
+Prior cough,resolved
+Chronic pulmonary embolism,ongoing
+asthma ongoing,ongoing
+Managed osteoporosis,ongoing
+shortness of breath remains present,ongoing
+Patient has no nausea,negated
+headache is stable,ongoing
+Chronic seizures,ongoing
+headache absent,negated
+migraine resolved,resolved
+Patient denies cough,negated
+shortness of breath in remission,resolved
+s/p treatment for shortness of breath,resolved
+Atypical presentation of fever,ambiguous
+vertigo currently present,ongoing
+No active cough,negated
+depression since this morning,ongoing
+deep vein thrombosis cleared 6 months ago,resolved
+Prior seizures,resolved
+No active migraine,negated
+fever cleared 6 months ago,resolved
+Status post fever,resolved
+anxiety active,ongoing
+s/p treatment for pneumonia,resolved
+? insomnia,ambiguous
+Probable pulmonary embolism,ambiguous
+migraine continues,ongoing
+diabetes in remission,resolved
+Currently has asthma,ongoing
+osteoporosis well-controlled,ongoing
+nausea continues,ongoing
+pulmonary embolism resolved,resolved
+Complains of fatigue,ongoing
+asthma improving,ongoing
+rheumatoid arthritis resolved,resolved
+No longer has sepsis,resolved
+Without osteoporosis,negated
+cough previously diagnosed,resolved
+Possible pulmonary embolism,ambiguous
+Concern for coronary artery disease,ambiguous
+No sepsis,negated
+insomnia in the past,resolved
+No complaints of deep vein thrombosis,negated
+depression previously diagnosed,resolved
+Possible new headache,ambiguous
+Considering fever,ambiguous
+h/o anxiety,resolved
+Probable heart failure,ambiguous
+Without seizures,negated
+Possible anxiety,ambiguous
+No history of anxiety,negated
+Considering pulmonary embolism,ambiguous
+Presenting with shortness of breath,ongoing
+No longer has nausea,resolved
+atrial fibrillation since this morning,ongoing
+History of deep vein thrombosis,resolved
+hypertension has resolved,resolved
+fatigue worsening,ongoing
+Possible new insomnia,ambiguous
+stroke last year,resolved
+obesity has resolved,resolved
+Currently has migraine,ongoing
+Considering headache,ambiguous
+No current hypertension,negated
+Worsening diabetes,ongoing
+fatigue is stable,ongoing
+edema not improving on current regimen,ongoing
+shortness of breath well-controlled,ongoing
+May have heart failure,ambiguous
+Active deep vein thrombosis,ongoing
+fever worsening,ongoing
+Unlikely but possible edema,ambiguous
+Atypical presentation of anxiety,ambiguous
+stroke in remission,resolved
+Had shortness of breath last year,resolved
+Unlikely but possible deep vein thrombosis,ambiguous
+depression treated successfully,resolved
+chest pain in remission,resolved
+Stable vertigo,ongoing
+Possible rheumatoid arthritis,ambiguous
+h/o asthma,resolved
+No documented cough,negated
+Managed anxiety,ongoing
+No complaints of fever,negated
+Working diagnosis of migraine,ambiguous
+s/p treatment for atrial fibrillation,resolved
+Active insomnia,ongoing
+No pulmonary embolism,negated
+depression currently present,ongoing
+Previous episode of seizures,resolved
+anemia remains present,ongoing
+asthma treated successfully,resolved
+? heart failure,ambiguous
+No current asthma,negated
+Persistent pneumonia,ongoing
+Denies any history of sepsis,negated
+hypertension 3 years ago,resolved
+Recovered from anemia,resolved
+Probable vertigo,ambiguous
+Patient has no heart failure,negated
+h/o migraine,resolved
+Previous episode of insomnia,resolved
+Query fever,ambiguous
+Patient has no sepsis,negated
+Stable obesity,ongoing
+No longer has vertigo,resolved
+diabetes negative,negated
+Worsening headache,ongoing
+heart failure active,ongoing
+vertigo improving,ongoing
+vertigo is stable,ongoing
+Presenting with stroke,ongoing
+Acute fever,ongoing
+seizures not detected,negated
+Suspected fever,ambiguous
+Symptoms consistent with diabetes,ambiguous
+Absence of headache,negated
+fever 2 months ago,resolved
+sepsis resolved,resolved
+Questionable fever,ambiguous
+Concern for diabetes,ambiguous
+stroke currently present,ongoing
+Suspected fatigue,ambiguous
+seizures no longer present,resolved
+Negative for pneumonia,negated
+pneumonia active,ongoing
+Previous episode of migraine,resolved
+Questionable headache,ambiguous
+Previous episode of depression,resolved
+Patient has seizures,ongoing
+obesity 3 years ago,resolved
+No current depression,negated
+shortness of breath fully resolved,resolved
+s/p treatment for deep vein thrombosis,resolved
+No documented coronary artery disease,negated
+Does not have anemia,negated
+No known asthma,negated
+Concern for shortness of breath,ambiguous
+nausea has resolved,resolved
+edema fully resolved,resolved
+edema improving,ongoing
+anxiety resolved after treatment,resolved
+No complaints of hypertension,negated
+Concern for asthma,ambiguous
+gout fully resolved,resolved
+Persistent rheumatoid arthritis,ongoing
+Stable coronary artery disease,ongoing
+Patient has insomnia,ongoing
+s/p treatment for chest pain,resolved
+pulmonary embolism -ve,negated
+Possible vertigo,ambiguous
+Absence of shortness of breath,negated
+Active obesity,ongoing
+Patient has no pneumonia,negated
+Worsening cough,ongoing
+Denies anxiety,negated
+History of migraine,resolved
+No evidence of shortness of breath,negated
+Status post deep vein thrombosis,resolved
+hypertension resolved after treatment,resolved
+shortness of breath negative,negated
+Persistent fever,ongoing
+No known rheumatoid arthritis,negated
+anxiety -ve,negated
+Negative for deep vein thrombosis,negated
+Status post rheumatoid arthritis,resolved
+migraine active,ongoing
+shortness of breath last year,resolved
+Past history of hypertension,resolved
+Denies any history of edema,negated
+insomnia has resolved,resolved
+Recovered from seizures,resolved
+Possible chest pain,ambiguous
+No history of coronary artery disease,negated
+migraine 3 years ago,resolved
+Currently has pneumonia,ongoing
+chest pain ruled out,negated
+Differential includes pulmonary embolism,ambiguous
+Patient has diabetes,ongoing
+To rule out heart failure,ambiguous
+Former chest pain,resolved
+No signs of headache,negated
+Unlikely but possible seizures,ambiguous
+Differential includes asthma,ambiguous
+chest pain stable,ongoing
+obesity currently present,ongoing
+insomnia in remission,resolved
+anxiety not improving on current regimen,ongoing
+gout negative,negated
+migraine resolved after treatment,resolved
+Recovered from pulmonary embolism,resolved
+seizures fully resolved,resolved
+shortness of breath ruled out,negated
+No active pneumonia,negated
+Absence of edema,negated
+seizures continues,ongoing
+Without nausea,negated
+Recovered from headache,resolved
+vertigo last year,resolved
+Patient has gout,ongoing
+Negative for heart failure,negated
+heart failure absent,negated
+fever currently present,ongoing
+atrial fibrillation absent,negated
+Rule out osteoporosis,ambiguous
+Suspected obesity,ambiguous
+diabetes treated successfully,resolved
+Working diagnosis of pulmonary embolism,ambiguous
+Persistent headache,ongoing
+migraine -ve,negated
+Active hypertension,ongoing
+deep vein thrombosis active,ongoing
+Free of fever,negated
+Symptoms consistent with sepsis,ambiguous
+pneumonia since this morning,ongoing
+migraine in the past,resolved
+Previous episode of cough,resolved
+headache ongoing,ongoing
+diabetes resolved after treatment,resolved
+Possible new chest pain,ambiguous
+Previous episode of osteoporosis,resolved
+History of gout,resolved
+To rule out pneumonia,ambiguous
+Cannot rule out depression,ambiguous
+sepsis ongoing,ongoing
+Possible stroke,ambiguous
+Cannot rule out anxiety,ambiguous
+Past history of vertigo,resolved
+chest pain not improving on current regimen,ongoing
+shortness of breath resolved after treatment,resolved
+Chronic osteoporosis,ongoing
+nausea currently present,ongoing
+coronary artery disease no longer present,resolved
+No signs of anemia,negated
+Free of anemia,negated
+edema not present,negated
+No gout,negated
+deep vein thrombosis negative,negated
+atrial fibrillation improving,ongoing
+pulmonary embolism is stable,ongoing
+Denies any history of stroke,negated
+insomnia well-controlled,ongoing
+Absence of fatigue,negated
+May have edema,ambiguous
+No documented diabetes,negated
+Worsening fever,ongoing
+Status post atrial fibrillation,resolved
+Possible diabetes,ambiguous
+vertigo absent,negated
+No longer has coronary artery disease,resolved
+No longer has fever,resolved
+No documented rheumatoid arthritis,negated
+Previous episode of pulmonary embolism,resolved
+depression -ve,negated
+osteoporosis 2 months ago,resolved
+Unlikely but possible migraine,ambiguous
+Symptoms consistent with stroke,ambiguous
+vertigo active,ongoing
+insomnia fully resolved,resolved
+osteoporosis active,ongoing
+Managed gout,ongoing
+Complains of atrial fibrillation,ongoing
+Had migraine last year,resolved
+Past history of anemia,resolved
+rheumatoid arthritis -ve,negated
+headache for the past 3 days,ongoing
+Questionable fatigue,ambiguous
+History of asthma,resolved
+No documented sepsis,negated
+Denies any history of anemia,negated
+Status post diabetes,resolved
+No evidence of diabetes,negated
+Atypical presentation of rheumatoid arthritis,ambiguous
+To rule out headache,ambiguous
+Possible history of chest pain,ambiguous
+Considering fatigue,ambiguous
+Differential includes headache,ambiguous
+Stable shortness of breath,ongoing
+? seizures,ambiguous
+coronary artery disease in remission,resolved
+No current anxiety,negated
+seizures cleared 6 months ago,resolved
+Does not have depression,negated
+Presenting with obesity,ongoing
+History of pulmonary embolism,resolved
+No signs of obesity,negated
+s/p treatment for heart failure,resolved
+depression not present,negated
+Stable asthma,ongoing
+To rule out obesity,ambiguous
+Unlikely but possible vertigo,ambiguous
+Differential includes coronary artery disease,ambiguous
+Worsening sepsis,ongoing
+Denies any history of anxiety,negated
+Had anemia last year,resolved
+h/o heart failure,resolved
+Possible atrial fibrillation,ambiguous
+Currently has anxiety,ongoing
+No documented headache,negated
+insomnia ruled out,negated
+Questionable depression,ambiguous
+Patient denies pneumonia,negated
+Patient denies atrial fibrillation,negated
+osteoporosis resolved after treatment,resolved
+Questionable sepsis,ambiguous
+Absence of anemia,negated
+s/p treatment for nausea,resolved
+? osteoporosis,ambiguous
+vertigo previously diagnosed,resolved
+gout in remission,resolved
+sepsis has resolved,resolved
+sepsis last year,resolved
+Imaging shows no evidence of seizures,negated
+No current heart failure,negated
+vertigo treated successfully,resolved
+Persistent obesity,ongoing
+Complains of sepsis,ongoing
+coronary artery disease negative,negated
+Concern for osteoporosis,ambiguous
+Without deep vein thrombosis,negated
+Concern for edema,ambiguous
+Presenting with vertigo,ongoing
+Denies any history of heart failure,negated
+Probable anemia,ambiguous
+osteoporosis currently present,ongoing
+To rule out fatigue,ambiguous
+Worsening chest pain,ongoing
+Former coronary artery disease,resolved
+Patient has no anemia,negated
+Differential includes fatigue,ambiguous
+hypertension negative,negated
+Does not have chest pain,negated
+Considering deep vein thrombosis,ambiguous
+Persistent hypertension,ongoing
+obesity improving,ongoing
+Suspected pulmonary embolism,ambiguous
+edema well-controlled,ongoing
+Previous episode of diabetes,resolved
+Worsening atrial fibrillation,ongoing
+fatigue negative,negated
+Acute asthma,ongoing
+seizures in the past,resolved
+migraine ongoing,ongoing
+anemia fully resolved,resolved
+migraine for the past 3 days,ongoing
+Persistent gout,ongoing
+Probable diabetes,ambiguous
+Differential includes seizures,ambiguous
+Worsening nausea,ongoing
+No evidence of edema,negated
+pneumonia ruled out,negated
+Status post anxiety,resolved
+sepsis currently present,ongoing
+No documented insomnia,negated
+depression was treated,resolved
+Possible new osteoporosis,ambiguous
+Possible history of fever,ambiguous
+Previous episode of shortness of breath,resolved
+Working diagnosis of deep vein thrombosis,ambiguous
+Worsening pulmonary embolism,ongoing
+Symptoms consistent with coronary artery disease,ambiguous
+stroke well-controlled,ongoing
+coronary artery disease continues,ongoing
+No atrial fibrillation,negated
+Status post cough,resolved
+Complains of edema,ongoing
+Possible new fatigue,ambiguous
+No signs of insomnia,negated
+Unlikely but possible nausea,ambiguous
+Unlikely but possible anemia,ambiguous
+Recovered from fatigue,resolved
+fatigue ongoing,ongoing
+vertigo 3 years ago,resolved
+coronary artery disease controlled on medication,ongoing
+pneumonia ongoing,ongoing
+Atypical presentation of migraine,ambiguous
+headache has resolved,resolved
+Previous episode of deep vein thrombosis,resolved
+headache stable,ongoing
+Rule out edema,ambiguous
+Complains of seizures,ongoing
+Query pulmonary embolism,ambiguous
+? edema,ambiguous
+Stable hypertension,ongoing
+Possible seizures,ambiguous
+shortness of breath 3 years ago,resolved
+No evidence of osteoporosis,negated
+No longer has diabetes,resolved
+Denies any history of cough,negated
+Patient has no rheumatoid arthritis,negated
+insomnia resolved,resolved
+Worsening pneumonia,ongoing
+May have sepsis,ambiguous
+obesity not improving on current regimen,ongoing
+Complains of hypertension,ongoing
+Recovered from cough,resolved
+No evidence of vertigo,negated
+anemia last year,resolved
+Recovered from obesity,resolved
+obesity since this morning,ongoing
+Persistent seizures,ongoing
+s/p treatment for cough,resolved
+obesity worsening,ongoing
+pulmonary embolism not improving on current regimen,ongoing
+Absence of rheumatoid arthritis,negated
+s/p treatment for fatigue,resolved
+History of vertigo,resolved
+gout worsening,ongoing
+Cannot rule out pulmonary embolism,ambiguous
+No signs of anxiety,negated
+Chronic asthma,ongoing
+Absence of migraine,negated
+No complaints of sepsis,negated
+Working diagnosis of rheumatoid arthritis,ambiguous
+chest pain is stable,ongoing
+Probable stroke,ambiguous
+Prior stroke,resolved
+May have fever,ambiguous
+Does not have gout,negated
+shortness of breath ongoing,ongoing
+Persistent nausea,ongoing
+fatigue last year,resolved
+asthma in the past,resolved
+depression in the past,resolved
+Absence of stroke,negated
+Cannot rule out stroke,ambiguous
+vertigo 2 months ago,resolved
+No complaints of pulmonary embolism,negated
+Could represent seizures,ambiguous
+Recovered from gout,resolved
+Former diabetes,resolved
+Chronic deep vein thrombosis,ongoing
+pulmonary embolism currently present,ongoing
+atrial fibrillation worsening,ongoing
+Prior sepsis,resolved
+Had cough last year,resolved
+Differential includes anxiety,ambiguous

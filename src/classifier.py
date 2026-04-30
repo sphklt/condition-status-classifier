@@ -27,6 +27,7 @@ Key improvements over the original system
 import re
 from src.normalizer import normalize
 from src.temporal import detect as detect_temporal
+from src.calibration import calibrate
 from src.rules import (
     NEGATION_CUES,
     RESOLVED_CUES,
@@ -216,7 +217,10 @@ def _classify_core(text_lower: str) -> dict:
             "resolved":  "Resolved/historical cue",
             "ongoing":   "Ongoing/active cue",
         }
-        reason = f"{label_desc[best_label]} found: '{winning_cue}'"
+        if winning_cue is None:
+            reason = f"No explicit cue; classified from temporal signal alone ({best_label})"
+        else:
+            reason = f"{label_desc[best_label]} found: '{winning_cue}'"
 
     if pseudo_found:
         reason += f" (pseudo-negation masked: {', '.join(repr(p) for p in pseudo_found)})"
@@ -286,11 +290,12 @@ def classify_condition_status(text: str) -> dict:
     if final_clause:
         clause_result = _classify_core(final_clause.lower())
         if clause_result["confidence"] >= _CLAUSE_CONFIDENCE_THRESHOLD:
-            # Apply a small discount: we are ignoring earlier context.
             clause_result["confidence"] = round(clause_result["confidence"] * 0.92, 3)
             clause_result["reason"] = f"[Final clause] {clause_result['reason']}"
             clause_result["signals"]["abbreviations"] = abbreviations_found
             clause_result["signals"]["clause_used"] = "final_clause"
+            clause_result["calibrated_confidence"] = calibrate(clause_result["confidence"])
             return clause_result
 
+    full_result["calibrated_confidence"] = calibrate(full_result["confidence"])
     return full_result

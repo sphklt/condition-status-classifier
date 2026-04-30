@@ -1,0 +1,7 @@
+{
+  "a": 4.1884801964169,
+  "b": -0.5507541223246557,
+  "n_phrases": 2850,
+  "accuracy": 0.8842105263157894,
+  "note": "Platt scaling (logistic regression on raw confidence \u2192 is_correct). Fitted on 2850 generated phrases."
+}

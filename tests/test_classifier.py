@@ -169,3 +169,46 @@ def test_empty_input():
     result = classify_condition_status("")
     assert result["status"] == "ambiguous"
     assert result["confidence"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# 8. New ongoing cues — "just have", "now have", "still have"
+# ---------------------------------------------------------------------------
+
+def test_just_have_is_ongoing():
+    """'Now, I just have cough' — 'just have' should score as ongoing."""
+    result = classify_condition_status("Now, I just have cough")
+    assert result["status"] == "ongoing"
+
+def test_now_have_is_ongoing():
+    result = classify_condition_status("Now I have nasal allergies")
+    assert result["status"] == "ongoing"
+
+def test_still_have_is_ongoing():
+    result = classify_condition_status("I still have headache")
+    assert result["status"] == "ongoing"
+
+def test_currently_have_is_ongoing():
+    result = classify_condition_status("I currently have asthma")
+    assert result["status"] == "ongoing"
+
+
+# ---------------------------------------------------------------------------
+# 9. Clause override — "just have" raises final-clause confidence above 0.65
+# ---------------------------------------------------------------------------
+
+def test_clause_override_just_have_beats_resolved():
+    """
+    'I had cold. It got over. Now, I just have cough' —
+    the final clause should override the resolved signal from 'got over'.
+    """
+    result = classify_condition_status(
+        "I had cold. It got over. Now, I just have cough"
+    )
+    assert result["status"] == "ongoing"
+
+def test_clause_override_now_have_beats_healed():
+    result = classify_condition_status(
+        "I had cold which got healed. Now, I just have nasal allergies"
+    )
+    assert result["status"] == "ongoing"
