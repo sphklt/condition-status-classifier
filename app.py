@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from src.classifier import classify_condition_status
+from src.hybrid import classify as hybrid_classify, TRIAGE_THRESHOLD
 from src.utils import evaluate_dataset
 from src.pipeline import process_note, format_results
 from src.ner import active_ner_method
@@ -71,7 +72,7 @@ with tab_phrase:
         if not user_text.strip():
             st.warning("Please enter a clinical phrase.")
         else:
-            result = classify_condition_status(user_text)
+            result = hybrid_classify(user_text)
             colour = STATUS_COLOURS.get(result["status"], "#888")
 
             st.markdown("### Prediction")
@@ -86,8 +87,47 @@ with tab_phrase:
                 f"Raw cue score: {result['confidence']:.0%} → "
                 f"calibrated probability of being correct: {cal_conf:.0%}"
             )
-            st.write(f"**Key signal:** `{result['cue']}`")
-            st.write(f"**Reason:** {result['reason']}")
+            st.write(f"**Key signal:** `{result['rule_cue']}`")
+            st.write(f"**Reason:** {result['rule_reason']}")
+
+            # ── Triage flag ───────────────────────────────────────────────────
+            entropy = result["entropy"]
+            if result["triage_flag"]:
+                st.warning(
+                    f"⚠ **Review recommended** — {result['triage_reason']}"
+                )
+            else:
+                st.success(
+                    f"✓ **High confidence** — entropy {entropy:.2f} bits "
+                    f"(threshold {TRIAGE_THRESHOLD} bits). Auto-approvable."
+                )
+
+            # ── Posterior distribution ────────────────────────────────────────
+            with st.expander("Posterior distribution (Bayesian fusion)", expanded=True):
+                post = result["posterior"]
+                runner_label, runner_prob = result["runner_up"]
+
+                post_df = pd.DataFrame([
+                    {"label": label, "probability": prob}
+                    for label, prob in sorted(post.items(), key=lambda x: x[1], reverse=True)
+                ])
+                st.bar_chart(post_df.set_index("label")["probability"])
+
+                col1, col2, col3 = st.columns(3)
+                col1.metric("MAP label", result["status"], help="Highest posterior probability label")
+                col2.metric("Runner-up", runner_label,
+                            delta=f"{runner_prob:.0%}",
+                            delta_color="off",
+                            help="Second most probable label")
+                col3.metric("Entropy", f"{entropy:.2f} bits",
+                            help="0 = certain, 2 = maximum uncertainty (uniform over 4 labels)")
+
+                if not result["agreement"]:
+                    st.info(
+                        f"Systems disagree: rule-based → **{result['status']}**, "
+                        f"Bayesian → **{result['bayes_status']}**. "
+                        "This cross-system conflict is one reason the prediction is flagged."
+                    )
 
             with st.expander("Signal breakdown"):
                 sigs = result["signals"]

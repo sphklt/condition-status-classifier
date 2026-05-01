@@ -2,12 +2,13 @@
 
 A clinical NLP system that classifies whether a medical condition mentioned in clinical text is **ongoing**, **resolved**, **negated**, or **ambiguous**.
 
-The system operates at two levels:
+The system operates at two classification levels and includes a research layer for calibration and uncertainty:
 
 - **Phrase level** — classifies a single short clinical phrase with confidence score and reasoning
 - **Note level** — processes a full clinical note end-to-end: detects sections, extracts conditions via NER, and classifies each condition in its sentence context
+- **Hybrid uncertainty layer** — combines a rule-based MAP prediction with a Bayesian posterior distribution and an entropy-based triage flag
 
-Both levels are fully rule-based and explainable. Every prediction returns the matched signal, the reason, and a confidence score.
+Every prediction returns the matched signal, the reason, a calibrated confidence score, and — via the hybrid classifier — a full posterior distribution and an auto-approve / review-recommended indicator.
 
 ---
 
@@ -119,7 +120,7 @@ The coref step fires only when the entity's own sentence is uninformative (confi
 
 ## Architecture
 
-The system operates as a two-level pipeline.
+The system operates as a two-level pipeline with an optional Bayesian uncertainty layer.
 
 ### Level 1 — Phrase Classifier
 
@@ -145,7 +146,26 @@ Adversative clause check    "But…" / "However…" / "." → classify final cla
 Conflict detection          competing signals → reduced confidence
     │
     ▼
-{status, confidence, cue, reason, signals}
+Platt calibration           raw cue-score → P(correct) via logistic scaler
+    │
+    ▼
+{status, confidence, calibrated_confidence, cue, reason, signals}
+```
+
+### Level 1b — Hybrid Classifier (phrase + uncertainty)
+
+```
+Raw phrase + section
+    │
+    ├──► Rule-based classifier ──► status, confidence, calibrated_confidence
+    │
+    └──► Bayesian fusion ──────► posterior {label: P}, entropy (bits)
+                │
+                ▼
+         Triage decision    entropy > 1.2 bits OR systems disagree → triage_flag=True
+                │
+                ▼
+{status, posterior, entropy, runner_up, triage_flag, triage_reason, agreement}
 ```
 
 ### Level 2 — Full Note Pipeline
@@ -206,7 +226,9 @@ Deduplication               first mention of each condition wins
 | `src/sentence_splitter.py` | Clinical sentence boundary detection |
 | `src/coref.py` | Pronoun-to-entity coreference within sections |
 | `src/pipeline.py` | Orchestrates the full note-level pipeline; wires dep parser refinement |
-| `src/calibration.py` | Platt scaler (`calibrate()`) + reliability diagram + ECE |
+| `src/calibration.py` | Platt scaler (`calibrate()`) + reliability diagram + ECE + calibration transfer helpers |
+| `src/bayesian_fusion.py` | Bayesian evidence fusion: posterior distribution + entropy uncertainty signal |
+| `src/hybrid.py` | Hybrid classifier: rule-based MAP label + Bayesian posterior + triage flag |
 | `src/baseline.py` | TF-IDF + logistic regression baseline for comparison with the rule system |
 | `src/note_evaluator.py` | Precision/recall/F1 evaluation on annotated clinical notes |
 | `src/utils.py` | Phrase-level dataset evaluation helper |
@@ -237,19 +259,25 @@ condition-status-classifier/
 │   ├── sentence_splitter.py          sentence boundary detection
 │   ├── coref.py                      pronoun-to-entity coreference
 │   ├── pipeline.py                   full note pipeline (dep parser refinement wired in)
-│   ├── calibration.py                Platt scaler + reliability diagram + ECE
+│   ├── calibration.py                Platt scaler + reliability diagram + ECE + calibration transfer
+│   ├── bayesian_fusion.py            Bayesian evidence fusion (posterior + entropy)
+│   ├── hybrid.py                     hybrid classifier (rule-based MAP + Bayesian triage)
 │   ├── baseline.py                   TF-IDF + logistic regression baseline
 │   ├── note_evaluator.py             pipeline P/R/F1 evaluation on annotated notes
 │   └── utils.py                      phrase-level dataset evaluation
 │
 ├── experiments/
-│   └── calibration_transfer.py       standalone reproducible calibration transfer experiment
+│   ├── calibration_transfer.py       standalone reproducible calibration transfer experiment
+│   ├── bayesian_fusion_eval.py       Bayesian fusion vs rule-based comparison experiment
+│   └── hybrid_eval.py                hybrid triage evaluation (precision/recall/F1 sweep)
 │
 ├── tests/
 │   ├── test_classifier.py            33 phrase-level tests
 │   ├── test_pipeline.py              44 pipeline tests (section, NER, pipeline, sentence splitter)
 │   ├── test_coref.py                 21 tests (coref unit, pipeline integration, calibration, evaluator)
-│   └── test_dep_and_calibration.py   38 tests (dep parser, Platt calibration, calibration transfer)
+│   ├── test_dep_and_calibration.py   38 tests (dep parser, Platt calibration, calibration transfer)
+│   ├── test_bayesian_fusion.py       36 tests (schema, classification, posterior, entropy, section prior)
+│   └── test_hybrid.py                31 tests (schema, triage flag, agreement, evaluate_triage)
 │
 ├── app.py                            Streamlit app (phrase + note + evaluation tabs)
 ├── main.py                           CLI evaluation entrypoint
@@ -358,7 +386,7 @@ pytest
 ```
 
 ```text
-110 passed in 5.34s
+202 passed in 7.4s
 ```
 
 ### Run the Streamlit app
@@ -371,7 +399,7 @@ The app has three tabs:
 
 | Tab | What it does |
 |---|---|
-| Single Phrase | Classify a phrase; shows confidence, signal scores, abbreviations expanded, clause used |
+| Single Phrase | Classify a phrase; shows calibrated confidence, triage flag (auto-approve or review), posterior distribution bar chart, runner-up label, signal scores, abbreviations expanded |
 | Full Clinical Note | Paste a clinical note; runs the full pipeline and returns a colour-coded condition table |
 | Evaluate Dataset | Five sub-sections: (1) phrase accuracy over the 127-phrase CSV, (2) confidence reliability diagram + ECE, (3) ML baseline comparison (TF-IDF + LR vs rule-based), (4) calibration methods comparison (Platt / isotonic / temperature), (5) precision/recall/F1 on 4 annotated clinical notes |
 
@@ -631,6 +659,69 @@ print(f"ECE = {df.attrs['ece']}")   # Expected Calibration Error
 
 **Expected Calibration Error (ECE):** weighted average of |confidence − accuracy| per bin. ECE = 0 is perfect; ECE > 0.10 indicates notable miscalibration. The Streamlit Evaluate tab renders this as a bar chart with an ECE reading.
 
+### `src/bayesian_fusion.py` — Bayesian evidence fusion
+
+Classifies a phrase by accumulating Bayes factors (log-likelihood ratios) for each label and normalising to a posterior probability distribution.
+
+```python
+from src.bayesian_fusion import fuse
+
+result = fuse("History of poorly controlled hypertension.", section="unknown")
+# result["status"]     → "ongoing"   (MAP label)
+# result["posterior"]  → {"ongoing": 0.47, "resolved": 0.38, "negated": 0.08, "ambiguous": 0.07}
+# result["entropy"]    → 1.21 bits   (competing resolved vs ongoing signals)
+# result["confidence"] → 0.47
+```
+
+**Core formula** — for each label ℓ and each fired cue with weight w:
+
+```
+log_score[ℓ_target]  += log(w / (1 - w))      ← positive Bayes factor
+log_score[ℓ_other]   -= log(w / (1 - w)) / 3  ← symmetric negative update
+posterior[ℓ]          = softmax(log_score)[ℓ]
+```
+
+The starting point is `log P(label | section)`. Section priors are encoded directly:
+
+| Section | Resolved prior | Ongoing prior |
+|---|---|---|
+| `past_medical_history` | 0.55 | 0.20 |
+| `hpi` / `assessment` | 0.20 | 0.50 |
+| `medications` | 0.15 | 0.65 |
+| `review_of_systems` | 0.20 | 0.30 |
+| unknown | 0.30 | 0.30 |
+
+Cues with weight ≤ 0.50 are skipped — their log-likelihood ratio is ≤ 0, meaning they carry no positive evidence for any label. Temporal signals contribute their own LLRs (e.g., past temporal → +0.85 to resolved).
+
+**Entropy** (`H = −Σ p log₂ p`) is the key output: 0 bits = perfectly certain, 2 bits = completely uniform over 4 labels. Wrong predictions average **1.85 bits** vs 0.77 for correct predictions — a 2.5× difference that makes entropy a reliable triage signal.
+
+### `src/hybrid.py` — Hybrid classifier
+
+Runs both classifiers and combines their outputs into a single triage-aware result:
+
+```python
+from src.hybrid import classify, evaluate_triage
+
+result = classify("No evidence of pneumonia.")
+# result["triage_flag"]  → False   (strong negation, both systems agree)
+# result["entropy"]      → 0.0 bits
+
+result = classify("Atrial fibrillation, previously in sinus rhythm.")
+# result["triage_flag"]  → True    (systems disagree: rule → resolved, Bayes → ongoing)
+# result["triage_reason"] → "Systems disagree: rule-based → resolved, Bayesian → ongoing."
+```
+
+**Triage flag** is set when either condition holds:
+1. `entropy > TRIAGE_THRESHOLD` (default 1.2 bits) — Bayesian posterior is uncertain
+2. `agreement == False` — the two classifiers predict different labels
+
+At the default threshold on 127 real phrases:
+- **100% recall** — every wrong prediction is flagged
+- **62% auto-approved** with 100% accuracy (safe to act on without review)
+- **2.6× review efficiency** — 3.7 phrases read per error found vs 9.8 without triage
+
+The threshold is tunable. `evaluate_triage(csv_path, thresholds=[...])` sweeps over thresholds and returns precision/recall/F1 at each, so the operating point can be chosen based on the acceptable false-positive rate for a given deployment.
+
 ### `src/note_evaluator.py` — Note-level evaluation
 
 Runs the full pipeline on `data/annotated_notes.json` (4 notes covering mixed PMH/HPI, negation-heavy ROS, pronoun coreference, and temporal signals) and computes precision/recall/F1.
@@ -662,7 +753,7 @@ Matching strategy: a pipeline result is a **true positive** if its condition tex
 
 ## Classifier Output Schema
 
-Every classification returns a consistent dictionary:
+### `classify_condition_status(text)` — rule-based
 
 ```python
 {
@@ -681,6 +772,31 @@ Every classification returns a consistent dictionary:
         "abbreviations":    ["htn → hypertension"],
         "clause_used":      "full"       # or "final_clause"
     }
+}
+```
+
+### `hybrid.classify(text, section)` — rule-based + Bayesian
+
+```python
+{
+    "status":               "ongoing",       # rule-based MAP label (best accuracy)
+    "confidence":           0.82,            # rule-based raw cue-score
+    "calibrated_confidence": 0.95,           # Platt-calibrated P(correct)
+    "posterior": {                           # Bayesian posterior distribution
+        "ongoing":   0.71,
+        "resolved":  0.18,
+        "negated":   0.07,
+        "ambiguous": 0.04,
+    },
+    "entropy":              0.43,            # bits; 0 = certain, 2 = max uncertainty
+    "runner_up":            ("resolved", 0.18),  # second most probable label
+    "agreement":            True,            # True if both systems agree
+    "triage_flag":          False,           # True → route to human review
+    "triage_reason":        "",              # explanation if flagged
+    "rule_reason":          "Ongoing/active cue found: 'worsening'",
+    "rule_cue":             "worsening",
+    "bayes_status":         "ongoing",       # Bayesian MAP label (for comparison)
+    "signals":              { ... }          # same as classify_condition_status
 }
 ```
 
@@ -787,6 +903,127 @@ Isotonic regression is not uniformly best across categories. For `ongoing` phras
 
 **4. Synthetic accuracy (88.4%) ≈ real accuracy (89.8%).**
 The near-identical accuracy rates on synthetic and real phrases are consistent with the transfer hypothesis: the rule system's error profile does not change substantially across surface forms, only across genuinely novel phrasing patterns not represented in either dataset.
+
+---
+
+## Bayesian Evidence Fusion
+
+### Motivation
+
+The rule-based classifier produces a single confidence score (the winning category score) and picks the highest-scoring label. This has two limitations:
+
+1. **No posterior distribution.** When two labels are nearly tied — e.g., "History of poorly controlled hypertension" where "history of" (resolved) and "poorly controlled" (ongoing) both fire with weight 0.95 — the system returns a label and a reduced confidence, but gives no information about how probable the *other* labels are.
+2. **Confidence is a score, not a probability.** The raw score is the weighted sum of matching cue weights, which is not naturally calibrated as P(correct). Platt scaling corrects this post-hoc, but does not produce a distribution.
+
+Bayesian evidence fusion addresses both by treating every cue weight as a calibrated likelihood ratio and accumulating evidence into a proper posterior.
+
+### Algorithm
+
+For each label ℓ ∈ {ongoing, resolved, negated, ambiguous}:
+
+```
+log_score[ℓ] = log P(label = ℓ | section)          ← section-conditional prior
+             + Σ  log(w / (1 - w))                  ← for each cue targeting ℓ (weight w)
+             - Σ  log(w' / (1 - w')) / 3            ← for each cue targeting ℓ' ≠ ℓ (weight w')
+
+posterior[ℓ] = softmax(log_score)[ℓ]
+```
+
+The weight `w` of a cue is the estimated precision of that cue for its intended label — the same value used in the rule-based scorer. Treating it as a likelihood ratio means the fusion is **calibration-aware at the feature level**: the calibration work done when setting cue weights in `rules.py` propagates directly into the posterior, without a separate post-hoc calibration step.
+
+**Section-conditional priors** encode clinical domain knowledge: conditions in `past_medical_history` are more likely resolved (prior 0.55), while conditions in `hpi` or `assessment` are more likely ongoing (prior 0.50).
+
+**Temporal signals** contribute via their own log-likelihood ratios (e.g., a "past" temporal expression adds log(0.70/0.30) ≈ 0.85 to `resolved`).
+
+**Entropy** measures posterior uncertainty in bits: H = −Σ p(ℓ) log₂ p(ℓ), with 0 = perfectly certain and 2 = maximum uncertainty (uniform over 4 labels).
+
+### Results
+
+Evaluated on the same 127 real phrases:
+
+| System | Accuracy | ECE | Brier |
+|---|---|---|---|
+| Rule-based | **89.8%** | 0.109 | 0.091 |
+| Bayesian fusion | 87.4% | 0.125 | 0.099 |
+
+**Per-label ECE** (lower = better calibrated):
+
+| Label | n | Rule-based ECE | Bayes ECE | Winner |
+|---|---|---|---|---|
+| ongoing | 42 | 0.259 | **0.215** | Bayes |
+| resolved | 38 | 0.116 | **0.104** | Bayes |
+| negated | 22 | 0.142 | **0.131** | Bayes |
+| ambiguous | 25 | **0.140** | 0.190 | Rule |
+
+**Entropy as an uncertainty signal:**
+
+| Prediction type | Average entropy |
+|---|---|
+| Correct predictions | 0.75 bits |
+| Wrong predictions | 1.85 bits |
+| Ratio (wrong / correct) | **2.5× higher on errors** |
+
+### Interpretation
+
+**1. Rule-based wins on accuracy (+2.4%) and overall ECE.**
+The rule-based system handles single-keyword negation (e.g. "No fever") well because it uses argmax on category scores with no competing prior. The Bayesian system correctly treats bare "no" (weight=0.60) as weak evidence — but when no other cues fire, the prior can dominate and cause misclassification. This is the honest tradeoff between principled probabilistic reasoning and the argmax heuristic.
+
+**2. Bayesian fusion wins on ECE for ongoing, resolved, and negated.**
+For the three categories where strong multi-word cues dominate (e.g., "no evidence of", "history of", "presents with"), the Bayes factors produce better-calibrated confidence estimates than the rule-based `max_weight + bonus` formula.
+
+**3. Posterior entropy reliably flags uncertain predictions.**
+Wrong predictions have **2.5× higher entropy** than correct ones. This means entropy is a principled triage signal: a system could route high-entropy predictions (H > 1.5 bits) to a human reviewer with very few false alarms.
+
+**4. The two systems are complementary.**
+The hybrid classifier (see below) uses the rule-based system for MAP prediction and Bayesian fusion for uncertainty quantification, combining the strengths of both.
+
+**Reproduce:** `python experiments/bayesian_fusion_eval.py`
+
+---
+
+## Hybrid Classifier
+
+`src/hybrid.py` combines both systems into a single API call:
+
+```python
+from src.hybrid import classify
+
+result = classify("History of poorly controlled hypertension.")
+# result["status"]       → "resolved"        (rule-based MAP label)
+# result["posterior"]    → {"ongoing": 0.47, "resolved": 0.38, ...}
+# result["entropy"]      → 1.21 bits          (high — two signals compete)
+# result["triage_flag"]  → True               (flagged for review)
+# result["runner_up"]    → ("ongoing", 0.47)  (close alternative)
+```
+
+### Triage logic
+
+A prediction is flagged when either:
+- **Bayesian posterior entropy > 1.2 bits** — the model is uncertain (default threshold, tunable)
+- **The two systems disagree** — rule-based and Bayesian infer different labels from the same phrase
+
+### Triage performance (127-phrase evaluation set)
+
+| Metric | Value |
+|---|---|
+| Phrases flagged | 48 / 127 (38%) |
+| Recall of errors | **100%** — every wrong prediction is flagged |
+| Precision | 27% — 1 in 3.7 flagged phrases is an actual error |
+| Auto-approved accuracy | **100%** — the 62% of phrases not flagged are all correct |
+| Review efficiency | **2.6× fewer** phrases read per error vs reviewing everything |
+
+At the best-F1 threshold (1.8 bits), 21% of predictions are flagged with 77% recall and 37% precision.
+
+### What the Streamlit app shows
+
+The Single Phrase tab now shows:
+- Green banner (✓) when entropy is low and both systems agree — safe to auto-approve
+- Warning banner (⚠) with triage reason when the prediction is uncertain
+- Posterior distribution bar chart over all four labels
+- Runner-up label and probability
+- System agreement/disagreement indicator
+
+**Reproduce:** `python experiments/hybrid_eval.py`
 
 ---
 
