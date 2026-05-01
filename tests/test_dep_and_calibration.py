@@ -181,3 +181,117 @@ class TestCalibrate:
         df = reliability_diagram("data/clinical_phrases.csv")
         assert "accuracy" in df.columns
         assert "ece" in df.attrs
+
+
+# ---------------------------------------------------------------------------
+# Calibration transfer helpers
+# ---------------------------------------------------------------------------
+
+class TestEceBrier:
+
+    def test_ece_perfect_calibration(self):
+        from src.calibration import _ece
+        # bin [0.8,1.0]: 10 items at conf=0.9, 9 correct → avg_conf=0.9, accuracy=0.9 → gap=0
+        # bin [0.0,0.2): 10 items at conf=0.1, 1 correct → avg_conf=0.1, accuracy=0.1 → gap=0
+        confs = [0.9] * 10 + [0.1] * 10
+        correct = [True] * 9 + [False] + [True] + [False] * 9
+        assert _ece(confs, correct) == 0.0
+
+    def test_ece_returns_float(self):
+        from src.calibration import _ece
+        confs = [0.7, 0.8, 0.6, 0.9]
+        correct = [True, False, True, True]
+        result = _ece(confs, correct)
+        assert isinstance(result, float)
+        assert 0.0 <= result <= 1.0
+
+    def test_brier_perfect(self):
+        from src.calibration import _brier
+        assert _brier([1.0, 1.0], [True, True]) == 0.0
+
+    def test_brier_worst_case(self):
+        from src.calibration import _brier
+        assert _brier([1.0, 0.0], [False, True]) == 1.0
+
+    def test_brier_returns_float_in_range(self):
+        from src.calibration import _brier
+        result = _brier([0.8, 0.6, 0.4], [True, True, False])
+        assert isinstance(result, float)
+        assert 0.0 <= result <= 1.0
+
+
+class TestIsotonicFit:
+
+    def test_fit_returns_predictor(self):
+        from src.calibration import _fit_isotonic
+        ir = _fit_isotonic([0.3, 0.6, 0.8], [False, True, True])
+        pred = ir.predict([0.5])
+        assert len(pred) == 1
+        assert 0.0 <= float(pred[0]) <= 1.0
+
+    def test_monotone_output(self):
+        from src.calibration import _fit_isotonic
+        raw = [0.1, 0.3, 0.5, 0.7, 0.9]
+        correct = [False, False, True, True, True]
+        ir = _fit_isotonic(raw, correct)
+        preds = [float(ir.predict([r])[0]) for r in raw]
+        assert all(preds[i] <= preds[i + 1] for i in range(len(preds) - 1))
+
+
+class TestTemperatureScaling:
+
+    def test_apply_temperature_identity(self):
+        from src.calibration import _apply_temperature
+        # T=1 should leave the logit unchanged
+        raw = 0.7
+        result = _apply_temperature(raw, 1.0)
+        assert abs(result - raw) < 0.01
+
+    def test_apply_temperature_softens(self):
+        from src.calibration import _apply_temperature
+        # T > 1 → push probabilities toward 0.5 (soften)
+        high_conf = 0.9
+        softened = _apply_temperature(high_conf, 2.0)
+        assert softened < high_conf
+
+    def test_apply_temperature_sharpens(self):
+        from src.calibration import _apply_temperature
+        # T < 1 → push probabilities away from 0.5 (sharpen)
+        mid = 0.6
+        sharpened = _apply_temperature(mid, 0.5)
+        assert sharpened > mid
+
+    def test_fit_temperature_returns_float(self):
+        from src.calibration import _fit_temperature
+        raw = [0.3, 0.6, 0.8, 0.9, 0.5]
+        correct = [False, True, True, True, False]
+        T = _fit_temperature(raw, correct)
+        assert isinstance(T, float)
+        assert 0.1 <= T <= 5.0
+
+
+class TestCompareCalibrationMethods:
+
+    def test_returns_expected_keys(self):
+        from src.calibration import compare_calibration_methods
+        result = compare_calibration_methods()
+        assert "summary" in result
+        assert "temperature" in result
+        assert "details" in result
+
+    def test_summary_has_four_methods(self):
+        from src.calibration import compare_calibration_methods
+        result = compare_calibration_methods()
+        assert len(result["summary"]) == 4
+
+    def test_summary_ece_in_range(self):
+        from src.calibration import compare_calibration_methods
+        result = compare_calibration_methods()
+        for ece in result["summary"]["ECE"]:
+            assert 0.0 <= ece <= 1.0
+
+    def test_isotonic_beats_uncalibrated(self):
+        from src.calibration import compare_calibration_methods
+        result = compare_calibration_methods()
+        df = result["summary"].set_index("method")
+        assert df.loc["Isotonic regression", "ECE"] < df.loc["Uncalibrated", "ECE"]

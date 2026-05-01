@@ -5,7 +5,7 @@ from src.classifier import classify_condition_status
 from src.utils import evaluate_dataset
 from src.pipeline import process_note, format_results
 from src.ner import active_ner_method
-from src.calibration import reliability_diagram
+from src.calibration import reliability_diagram, compare_calibration_methods
 from src.note_evaluator import evaluate_notes
 from src.baseline import evaluate as baseline_evaluate
 
@@ -287,6 +287,47 @@ with tab_eval:
             "Note: calibration estimated on 39 phrases. A statistically robust calibration "
             "curve requires ≥500 labelled examples."
         )
+
+    st.divider()
+
+    # ── Calibration methods comparison ───────────────────────────────────────
+    st.subheader("Calibration methods comparison")
+    st.caption(
+        "Fits Platt scaling, isotonic regression, and temperature scaling on "
+        "2,850 **synthetic** phrases, then evaluates each on the **real** annotated set. "
+        "Tests whether calibration fitted on synthetic data transfers to real clinical text."
+    )
+
+    if st.button("Run calibration comparison", key="btn_calib_compare"):
+        with st.spinner("Fitting on synthetic data, evaluating on real phrases…"):
+            calib_result = compare_calibration_methods(
+                synthetic_csv="data/calibration_phrases.csv",
+                real_csv="data/clinical_phrases.csv",
+            )
+
+        summary = calib_result["summary"]
+        T       = calib_result["temperature"]
+
+        st.write(f"**Fitted temperature T = {T}** "
+                 f"({'overconfident → softened' if T > 1 else 'underconfident → sharpened'})")
+
+        st.dataframe(
+            summary.style.highlight_min(subset=["ECE", "Brier score"], color="#2ecc7144"),
+            hide_index=True,
+            use_container_width=True,
+        )
+
+        best_method = summary.loc[summary["ECE"].idxmin(), "method"]
+        best_ece    = summary.loc[summary["ECE"].idxmin(), "ECE"]
+        raw_ece     = summary.loc[summary["method"] == "Uncalibrated", "ECE"].values[0]
+        st.success(
+            f"**{best_method}** achieves the lowest ECE ({best_ece:.3f}), "
+            f"reducing miscalibration by {(raw_ece - best_ece) / raw_ece:.0%} "
+            f"vs uncalibrated ({raw_ece:.3f}) — fitted entirely on synthetic data."
+        )
+
+        with st.expander("Per-phrase confidence breakdown"):
+            st.dataframe(calib_result["details"], hide_index=True, use_container_width=True)
 
     st.divider()
 

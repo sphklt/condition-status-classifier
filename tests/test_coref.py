@@ -142,7 +142,7 @@ class TestCalibration:
 
     def test_n_total_matches_dataset(self):
         df = reliability_diagram("data/clinical_phrases.csv")
-        assert df.attrs["n_total"] == 39
+        assert df.attrs["n_total"] == 127
 
     def test_bin_counts_sum_to_total(self):
         df = reliability_diagram("data/clinical_phrases.csv")

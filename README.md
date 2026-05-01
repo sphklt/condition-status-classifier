@@ -219,7 +219,7 @@ Deduplication               first mention of each condition wins
 condition-status-classifier/
 │
 ├── data/
-│   ├── clinical_phrases.csv          39-phrase labelled dataset (hard cases included)
+│   ├── clinical_phrases.csv          127-phrase labelled dataset (hard cases + calibration eval set)
 │   ├── annotated_notes.json          4 annotated clinical notes for pipeline P/R/F1 evaluation
 │   ├── calibration.json              fitted Platt scaler parameters (a, b)
 │   ├── calibration_phrases.csv       2,850 synthetic phrases used to fit the Platt scaler
@@ -242,11 +242,14 @@ condition-status-classifier/
 │   ├── note_evaluator.py             pipeline P/R/F1 evaluation on annotated notes
 │   └── utils.py                      phrase-level dataset evaluation
 │
+├── experiments/
+│   └── calibration_transfer.py       standalone reproducible calibration transfer experiment
+│
 ├── tests/
 │   ├── test_classifier.py            33 phrase-level tests
 │   ├── test_pipeline.py              44 pipeline tests (section, NER, pipeline, sentence splitter)
 │   ├── test_coref.py                 21 tests (coref unit, pipeline integration, calibration, evaluator)
-│   └── test_dep_and_calibration.py   23 tests (dep parser + Platt calibration)
+│   └── test_dep_and_calibration.py   38 tests (dep parser, Platt calibration, calibration transfer)
 │
 ├── app.py                            Streamlit app (phrase + note + evaluation tabs)
 ├── main.py                           CLI evaluation entrypoint
@@ -370,7 +373,7 @@ The app has three tabs:
 |---|---|
 | Single Phrase | Classify a phrase; shows confidence, signal scores, abbreviations expanded, clause used |
 | Full Clinical Note | Paste a clinical note; runs the full pipeline and returns a colour-coded condition table |
-| Evaluate Dataset | Four sub-sections: (1) phrase accuracy over the 39-phrase CSV, (2) confidence reliability diagram + ECE, (3) ML baseline comparison (TF-IDF + LR vs rule-based), (4) precision/recall/F1 on 4 annotated clinical notes |
+| Evaluate Dataset | Five sub-sections: (1) phrase accuracy over the 127-phrase CSV, (2) confidence reliability diagram + ECE, (3) ML baseline comparison (TF-IDF + LR vs rule-based), (4) calibration methods comparison (Platt / isotonic / temperature), (5) precision/recall/F1 on 4 annotated clinical notes |
 
 ---
 
@@ -645,7 +648,7 @@ Matching strategy: a pipeline result is a **true positive** if its condition tex
 
 ## Dataset
 
-`data/clinical_phrases.csv` contains 39 labelled phrases, expanded from the original 15 to include harder cases that expose common failure modes:
+`data/clinical_phrases.csv` contains 127 labelled phrases, expanded from the original 15 to include harder cases that expose common failure modes and the real-phrase calibration evaluation set:
 
 | Category | Examples |
 |---|---|
@@ -689,7 +692,7 @@ Every classification returns a consistent dictionary:
 
 Clinical NLP demands interpretability. Every prediction this system makes can be traced back to a specific cue, a temporal expression, or a section prior. A clinician or engineer auditing a prediction can see exactly why the label was assigned and correct the rules if they disagree.
 
-To make this concrete, a TF-IDF + logistic regression baseline was trained on the same 2,850 synthetic phrases used for Platt calibration, then evaluated on the 39-phrase hard test set alongside the rule-based system:
+To make this concrete, a TF-IDF + logistic regression baseline was trained on the same 2,850 synthetic phrases used for Platt calibration, then evaluated on the original 39-phrase hard test set alongside the rule-based system:
 
 | System | Accuracy | Misclassified |
 |---|---|---|
@@ -726,6 +729,64 @@ Weighted scoring is better because it reflects how much evidence supports each l
 The phrase classifier is designed for short, focused input — a clause or sentence about one condition. Real clinical notes are long and mention many conditions in different contexts and sections.
 
 The pipeline feeds the phrase classifier exactly what it needs: a single sentence from the appropriate section. This separation of concerns means the classifier does not need to change as the pipeline becomes more sophisticated (e.g. adding NER models, section-specific logic, coreference resolution).
+
+---
+
+## Calibration Transfer Experiment
+
+### Motivation
+
+Rule-based NLP systems assign confidence scores based on how strongly their rules fire, not on empirical estimates of accuracy. These scores are systematically miscalibrated — a raw confidence of 35% does not mean the system is correct 35% of the time. Correcting this requires a calibration model fitted on labelled data.
+
+The challenge in clinical NLP is that labelled data is scarce and expensive to obtain. This experiment tests the following claim:
+
+> *Miscalibration in rule-based clinical NLP systems is driven by rule activation patterns, not by surface form variation. Calibration models fitted on synthetic template-generated phrases therefore transfer to real clinical text.*
+
+### Experimental setup
+
+| | Detail |
+|---|---|
+| **Training set** | 2,850 synthetic phrases from `data/calibration_phrases.csv` (template-generated, 88.4% classifier accuracy) |
+| **Test set** | 127 manually annotated real phrases from `data/clinical_phrases.csv` (89.8% classifier accuracy) |
+| **Methods** | Uncalibrated · Platt scaling · Isotonic regression · Temperature scaling |
+| **Metrics** | ECE (Expected Calibration Error) · Brier score |
+| **Reproduce** | `python experiments/calibration_transfer.py` |
+
+The three calibration methods are fitted **only on synthetic data** and evaluated **only on real data**. No real phrases are seen during fitting.
+
+### Results
+
+**Overall calibration (127 real phrases):**
+
+| Method | ECE | Brier score | ECE vs raw |
+|---|---|---|---|
+| Uncalibrated | 0.109 | 0.091 | — |
+| Platt scaling | 0.065 | 0.071 | −40% |
+| **Isotonic regression** | **0.003** | **0.061** | **−97%** |
+| Temperature scaling | 0.130 | 0.095 | +20% |
+
+**Per-category ECE breakdown:**
+
+| Category | n | Uncalibrated | Platt | Isotonic | Temperature |
+|---|---|---|---|---|---|
+| ongoing | 42 | 0.259 | **0.093** | 0.153 | 0.236 |
+| resolved | 38 | 0.116 | 0.083 | **0.032** | 0.102 |
+| negated | 22 | 0.142 | 0.115 | **0.095** | 0.157 |
+| ambiguous | 25 | 0.140 | 0.176 | **0.116** | 0.164 |
+
+### Interpretation
+
+**1. Isotonic regression transfers best overall (ECE 0.003, −97%).**
+A non-parametric monotone function fitted on synthetic confidence–accuracy pairs matches the real data calibration curve almost exactly. This confirms the core claim: what the calibration model needs to learn is the shape of the rule activation–accuracy relationship, which is the same whether the surface text is synthetic or real.
+
+**2. Temperature scaling makes miscalibration worse (ECE 0.130, +20%).**
+Temperature scaling applies a single global multiplier (T = 1.5) to all logits. The fact that it fails shows miscalibration is **non-uniform** — the system is overconfident in some confidence ranges and underconfident in others. A single scalar cannot correct this; a bin-specific non-parametric method is required.
+
+**3. Category-level variation reveals a nuanced picture.**
+Isotonic regression is not uniformly best across categories. For `ongoing` phrases — which have the widest spread of confidence scores and the most competing signals — Platt scaling (ECE 0.093) outperforms isotonic (ECE 0.153). For `resolved` and `negated`, where high-weight cues produce more consistent scores, isotonic dominates. This suggests a hybrid approach (category-conditional calibration) could reduce ECE further.
+
+**4. Synthetic accuracy (88.4%) ≈ real accuracy (89.8%).**
+The near-identical accuracy rates on synthetic and real phrases are consistent with the transfer hypothesis: the rule system's error profile does not change substantially across surface forms, only across genuinely novel phrasing patterns not represented in either dataset.
 
 ---
 

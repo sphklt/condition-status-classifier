@@ -1,8 +1,8 @@
 """
 Confidence calibration for the phrase classifier.
 
-Two capabilities
-----------------
+Production calibration
+----------------------
 calibrate(raw)
     Apply the pre-fitted Platt scaler (saved in data/calibration.json) to map
     a raw confidence score to an estimated probability of being correct.
@@ -10,16 +10,20 @@ calibrate(raw)
 
 reliability_diagram(csv_path)
     Compute reliability diagram data and ECE over a labelled CSV.
-    Used for the calibration analysis view in the Streamlit Evaluate tab.
 
-Fitting the Platt scaler
-------------------------
-Parameters were fitted on 2,850 generated clinical phrases (88.4% accuracy):
-    raw=0.35 → 71%   raw=0.70 → 92%   raw=1.00 → 97%
+Research: calibration transfer experiment
+-----------------------------------------
+compare_calibration_methods(synthetic_csv, real_csv)
+    Fit Platt scaling, isotonic regression, and temperature scaling on
+    synthetic template-generated phrases, then evaluate all methods
+    (including uncalibrated) on real annotated phrases.
 
-Re-fit on new data:
-    python data/generate_calibration_dataset.py
-Then re-run the fitting script to update data/calibration.json.
+    This is the core experiment for the calibration transfer claim:
+    miscalibration in rule-based systems is driven by rule activation
+    patterns, not surface form — so calibration fitted on synthetic data
+    transfers to real clinical text.
+
+    Metrics: ECE (Expected Calibration Error) and Brier score.
 """
 
 import json
@@ -131,3 +135,156 @@ def reliability_diagram(csv_path: str, n_bins: int = 5) -> pd.DataFrame:
     result.attrs["n_correct"] = int(raw["correct"].sum())
     result.attrs["n_total"] = n
     return result
+
+
+# ---------------------------------------------------------------------------
+# Calibration transfer experiment — helpers
+# ---------------------------------------------------------------------------
+
+def _ece(confidences: list[float], correct: list[bool], n_bins: int = 5) -> float:
+    """Expected Calibration Error over equal-width bins."""
+    n = len(confidences)
+    edges = [i / n_bins for i in range(n_bins + 1)]
+    total = 0.0
+    for i in range(n_bins):
+        lo, hi = edges[i], edges[i + 1]
+        idx = [j for j, c in enumerate(confidences)
+               if (lo <= c <= hi if hi == 1.0 else lo <= c < hi)]
+        if not idx:
+            continue
+        acc  = sum(correct[j] for j in idx) / len(idx)
+        conf = sum(confidences[j] for j in idx) / len(idx)
+        total += (len(idx) / n) * abs(conf - acc)
+    return round(total, 4)
+
+
+def _brier(confidences: list[float], correct: list[bool]) -> float:
+    """Binary Brier score: mean squared error of calibrated confidence vs outcome."""
+    return round(
+        sum((c - float(y)) ** 2 for c, y in zip(confidences, correct)) / len(confidences),
+        4,
+    )
+
+
+def _fit_isotonic(raw_scores: list[float], correct: list[bool]):
+    """Fit an isotonic regression calibrator on (raw_score, is_correct) pairs."""
+    from sklearn.isotonic import IsotonicRegression
+    ir = IsotonicRegression(out_of_bounds="clip")
+    ir.fit(raw_scores, [float(c) for c in correct])
+    return ir
+
+
+def _fit_temperature(raw_scores: list[float], correct: list[bool]) -> float:
+    """
+    Find temperature T that minimises NLL on calibration data.
+    T > 1 → soften (system overconfident); T < 1 → sharpen.
+    Uses a grid search over [0.1, 5.0] — no scipy dependency needed.
+    """
+    def nll(T: float) -> float:
+        total = 0.0
+        for raw, y in zip(raw_scores, correct):
+            raw = max(min(raw, 1 - 1e-7), 1e-7)
+            logit = math.log(raw / (1 - raw))
+            p = max(min(1 / (1 + math.exp(-logit / T)), 1 - 1e-7), 1e-7)
+            total -= float(y) * math.log(p) + (1 - float(y)) * math.log(1 - p)
+        return total
+
+    best_T, best_loss = 1.0, float("inf")
+    for t in [round(0.1 + i * 0.05, 2) for i in range(99)]:  # 0.10 → 5.00
+        loss = nll(t)
+        if loss < best_loss:
+            best_loss, best_T = loss, t
+    return round(best_T, 2)
+
+
+def _apply_temperature(raw: float, T: float) -> float:
+    raw = max(min(raw, 1 - 1e-7), 1e-7)
+    logit = math.log(raw / (1 - raw))
+    return round(1 / (1 + math.exp(-logit / T)), 3)
+
+
+# Module-level cache so synthetic predictions aren't recomputed on every call.
+_synthetic_cache: dict | None = None
+
+
+def _get_synthetic_scores(synthetic_csv: str) -> dict:
+    """Run the classifier over synthetic_csv and cache (raw_scores, correct)."""
+    global _synthetic_cache
+    if _synthetic_cache is not None:
+        return _synthetic_cache
+    from src.classifier import classify_condition_status
+    df = pd.read_csv(synthetic_csv)
+    results = [classify_condition_status(t) for t in df["text"]]
+    raw_scores = [r["confidence"] for r in results]
+    correct    = [r["status"] == g for r, g in zip(results, df["gold_status"])]
+    _synthetic_cache = {"raw": raw_scores, "correct": correct}
+    return _synthetic_cache
+
+
+# ---------------------------------------------------------------------------
+# Public API — calibration transfer experiment
+# ---------------------------------------------------------------------------
+
+def compare_calibration_methods(
+    synthetic_csv: str = "data/calibration_phrases.csv",
+    real_csv:      str = "data/clinical_phrases.csv",
+    n_bins:        int = 5,
+) -> dict:
+    """
+    Fit Platt, isotonic regression, and temperature scaling on *synthetic_csv*,
+    then evaluate all four variants (+ uncalibrated) on *real_csv*.
+
+    Returns
+    -------
+    dict with:
+        "summary"     pd.DataFrame  — method, ECE, Brier score
+        "temperature" float         — fitted temperature value T
+        "details"     pd.DataFrame  — per-phrase confidences under each method
+    """
+    from src.classifier import classify_condition_status
+
+    # ── 1. Fit on synthetic data ─────────────────────────────────────────────
+    syn = _get_synthetic_scores(synthetic_csv)
+    _load_params()                                     # ensure Platt a, b loaded
+    ir  = _fit_isotonic(syn["raw"], syn["correct"])
+    T   = _fit_temperature(syn["raw"], syn["correct"])
+
+    # ── 2. Evaluate on real data ─────────────────────────────────────────────
+    real_df  = pd.read_csv(real_csv)
+    results  = [classify_condition_status(t) for t in real_df["text"]]
+    raw_conf = [r["confidence"] for r in results]
+    correct  = [r["status"] == g for r, g in zip(results, real_df["gold_status"])]
+
+    platt_conf = [calibrate(r) for r in raw_conf]
+    iso_conf   = [round(float(ir.predict([r])[0]), 3) for r in raw_conf]
+    temp_conf  = [_apply_temperature(r, T) for r in raw_conf]
+
+    # ── 3. Metrics ───────────────────────────────────────────────────────────
+    methods = {
+        "Uncalibrated":           raw_conf,
+        "Platt scaling":          platt_conf,
+        "Isotonic regression":    iso_conf,
+        "Temperature scaling":    temp_conf,
+    }
+
+    summary_rows = []
+    for name, confs in methods.items():
+        summary_rows.append({
+            "method":      name,
+            "ECE":         _ece(confs, correct, n_bins),
+            "Brier score": _brier(confs, correct),
+        })
+
+    # ── 4. Per-phrase detail table ───────────────────────────────────────────
+    details = real_df[["text", "gold_status"]].copy()
+    details["correct"]             = correct
+    details["raw confidence"]      = raw_conf
+    details["Platt"]               = platt_conf
+    details["Isotonic"]            = iso_conf
+    details["Temperature"]         = temp_conf
+
+    return {
+        "summary":     pd.DataFrame(summary_rows),
+        "temperature": T,
+        "details":     details,
+    }
