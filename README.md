@@ -207,6 +207,7 @@ Deduplication               first mention of each condition wins
 | `src/coref.py` | Pronoun-to-entity coreference within sections |
 | `src/pipeline.py` | Orchestrates the full note-level pipeline; wires dep parser refinement |
 | `src/calibration.py` | Platt scaler (`calibrate()`) + reliability diagram + ECE |
+| `src/baseline.py` | TF-IDF + logistic regression baseline for comparison with the rule system |
 | `src/note_evaluator.py` | Precision/recall/F1 evaluation on annotated clinical notes |
 | `src/utils.py` | Phrase-level dataset evaluation helper |
 
@@ -237,6 +238,7 @@ condition-status-classifier/
 │   ├── coref.py                      pronoun-to-entity coreference
 │   ├── pipeline.py                   full note pipeline (dep parser refinement wired in)
 │   ├── calibration.py                Platt scaler + reliability diagram + ECE
+│   ├── baseline.py                   TF-IDF + logistic regression baseline
 │   ├── note_evaluator.py             pipeline P/R/F1 evaluation on annotated notes
 │   └── utils.py                      phrase-level dataset evaluation
 │
@@ -368,7 +370,7 @@ The app has three tabs:
 |---|---|
 | Single Phrase | Classify a phrase; shows confidence, signal scores, abbreviations expanded, clause used |
 | Full Clinical Note | Paste a clinical note; runs the full pipeline and returns a colour-coded condition table |
-| Evaluate Dataset | Three sub-sections: (1) phrase accuracy over the 39-phrase CSV, (2) confidence reliability diagram + ECE, (3) precision/recall/F1 on 4 annotated clinical notes |
+| Evaluate Dataset | Four sub-sections: (1) phrase accuracy over the 39-phrase CSV, (2) confidence reliability diagram + ECE, (3) ML baseline comparison (TF-IDF + LR vs rule-based), (4) precision/recall/F1 on 4 annotated clinical notes |
 
 ---
 
@@ -686,6 +688,23 @@ Every classification returns a consistent dictionary:
 ### Why rule-based rather than ML?
 
 Clinical NLP demands interpretability. Every prediction this system makes can be traced back to a specific cue, a temporal expression, or a section prior. A clinician or engineer auditing a prediction can see exactly why the label was assigned and correct the rules if they disagree.
+
+To make this concrete, a TF-IDF + logistic regression baseline was trained on the same 2,850 synthetic phrases used for Platt calibration, then evaluated on the 39-phrase hard test set alongside the rule-based system:
+
+| System | Accuracy | Misclassified |
+|---|---|---|
+| Rule-based (this system) | **97%** | 1 / 39 |
+| TF-IDF + logistic regression | 90% | 4 / 39 |
+
+The three cases where the ML baseline fails and the rule system succeeds illustrate exactly why domain engineering matters here:
+
+| Phrase | Gold | ML predicts | Why ML fails |
+|---|---|---|---|
+| `"Asthma better today"` | `ongoing` | `resolved` | "better" correlates with resolved in training data; rule system knows "better" = improving but still present |
+| `"s/p appendectomy"` | `resolved` | `ongoing` | abbreviation not expanded before ML sees it; rule system normalises `s/p → status post` first |
+| `"Cough, no improvement noted"` | `ongoing` | `negated` | ML sees "no" and fires negation; rule system masks "no improvement" as a pseudo-negation before scoring |
+
+The ML baseline comparison is available in the **Evaluate Dataset** tab of the Streamlit app.
 
 An ML model offers higher recall at the cost of opacity. For a system whose predictions could inform clinical decisions, a transparent rule system with known failure modes is a safer starting point.
 

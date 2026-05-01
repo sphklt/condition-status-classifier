@@ -7,6 +7,7 @@ from src.pipeline import process_note, format_results
 from src.ner import active_ner_method
 from src.calibration import reliability_diagram
 from src.note_evaluator import evaluate_notes
+from src.baseline import evaluate as baseline_evaluate
 
 st.set_page_config(
     page_title="Clinical Condition Status Classifier",
@@ -286,6 +287,67 @@ with tab_eval:
             "Note: calibration estimated on 39 phrases. A statistically robust calibration "
             "curve requires ≥500 labelled examples."
         )
+
+    st.divider()
+
+    # ── ML baseline comparison ───────────────────────────────────────────────
+    st.subheader("ML baseline comparison")
+    st.caption(
+        "Trains a TF-IDF + logistic regression model on the 2,850 synthetic phrases "
+        "and evaluates it on the same 39-phrase test set as the rule-based classifier. "
+        "Shows where each approach wins and loses."
+    )
+
+    if st.button("Run baseline comparison", key="btn_baseline"):
+        with st.spinner("Training baseline and evaluating both classifiers…"):
+            cmp_df = baseline_evaluate("data/clinical_phrases.csv")
+
+        bl_acc   = cmp_df.attrs["baseline_accuracy"]
+        rule_acc = cmp_df.attrs["rule_accuracy"]
+
+        col1, col2 = st.columns(2)
+        col1.metric("Rule-based accuracy",  f"{rule_acc:.0%}")
+        col2.metric("ML baseline accuracy", f"{bl_acc:.0%}",
+                    delta=f"{bl_acc - rule_acc:+.0%} vs rule-based")
+
+        # Cases where the two systems disagree
+        disagree = cmp_df[cmp_df["rule_status"] != cmp_df["baseline_status"]].copy()
+        agree    = cmp_df[cmp_df["rule_status"] == cmp_df["baseline_status"]]
+
+        st.write(
+            f"**Agreement:** {len(agree)}/{len(cmp_df)} phrases classified the same. "
+            f"**Disagreements:** {len(disagree)}"
+        )
+
+        if not disagree.empty:
+            disagree["rule ✓"] = disagree["rule_correct"].map({True: "✓", False: "✗"})
+            disagree["ML ✓"]   = disagree["baseline_correct"].map({True: "✓", False: "✗"})
+            st.dataframe(
+                disagree[["text", "gold_status", "rule_status", "rule ✓",
+                           "baseline_status", "ML ✓"]].rename(
+                    columns={"gold_status": "gold", "rule_status": "rule",
+                             "baseline_status": "ML"}
+                ),
+                hide_index=True,
+                use_container_width=True,
+            )
+
+        # Where rule wins over ML
+        rule_wins = cmp_df[cmp_df["rule_correct"] & ~cmp_df["baseline_correct"]]
+        ml_wins   = cmp_df[cmp_df["baseline_correct"] & ~cmp_df["rule_correct"]]
+
+        if not rule_wins.empty:
+            with st.expander(f"Rule-based wins ({len(rule_wins)} phrase(s))"):
+                st.dataframe(
+                    rule_wins[["text", "gold_status", "rule_status", "baseline_status"]],
+                    hide_index=True, use_container_width=True,
+                )
+        if not ml_wins.empty:
+            with st.expander(f"ML baseline wins ({len(ml_wins)} phrase(s))"):
+                st.dataframe(
+                    ml_wins[["text", "gold_status", "baseline_status", "rule_status"]],
+                    hide_index=True, use_container_width=True,
+                )
 
     st.divider()
 
