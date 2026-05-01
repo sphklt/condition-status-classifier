@@ -37,6 +37,7 @@ import re
 
 from src.calibration import calibrate
 from src.normalizer import normalize
+from src.tam import TAMSignature, extract_tam, tam_to_llr
 from src.rules import (
     AMBIGUOUS_CUES,
     NEGATION_CUES,
@@ -190,6 +191,17 @@ def _fuse_core(text_lower: str, section: str = "unknown") -> dict:
             else:
                 log_scores[l] -= t_llr / (_N - 1)
 
+    # ── TAM evidence ──────────────────────────────────────────────────────────
+    # Grammatical tense/aspect/modality contributes independent LLRs.
+    # Each TAM component is additive in log space — compositionality means
+    # novel constructions ("might have been resolving") are handled without
+    # explicit cue entries.
+    tam_sig = extract_tam(text_lower)
+    if tam_sig.has_signal():
+        tam_llr = tam_to_llr(tam_sig, LABELS)
+        for l in LABELS:
+            log_scores[l] += tam_llr[l]
+
     # ── Posterior ─────────────────────────────────────────────────────────────
     posterior  = _softmax(log_scores)
     map_label  = max(posterior, key=posterior.get)
@@ -206,6 +218,12 @@ def _fuse_core(text_lower: str, section: str = "unknown") -> dict:
             "fired_cues":       fired,
             "temporal":         temporal["signal"],
             "pseudo_negations": pseudo_found,
+            "tam": {
+                "tense":          tam_sig.tense,
+                "aspect":         tam_sig.aspect,
+                "modal":          tam_sig.modal,
+                "modal_strength": round(tam_sig.modal_strength, 3),
+            } if tam_sig.has_signal() else None,
         },
     }
 

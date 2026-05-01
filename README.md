@@ -6,7 +6,8 @@ A clinical NLP system that classifies whether a medical condition in clinical te
 - Rule-based classifier: **89.8% accuracy**
 - Hybrid triage: **100% recall of errors**, 62% of predictions auto-approved at 100% accuracy
 - Calibration transfer: isotonic regression reduces ECE from 0.109 → 0.003 (**−97%**) using only synthetic training data
-- 202 tests across 6 test files
+- TAM: grammatical tense/aspect/modality adds **+0.8% accuracy**, ECE −4%, zero predictions hurt
+- 254 tests across 7 test files
 
 ---
 
@@ -15,7 +16,7 @@ A clinical NLP system that classifies whether a medical condition in clinical te
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-pytest                      # 202 passed
+pytest                      # 254 passed
 streamlit run app.py        # browser UI
 python main.py              # CLI evaluation
 ```
@@ -141,6 +142,61 @@ The phrase classifier is optimised for short, focused input. The pipeline feeds 
 ---
 
 ## Research
+
+### Tense-Aspect-Modality (TAM) Classification
+
+**Motivation.** All existing clinical condition classifiers — including this system's rule-based and Bayesian layers — rely on *lexical* signals: keyword lookup with associated weights. Grammatical predicate structure carries strong status information that no keyword can capture:
+
+- `"Symptoms are worsening"` — no temporal adverb, but present progressive = ongoing
+- `"Blood pressure should be monitored"` — no cue fires, but deontic modal = ongoing obligation
+- `"The infection had resolved"` — past perfect = completed before a past reference point → resolved
+- `"Symptoms might be worsening"` — strong ongoing cue, but epistemic modal raises uncertainty
+
+**Approach.** Extract the Tense-Aspect-Modality signature of the predicate governing the condition, then map each component to an independent log-likelihood ratio (LLR) that feeds the same Bayesian log-score vector as keyword cues:
+
+```
+TAMSignature(tense, aspect, modal)
+  tense:  past | present | future
+  aspect: progressive | perfect | past_perfect
+  modal:  epistemic_weak | epistemic_strong | deontic | negated_deontic | conditional
+```
+
+**Key novelty — compositionality:** tense, aspect, and modality each contribute independent LLRs. Novel constructions are handled correctly without explicit cue entries:
+
+```
+"might have been resolving"
+  epistemic_weak (modal)  → shifts posterior toward ambiguous
+  + progressive (aspect)  → shifts toward ongoing
+  = high-entropy posterior (ambiguous vs ongoing) → triage flagged
+```
+
+This is categorically different from adding "might have been resolving" as a cue phrase — it generalises to any unseen combination.
+
+**Complementarity with temporal detection.** `temporal.py` catches adverbial time expressions ("3 years ago", "currently"). TAM catches grammatical predicate structure. They are independent evidence sources:
+
+| Signal type | Example | What fires |
+|---|---|---|
+| Adverbial temporal | `"diagnosed 3 years ago"` | temporal.py |
+| Grammatical TAM | `"is worsening"` | TAM (progressive) |
+| Both | `"was stable last month"` | temporal + TAM (past) |
+| Neither | `"no evidence of fever"` | keyword cue |
+
+**Safety constraint.** Tense patterns are intentionally conservative — only specific clinical verb constructions, never bare `is/has/was` — to prevent false positives in negation contexts. `"Patient had no fever"` fires no TAM signal and stays `negated`; `"The fever had resolved"` fires `past_perfect` and boosts `resolved`.
+
+**Results** (127-phrase set, with vs without TAM):
+
+| Metric | Without TAM | With TAM | Δ |
+|---|---|---|---|
+| Accuracy | 87.4% | **88.2%** | +0.8% |
+| ECE | 0.125 | **0.120** | −4% |
+| Mean entropy | 0.886 bits | **0.849 bits** | −4.2% |
+| Predictions changed | — | 1 improved, 0 hurt | — |
+
+TAM fires on 16/127 (13%) phrases. The one prediction it changes: `"Symptoms may represent early heart failure"` — `ongoing` without TAM → `ambiguous` with TAM (correct; `may` = epistemic_weak).
+
+Reproduce: `python experiments/tam_eval.py`
+
+---
 
 ### Calibration Transfer
 
@@ -464,7 +520,8 @@ condition-status-classifier/
 │   ├── coref.py                      pronoun-to-entity coreference within sections
 │   ├── pipeline.py                   full note pipeline
 │   ├── calibration.py                Platt scaler + ECE + calibration transfer helpers
-│   ├── bayesian_fusion.py            Bayesian evidence fusion (posterior + entropy)
+│   ├── tam.py                        TAM extraction (tense/aspect/modality → LLRs)
+│   ├── bayesian_fusion.py            Bayesian evidence fusion (posterior + entropy + TAM)
 │   ├── hybrid.py                     hybrid classifier (rule-based MAP + Bayesian triage)
 │   ├── baseline.py                   TF-IDF + logistic regression baseline
 │   ├── note_evaluator.py             pipeline P/R/F1 on annotated notes
@@ -473,7 +530,8 @@ condition-status-classifier/
 ├── experiments/
 │   ├── calibration_transfer.py
 │   ├── bayesian_fusion_eval.py
-│   └── hybrid_eval.py
+│   ├── hybrid_eval.py
+│   └── tam_eval.py
 │
 ├── tests/
 │   ├── test_classifier.py            33 tests
@@ -481,7 +539,8 @@ condition-status-classifier/
 │   ├── test_coref.py                 21 tests
 │   ├── test_dep_and_calibration.py   38 tests
 │   ├── test_bayesian_fusion.py       36 tests
-│   └── test_hybrid.py                31 tests
+│   ├── test_hybrid.py                31 tests
+│   └── test_tam.py                   52 tests
 │
 ├── app.py
 ├── main.py
@@ -504,7 +563,8 @@ condition-status-classifier/
 | `src/coref.py` | Pronoun coreference within sections; fires only when entity confidence < 0.65 |
 | `src/pipeline.py` | Orchestrates the full note-level pipeline; wires dep parser refinement |
 | `src/calibration.py` | Platt scaler (`calibrate()`), reliability diagram, ECE, Brier, isotonic/temperature methods |
-| `src/bayesian_fusion.py` | Bayesian evidence fusion: posterior distribution, Shannon entropy, section priors |
+| `src/tam.py` | TAM extraction: tense/aspect/modality → LLRs; compositionality over novel predicate constructions |
+| `src/bayesian_fusion.py` | Bayesian evidence fusion: posterior distribution, Shannon entropy, section priors, TAM integration |
 | `src/hybrid.py` | Hybrid classifier: rule-based MAP label + Bayesian posterior + entropy triage flag |
 | `src/baseline.py` | TF-IDF + logistic regression baseline |
 | `src/note_evaluator.py` | Precision/recall/F1 evaluation on annotated clinical notes |
