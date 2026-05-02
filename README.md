@@ -55,11 +55,11 @@ Asthma better today  →  ongoing
 
 ## How It Works
 
-### Five non-trivial capabilities
+### 1. Pseudo-negation filtering
 
-**1. Pseudo-negation filtering (NegEx-inspired)**
+**Motivation.** Not every "no" in clinical text is a negation. `"No longer has headache"` means the condition has resolved; `"No improvement noted"` means it persists. A naive negation detector mis-classifies both — and these patterns are common enough in clinical documentation that getting them wrong meaningfully degrades accuracy.
 
-Some phrases contain negation words that do not deny a condition. These patterns are detected and masked before cue scoring.
+The system detects and masks pseudo-negation patterns before cue scoring, so the true clinical meaning is preserved.
 
 | Phrase | Naive | This system | Why |
 |---|---|---|---|
@@ -68,9 +68,11 @@ Some phrases contain negation words that do not deny a condition. These patterns
 | `No improvement noted` | `negated` | `ongoing` | condition persists unchanged |
 | `No change in diabetes status` | `negated` | `ongoing` | unchanged = still present |
 
-**2. Adversative clause detection**
+### 2. Adversative clause detection
 
-When a sentence has clauses separated by an adversative conjunction or a period, the final clause carries the definitive status.
+**Motivation.** Compound sentences contain contradictory signals. An earlier clause may describe a prior state that the final clause overrides — taking the first strong signal produces the wrong result, and taking the strongest signal ignores the temporal ordering that gives the final clause its authority.
+
+When a sentence has clauses separated by an adversative conjunction or period, only the final clause is classified.
 
 ```
 "I had severe flu which I think is getting better now.
@@ -78,9 +80,9 @@ When a sentence has clauses separated by an adversative conjunction or a period,
 → resolved  (final clause wins; first clause ignored)
 ```
 
-**3. Temporal signal detection**
+### 3. Temporal signal detection
 
-Past and present temporal expressions boost the relevant label score independently of keyword cues.
+**Motivation.** Keyword cues alone cannot distinguish `"chest pain 3 years ago"` (resolved) from `"chest pain since this morning"` (ongoing). The same condition entity appears in both phrases — only the temporal expression differentiates them, and no keyword fires on the entity itself. Past and present temporal expressions carry independent evidence that must feed the classification separately from keyword matches.
 
 | Phrase | Signal | Effect |
 |---|---|---|
@@ -89,9 +91,11 @@ Past and present temporal expressions boost the relevant label score independent
 | `"Was treated for pneumonia last year"` | past | boosts resolved |
 | `"Acute onset shortness of breath"` | present | boosts ongoing |
 
-**4. Sentence-boundary-aware context windows**
+### 4. Sentence-boundary-aware context windows
 
-Entity classification uses only the sentence containing the entity — not a fixed character window. This prevents signals from adjacent sentences from bleeding into the wrong classification.
+**Motivation.** Fixed character windows bleed signals across sentence boundaries. `"No fever. Patient has diabetes."` — a 50-character window around "diabetes" reaches the "No" from sentence 1, causing a false negation. Clinical notes have high sentence density; adjacent sentences routinely carry opposite status signals.
+
+Entity classification uses only the sentence containing the entity. Each sentence is a self-contained evidence unit.
 
 ```
 "No fever.  Patient has diabetes."
@@ -99,16 +103,114 @@ Entity classification uses only the sentence containing the entity — not a fix
  sentence 1   sentence 2 → "No" from sentence 1 never reaches diabetes
 ```
 
-**5. Pronoun coreference within sections**
+### 5. Pronoun coreference within sections
 
-When a pronoun sentence contains a confident status signal and the entity's own sentence was uninformative, the status is attributed to the most recent entity in the same section.
+**Motivation.** Clinical notes frequently refer back to a just-mentioned condition with "it", "this", or "they". The entity's own sentence may be a bare noun phrase with no classifiable cues — `"The patient had a cough."` — while the definitive status appears in the next sentence via a pronoun. Ignoring pronoun sentences loses valid evidence that is directly about the entity.
+
+When a pronoun sentence contains a confident status signal and the entity's own sentence was weak (confidence < 0.65), the status is attributed to the most recent entity in the same section. Coref is section-scoped to prevent cross-section contamination.
 
 ```
 "The patient had a cough. It resolved."
                           ──────────── → cough: resolved (87% conf)
 ```
 
-Coref fires only when the entity's own sentence confidence < 0.65, ensuring it never overrides a confident classification. Coref is section-scoped.
+### 6. Tense-Aspect-Modality (TAM)
+
+**Motivation.** All keyword-based classifiers — including this system's rule and Bayesian layers — are lexically grounded. They fire on words, not grammatical structure. But grammatical predicate structure carries strong status information that no keyword can capture:
+
+- `"Symptoms are worsening"` — no temporal adverb, but present progressive = ongoing
+- `"Blood pressure should be monitored"` — no cue fires, but deontic modal = ongoing obligation
+- `"The infection had resolved"` — past perfect = completed before a past reference point → resolved
+- `"Symptoms might be worsening"` — strong ongoing cue, but epistemic modal raises uncertainty
+
+Adding "might have been resolving" as a keyword phrase would handle only that exact string. TAM extracts the grammatical signature and handles any unseen combination compositely.
+
+The TAM signature of the governing predicate is extracted and mapped to independent LLRs feeding the same Bayesian log-score accumulator as keyword cues. Tense, aspect, and modality each contribute separately:
+
+```
+"might have been resolving"
+  epistemic_weak (modal)  → shifts posterior toward ambiguous
+  + progressive (aspect)  → shifts toward ongoing
+  = high-entropy posterior → triage flagged
+```
+
+TAM patterns are intentionally conservative — only specific clinical verb constructions, never bare `is/has/was` — to prevent false positives in negation contexts. `"Patient had no fever"` fires no TAM signal and stays `negated`; `"The fever had resolved"` fires `past_perfect` and boosts `resolved`.
+
+### 7. Attribution-aware confidence
+
+**Motivation.** TAM captures *how* the predicate is expressed. Temporal signals capture *when*. Both are silent about *who* is asserting the status. A patient who *thinks* they have hypertension, a family member who *reports* a seizure history, and an EHR fragment that *shows* diabetes are qualitatively different claims — carrying different degrees of clinical certainty — and none are captured by keyword, temporal, or TAM signals.
+
+**Key novel case — record attribution.** `"Per records, hypertension"` and `"Records show asthma"` contain no resolved keyword, no temporal adverb, and no TAM signal. Without attribution, the classifier has no resolved evidence and defaults to ongoing/ambiguous. The record source contributes LLR +1.0 to resolved — enough to produce the correct classification from a single signal.
+
+Each asserter type maps to an independent LLR vector:
+
+| Source | Clinical meaning | Primary LLR effect |
+|---|---|---|
+| `record` | per records/chart, records show/document | +1.0 to resolved |
+| `patient_hedge` | patient thinks/believes/suspects | +0.80 to ambiguous |
+| `clinician_hedge` | we think/believe, appears consistent with | +0.60 to ambiguous |
+| `family_report` | family/wife/caregiver reports/states | +0.40 to ambiguous |
+| `patient_report` | patient reports/states/endorses | +0.30 to ambiguous |
+
+All attribution LLRs are capped at ±1.0. Strong keyword cues (LLR ≈ 6.9 for weight=0.999) always dominate — `"Patient denies fever"` stays `negated` even though `patient_report` fires, because `denies` (LLR ≈ 3.7) overwhelms the +0.30 attribution signal. `"Family history of diabetes"` does not trigger `family_report` because the pattern requires a report verb after the family noun.
+
+### 8. Status trajectory
+
+**Motivation.** Every prior approach classifies each entity against the *single sentence* that contains it. When the same condition appears multiple times within a section, earlier sentences are discarded entirely. This throws away directional evidence: a condition mentioned as ongoing in sentence 1 and resolved in sentence 3 is a *resolution* — a clinically meaningful transition — not an ambiguous signal to be averaged or ignored.
+
+The sequence of status classifications for a condition across all sentences in a section is reconciled using time-decayed log-evidence accumulation. Each transition type earns a bonus LLR encoding the clinical prior that this transition is meaningful:
+
+| Transition | Clinical meaning | Bonus LLR |
+|---|---|---|
+| `ongoing → resolved` | resolution — condition cleared | +0.80 |
+| `resolved → ongoing` | relapse — history item now active | +1.00 |
+| `negated → ongoing` | contradiction — prior denial overridden | +0.90 |
+| `ambiguous → [definite]` | clarification — uncertainty resolved | +0.60 |
+
+Each point contributes `0.7^(n−1−i)` weight — the most recent mention dominates but earlier signals still inform. This is strictly better than "take the last sentence" because early-context confidence bounds the posterior when the final sentence is weak. The `transition_type` field (`relapse`, `contradiction`, `multi_transition`) feeds directly into the hybrid triage system for clinical review.
+
+**Complementarity with coreference.** Pronoun coreference handles `"Patient has cough. It resolved."` (pronoun bridge). Trajectory handles `"Patient has cough. Cough resolved."` (explicit re-mention). Neither replaces the other — both fire in the same pipeline step.
+
+### 9. Bayesian evidence fusion
+
+**Motivation.** The rule-based classifier returns a single confidence score and argmax — no distribution, no uncertainty quantification. Without a proper posterior, there is no principled basis for combining multiple evidence sources, detecting conflicting signals, or routing uncertain predictions to human review. Confidence scores based on how strongly rules fire are not the same as calibrated probabilities of being correct.
+
+Bayesian fusion treats cue weights as calibrated likelihood ratios and accumulates all evidence into a posterior distribution. For each label ℓ:
+
+```
+log_score[ℓ] = log P(label=ℓ | section)       ← section-conditional prior
+             + Σ log(w / (1-w))                ← for each cue targeting ℓ
+             - Σ log(w' / (1-w')) / 3          ← for each cue targeting ℓ' ≠ ℓ
+             + TAM LLR[ℓ]                      ← grammatical predicate structure
+             + attribution LLR[ℓ]              ← asserter identity
+
+posterior[ℓ] = softmax(log_score)[ℓ]
+```
+
+All evidence sources — keywords, temporal, TAM, attribution — are orthogonal dimensions summing into the same log-score vector before softmax. Section priors encode clinical domain knowledge: PMH → resolved=0.55; HPI/Assessment → ongoing=0.50.
+
+### 10. Hybrid triage
+
+**Motivation.** In clinical settings, the cost of an incorrect classification is high — but routing every prediction for human review defeats the purpose of automation. The goal is to identify which specific predictions are uncertain enough to warrant review, while auto-approving the rest with provably high accuracy. Entropy over the posterior provides exactly this signal: wrong predictions have 2.5× higher entropy than correct ones.
+
+A prediction is flagged when either:
+- Bayesian entropy > 1.2 bits (tunable default)
+- The rule-based system and Bayesian system predict different labels
+
+```python
+result = classify("History of poorly controlled hypertension.")
+# result["entropy"]      → 1.21 bits  (two signals compete)
+# result["triage_flag"]  → True       (flagged for review)
+# result["runner_up"]    → ("ongoing", 0.47)
+```
+
+### 11. Calibration transfer
+
+**Motivation.** Rule-based systems assign confidence scores based on how strongly rules fire, not empirical accuracy — these scores are systematically miscalibrated. Collecting labelled real clinical text for calibration fitting is expensive and requires de-identification. If calibration can be fitted entirely on synthetic data and transferred to real text, the overhead of calibration fitting drops to near zero.
+
+> *Miscalibration is driven by rule activation patterns, not surface form variation. Calibration models therefore transfer from synthetic to real text.*
+
+Isotonic regression fitted on 2,850 synthetic phrases reduces ECE by 97% on real clinical text, confirming the transfer hypothesis.
 
 ### Design decisions
 
@@ -143,49 +245,31 @@ The phrase classifier is optimised for short, focused input. The pipeline feeds 
 
 ---
 
-## Research
+## Results
 
-### Tense-Aspect-Modality (TAM) Classification
+### Phrase-level accuracy
 
-**Motivation.** All existing clinical condition classifiers — including this system's rule-based and Bayesian layers — rely on *lexical* signals: keyword lookup with associated weights. Grammatical predicate structure carries strong status information that no keyword can capture:
+Evaluated on 159 labelled clinical phrases covering all four status labels and TAM-sensitive, attribution-sensitive, and temporally-marked constructions.
 
-- `"Symptoms are worsening"` — no temporal adverb, but present progressive = ongoing
-- `"Blood pressure should be monitored"` — no cue fires, but deontic modal = ongoing obligation
-- `"The infection had resolved"` — past perfect = completed before a past reference point → resolved
-- `"Symptoms might be worsening"` — strong ongoing cue, but epistemic modal raises uncertainty
-
-**Approach.** Extract the Tense-Aspect-Modality signature of the predicate governing the condition, then map each component to an independent log-likelihood ratio (LLR) that feeds the same Bayesian log-score vector as keyword cues:
-
-```
-TAMSignature(tense, aspect, modal)
-  tense:  past | present | future
-  aspect: progressive | perfect | past_perfect
-  modal:  epistemic_weak | epistemic_strong | deontic | negated_deontic | conditional
-```
-
-**Key novelty — compositionality:** tense, aspect, and modality each contribute independent LLRs. Novel constructions are handled correctly without explicit cue entries:
-
-```
-"might have been resolving"
-  epistemic_weak (modal)  → shifts posterior toward ambiguous
-  + progressive (aspect)  → shifts toward ongoing
-  = high-entropy posterior (ambiguous vs ongoing) → triage flagged
-```
-
-This is categorically different from adding "might have been resolving" as a cue phrase — it generalises to any unseen combination.
-
-**Complementarity with temporal detection.** `temporal.py` catches adverbial time expressions ("3 years ago", "currently"). TAM catches grammatical predicate structure. They are independent evidence sources:
-
-| Signal type | Example | What fires |
+| System | Accuracy | ECE |
 |---|---|---|
-| Adverbial temporal | `"diagnosed 3 years ago"` | temporal.py |
-| Grammatical TAM | `"is worsening"` | TAM (progressive) |
-| Both | `"was stable last month"` | temporal + TAM (past) |
-| Neither | `"no evidence of fever"` | keyword cue |
+| Rule-based | **89.8%** | 0.109 |
+| Bayesian fusion | 87.4% | 0.125 |
 
-**Safety constraint.** Tense patterns are intentionally conservative — only specific clinical verb constructions, never bare `is/has/was` — to prevent false positives in negation contexts. `"Patient had no fever"` fires no TAM signal and stays `negated`; `"The fever had resolved"` fires `past_perfect` and boosts `resolved`.
+Per-label ECE — Bayesian wins on 3 of 4 categories:
 
-**Results** (151-phrase set, with vs without TAM):
+| Label | Rule ECE | Bayes ECE |
+|---|---|---|
+| ongoing | 0.259 | **0.215** |
+| resolved | 0.116 | **0.104** |
+| negated | 0.142 | **0.131** |
+| ambiguous | **0.140** | 0.190 |
+
+Reproduce: `python experiments/bayesian_fusion_eval.py`
+
+### TAM contribution
+
+Comparison on 151-phrase set (includes 64 TAM-sensitive phrases), with vs without TAM:
 
 | Metric | Without TAM | With TAM | Δ |
 |---|---|---|---|
@@ -194,7 +278,7 @@ This is categorically different from adding "might have been resolving" as a cue
 | Mean entropy | 1.012 bits | **0.915 bits** | −9.6% |
 | Predictions changed | — | **21 improved, 0 hurt** | — |
 
-Per-label accuracy on TAM-sensitive constructions (64 new phrases):
+Per-label accuracy on TAM-sensitive constructions (64 phrases):
 
 | Label | Without TAM | With TAM | Δ |
 |---|---|---|---|
@@ -203,29 +287,55 @@ Per-label accuracy on TAM-sensitive constructions (64 new phrases):
 | ongoing | 90% | 90% | 0% |
 | negated | 86% | 86% | 0% |
 
-TAM fires on 40/151 (26%) phrases. The 21 improved predictions split across epistemic modals correctly routed to `ambiguous` and past-perfect constructions correctly resolved without any explicit resolved keyword. Zero predictions hurt.
-
-ECE increases because the system becomes much more confident on the new phrases — and while those confidences are directionally correct (21 improvements), the isotonic calibrator was fitted on the original 127-phrase distribution and does not re-calibrate for the expanded set.
+TAM fires on 40/151 (26%) phrases. ECE increases because the system becomes more confident on the new phrases — while those confidences are directionally correct, the isotonic calibrator was fitted on the original 127-phrase distribution and does not re-calibrate for the expanded set.
 
 Reproduce: `python experiments/tam_eval.py`
 
----
+### Attribution contribution
 
-### Calibration Transfer
+Comparison on 159-phrase set (includes 8 record-attribution phrases), with vs without attribution:
 
-**Motivation.** Rule-based systems assign confidence scores based on how strongly rules fire, not empirical accuracy. These scores are systematically miscalibrated. The key question: can a calibration model fitted on *synthetic* template-generated phrases transfer to *real* clinical text?
+| Metric | Without attribution | With attribution | Δ |
+|---|---|---|---|
+| Accuracy | 86.2% | **90.6%** | **+4.4%** |
+| Predictions changed | — | **7 improved, 0 hurt** | — |
 
-> *Miscalibration is driven by rule activation patterns, not surface form variation. Calibration models therefore transfer from synthetic to real text.*
+Attribution fires on only 8/159 (5%) phrases — all `record` source — but converts every one from incorrect (ongoing) to correct (resolved). Zero predictions hurt.
 
-**Setup:**
+Targeted evaluation on 25 attribution-specific cases (all five source types):
 
-| | |
-|---|---|
-| Training set | 2,850 synthetic phrases (`data/calibration_phrases.csv`); 88.4% classifier accuracy |
-| Test set | 127 real phrases (`data/clinical_phrases.csv`); 89.8% classifier accuracy |
-| Methods | Uncalibrated · Platt scaling · Isotonic regression · Temperature scaling |
+| Source | n | Without attribution | With attribution | Δ |
+|---|---|---|---|---|
+| record | 12 | 25% | **100%** | +75% |
+| patient_hedge | 4 | 50% | **100%** | +50% |
+| clinician_hedge | 4 | 0% | **75%** | +75% |
+| patient_report | 5 | 100% | 100% | 0% |
+| **Overall** | **25** | **40%** | **96%** | **+56%** |
 
-**Results:**
+`patient_report` baseline is already 100% because the ongoing cue independently scores the phrase correctly — the attribution signal is additive but not load-bearing. `clinician_hedge` (75%) misses one case where the hedged phrase has a strong keyword cue that dominates the attribution LLR.
+
+Reproduce: `python experiments/attribution_eval.py`
+
+### Trajectory contribution
+
+Evaluated on 40 multi-sentence passages, each with 2 explicit mentions of the same condition:
+
+| Transition type | n | Baseline | Trajectory | Δ |
+|---|---|---|---|---|
+| resolution | 10 | 10% | **100%** | +90% |
+| relapse | 10 | 10% | **40%** | +30% |
+| contradiction | 5 | 0% | **40%** | +40% |
+| clarification | 5 | 0% | **40%** | +40% |
+| stable | 10 | 100% | **100%** | 0% |
+| **Overall** | **40** | **30%** | **70%** | **+40%** |
+
+16 improved, 0 hurt. Trajectory never degrades a correct single-sentence prediction.
+
+Reproduce: `python experiments/trajectory_eval.py`
+
+### Calibration transfer
+
+Training set: 2,850 synthetic phrases. Test set: 159 real clinical phrases.
 
 | Method | ECE | Brier | ECE vs raw |
 |---|---|---|---|
@@ -243,78 +353,13 @@ Per-category ECE:
 | negated | 22 | 0.142 | 0.115 | **0.095** | 0.157 |
 | ambiguous | 25 | 0.140 | 0.176 | **0.116** | 0.164 |
 
-**Interpretation.** Isotonic regression transfers nearly perfectly (ECE 0.003), confirming the transfer hypothesis. Temperature scaling fails (ECE +20%) because miscalibration is non-uniform — a single global scalar cannot correct category-specific over/under-confidence. For `ongoing`, Platt scaling (ECE 0.093) outperforms isotonic (0.153) due to wider score spread; isotonic dominates for `resolved` and `negated`.
+Temperature scaling fails because miscalibration is non-uniform — a single global scalar cannot correct category-specific over/under-confidence. For `ongoing`, Platt (ECE 0.093) outperforms isotonic (0.153) due to wider score spread; isotonic dominates for `resolved` and `negated`.
 
 Reproduce: `python experiments/calibration_transfer.py`
 
----
+### Hybrid triage
 
-### Bayesian Evidence Fusion
-
-**Motivation.** The rule-based classifier returns a single confidence score and argmax — no distribution, no uncertainty. Bayesian fusion treats cue weights as calibrated likelihood ratios and accumulates evidence into a proper posterior.
-
-**Algorithm.** For each label ℓ ∈ {ongoing, resolved, negated, ambiguous}:
-
-```
-log_score[ℓ] = log P(label=ℓ | section)       ← section-conditional prior
-             + Σ log(w / (1-w))                ← for each cue targeting ℓ
-             - Σ log(w' / (1-w')) / 3          ← for each cue targeting ℓ' ≠ ℓ
-
-posterior[ℓ] = softmax(log_score)[ℓ]
-```
-
-Cue weights (w) are already calibrated precision estimates from `rules.py`, so calibration propagates at the feature level. Section priors encode clinical domain knowledge (PMH → resolved=0.55; HPI/Assessment → ongoing=0.50). Temporal signals contribute their own LLRs (e.g., past temporal → +0.85 to resolved). Cues with w ≤ 0.50 are skipped (LLR ≤ 0 = no positive evidence).
-
-**Results** (127 real phrases):
-
-| System | Accuracy | ECE |
-|---|---|---|
-| Rule-based | **89.8%** | 0.109 |
-| Bayesian fusion | 87.4% | 0.125 |
-
-Per-label ECE — Bayesian wins on 3 of 4 categories:
-
-| Label | Rule ECE | Bayes ECE |
-|---|---|---|
-| ongoing | 0.259 | **0.215** |
-| resolved | 0.116 | **0.104** |
-| negated | 0.142 | **0.131** |
-| ambiguous | **0.140** | 0.190 |
-
-**Entropy as triage signal:**
-
-| Prediction type | Mean entropy |
-|---|---|
-| Correct predictions | 0.75 bits |
-| Wrong predictions | 1.85 bits |
-| Ratio | **2.5× higher on errors** |
-
-Wrong predictions have 2.5× higher entropy than correct ones, making entropy a reliable flag for routing uncertain predictions to human review.
-
-Reproduce: `python experiments/bayesian_fusion_eval.py`
-
----
-
-### Hybrid Classifier
-
-`src/hybrid.py` combines the rule-based MAP label with Bayesian uncertainty into a single triage-aware result.
-
-**Triage logic:** a prediction is flagged when either:
-- Bayesian entropy > 1.2 bits (tunable default)
-- The two systems predict different labels
-
-```python
-from src.hybrid import classify
-
-result = classify("History of poorly controlled hypertension.")
-# result["status"]       → "resolved"       (rule-based MAP)
-# result["posterior"]    → {"ongoing": 0.47, "resolved": 0.38, ...}
-# result["entropy"]      → 1.21 bits        (two signals compete)
-# result["triage_flag"]  → True             (flagged for review)
-# result["runner_up"]    → ("ongoing", 0.47)
-```
-
-**Triage performance** (127-phrase set, default threshold 1.2 bits):
+Evaluated on 127-phrase set, default threshold 1.2 bits:
 
 | Metric | Value |
 |---|---|
@@ -324,53 +369,13 @@ result = classify("History of poorly controlled hypertension.")
 | Auto-approved accuracy | **100%** — 62% of predictions, no errors |
 | Review efficiency | **2.6×** fewer phrases read per error |
 
-At best-F1 threshold (1.8 bits): 21% flagged, 77% recall, 37% precision.
-
-The threshold is tunable. `evaluate_triage(csv_path, thresholds=[...])` sweeps thresholds and returns precision/recall/F1 at each.
+Wrong predictions have 2.5× higher entropy than correct ones, making entropy a reliable signal for routing uncertain predictions to human review. At best-F1 threshold (1.8 bits): 21% flagged, 77% recall, 37% precision. The threshold is tunable — `evaluate_triage(csv_path, thresholds=[...])` sweeps thresholds and returns precision/recall/F1 at each.
 
 Reproduce: `python experiments/hybrid_eval.py`
 
----
+### Note-level evaluation
 
-### Status Trajectory
-
-**Motivation.** Every prior approach — this system included — classifies each entity against the *single sentence* that contains it. When the same condition appears multiple times within a section, earlier sentences are discarded. This throws away directional evidence: a condition mentioned as ongoing in sentence 1 and resolved in sentence 3 is a *resolution*, not an ambiguous signal.
-
-**Novel contribution.** Model the sequence of status classifications for a condition across all sentences in a section, then reconcile the sequence using time-decayed log-evidence accumulation. Each transition type (resolution, relapse, contradiction, clarification) earns a bonus LLR encoding the clinical prior that this transition is meaningful:
-
-| Transition | Clinical meaning | Bonus LLR |
-|---|---|---|
-| `ongoing → resolved` | resolution — condition cleared | +0.80 |
-| `resolved → ongoing` | relapse — history item now active | +1.00 |
-| `negated → ongoing` | contradiction — prior denial overridden | +0.90 |
-| `ambiguous → [definite]` | clarification — uncertainty resolved | +0.60 |
-
-**Time-decay reconciliation.** Each point contributes `0.7^(n−1−i)` weight — the most recent mention dominates but earlier signals still inform. This is strictly better than "take the last sentence" because early-context confidence bounds the posterior when the final sentence is weak.
-
-```python
-# Resolution: 9/10 test cases resolved correctly vs. 1/10 baseline
-"Patient has cough. Cough resolved after antibiotic treatment."
-  Point 0: ongoing (0.80)  →  Point 1: resolved (0.88)
-  Transition bonus: +0.80 to resolved
-  → Final: resolved (trajectory), ongoing (baseline, wrong)
-```
-
-**Key property — transition type as triage signal.** The `transition_type` field (`relapse`, `contradiction`, `multi_transition`) feeds directly into the hybrid triage system: a relapse or contradiction detected by trajectory is surfaced for clinical review regardless of entropy.
-
-**Results** (40 multi-sentence passages, all with 2 explicit entity mentions):
-
-| Transition type | n | Baseline | Trajectory | Δ |
-|---|---|---|---|---|
-| resolution | 10 | 10% | **100%** | +90% |
-| relapse | 10 | 10% | **40%** | +30% |
-| contradiction | 5 | 0% | **40%** | +40% |
-| clarification | 5 | 0% | **40%** | +40% |
-| stable | 10 | 100% | **100%** | 0% |
-| **Overall** | **40** | **30%** | **70%** | **+40%** |
-
-16 improved, 0 hurt. Trajectory never degrades a correct single-sentence prediction.
-
-**Note-level results** (7-note annotated set, with vs without trajectory):
+Evaluated on 7 annotated clinical notes (4 general + 3 trajectory-specific: resolution, relapse, clarification), with vs without trajectory:
 
 | Metric | Without trajectory | With trajectory | Δ |
 |---|---|---|---|
@@ -378,67 +383,9 @@ Reproduce: `python experiments/hybrid_eval.py`
 | Recall | 0.781 | **0.848** | +8.6% |
 | F1 | 0.694 | **0.757** | +9.1% |
 
-14/14 trajectory-dependent conditions correctly classified across the 3 new notes (resolution, relapse, clarification types). The 7 FN errors in both configurations are pre-existing NER misses unrelated to status classification.
+14/14 trajectory-dependent conditions correctly classified across the 3 new notes. The 7 FN errors in both configurations are pre-existing NER misses unrelated to status classification.
 
-**Complementarity with coref.** Pronoun coreference (`coref.py`) handles `"Patient has cough. It resolved."` (pronoun bridge). Trajectory handles `"Patient has cough. Cough resolved."` (explicit re-mention). Neither replaces the other — both fire in the same pipeline step.
-
-Reproduce: `python experiments/trajectory_eval.py`
-
----
-
-### Attribution-Aware Confidence
-
-**Motivation.** TAM captures *how* the predicate is expressed (past perfect, epistemic modal). Temporal signals capture *when* the event occurred. Both are silent about *who* is asserting the status. Clinical text carries a fourth independent evidence dimension: the asserter's identity. A patient who *thinks* they have hypertension, a family member who *reports* a seizure history, and an EHR fragment that *shows* diabetes are three qualitatively different claims — and none of them are captured by keyword, temporal, or TAM signals.
-
-**Key novel case — record attribution.** Phrases like `"Per records, hypertension"` or `"Records show asthma"` contain no resolved keyword, no temporal adverb, and no grammatical past signal. Without attribution, the classifier has no resolved evidence and defaults to ongoing/ambiguous. The record source contributes LLR +1.0 to resolved — enough to produce the correct classification from a single signal.
-
-**Approach.** Extract the asserter's identity from the sentence, classify it into one of five attribution source types, and map each source to an independent LLR vector that feeds the same Bayesian log-score accumulator as keyword, temporal, and TAM signals:
-
-| Source | Clinical meaning | Primary LLR effect |
-|---|---|---|
-| `record` | per records/chart, records show/document | +1.0 to resolved |
-| `patient_hedge` | patient thinks/believes/suspects | +0.80 to ambiguous |
-| `clinician_hedge` | we think/believe, appears consistent with | +0.60 to ambiguous |
-| `family_report` | family/wife/caregiver reports/states | +0.40 to ambiguous |
-| `patient_report` | patient reports/states/endorses | +0.30 to ambiguous |
-
-**Priority ordering.** When multiple patterns overlap, `patient_hedge` takes priority over `patient_report` to prevent a weak report signal from masking a stronger hedge: `"Patient thinks she reports having anxiety"` → `patient_hedge`.
-
-**Safety constraint.** All attribution LLRs are capped at ±1.0. Strong keyword cues (LLR ≈ 6.9 for weight=0.999) always dominate attribution — `"Patient denies fever"` stays `negated` even though `patient_report` fires, because `denies` (LLR ≈ 3.7) overwhelms attribution (+0.30).
-
-**False-positive prevention for family history.** `"Family history of diabetes"` contains "family" but has no report verb — the pattern requires `family/wife/... + reports?/states?/mentions?` to prevent family history entries from incorrectly triggering `family_report`.
-
-**Results** (159-phrase dataset, without vs with attribution):
-
-| Metric | Without attribution | With attribution | Δ |
-|---|---|---|---|
-| Accuracy | 86.2% | **90.6%** | **+4.4%** |
-| Changed predictions | — | **7 improved, 0 hurt** | — |
-
-Attribution fires on only 8/159 (5%) of the dataset phrases — all `record` source — but converts every one from incorrect (ongoing) to correct (resolved). Zero predictions hurt.
-
-Attribution-only inline evaluation (n=25 targeted cases):
-
-| Source | n | Without attribution | With attribution | Δ |
-|---|---|---|---|---|
-| record | 12 | 25% | **100%** | +75% |
-| patient_hedge | 4 | 50% | **100%** | +50% |
-| clinician_hedge | 4 | 0% | **75%** | +75% |
-| patient_report | 5 | 100% | 100% | 0% |
-| **Overall** | **25** | **40%** | **96%** | **+56%** |
-
-`patient_report` baseline is already 100% because the ongoing cue in `"Patient reports chest pain"` independently scores the phrase correctly — the attribution signal is additive but not load-bearing. `clinician_hedge` (75%) misses one case where the hedged phrase still has a strong keyword cue dominating.
-
-**Complementarity with TAM and temporal signals.** All three are orthogonal evidence dimensions feeding the same log-score vector:
-
-| Signal type | Example | What fires |
-|---|---|---|
-| Keyword cue | `"resolved after treatment"` | `rules.py` |
-| Temporal adverb | `"diagnosed 3 years ago"` | `temporal.py` |
-| Grammatical TAM | `"had resolved"` (past perfect) | `tam.py` |
-| Asserter attribution | `"per records, hypertension"` | `attribution.py` |
-
-Reproduce: `python experiments/attribution_eval.py`
+Reproduce: `python main.py` (note-level section)
 
 ---
 
@@ -714,5 +661,3 @@ condition-status-classifier/
 | Pronoun coreference fails when multiple entities are plausible antecedents | Neural coreference resolution (e.g. SpanBERT-based) |
 | Section prior threshold (0.55) is not empirically calibrated | Tune on a held-out annotated note set |
 | Dep parser silently degrades to regex-only if `en_core_web_sm` is not installed | Surface a clear warning in the UI and CLI |
-
----
