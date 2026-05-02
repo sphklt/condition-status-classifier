@@ -58,5 +58,40 @@
       {"keyword": "pulmonary embolism","status": "ambiguous","note": "Suspected"},
       {"keyword": "anxiety",           "status": "negated",  "note": "Ruled out"}
     ]
+  },
+  {
+    "id": "note_005",
+    "title": "Inpatient Admission — HPI Resolution (trajectory: resolution)",
+    "note": "History of Present Illness:\n65-year-old patient presenting with pneumonia, confirmed on chest X-ray.\nPneumonia was treated with IV antibiotics for 5 days.\nPneumonia resolved by discharge.\nFever was present on admission.\nFever resolved with antipyretics within 48 hours.\nCough was noted at admission.\nCough resolved by day 4.\n\nPast Medical History:\nHypertension, well-controlled on lisinopril.\nType 2 diabetes mellitus, stable on metformin.\n",
+    "expected": [
+      {"keyword": "pneumonia",           "status": "resolved",  "note": "Trajectory resolution: presenting → treated → resolved"},
+      {"keyword": "fever",               "status": "resolved",  "note": "Trajectory resolution: present → resolved"},
+      {"keyword": "cough",               "status": "resolved",  "note": "Resolved by day 4"},
+      {"keyword": "hypertension",        "status": "ongoing",   "note": "Well-controlled = ongoing active management"},
+      {"keyword": "type 2 diabetes mellitus", "status": "ongoing", "note": "Stable = ongoing"}
+    ]
+  },
+  {
+    "id": "note_006",
+    "title": "PMH Relapse Note — Trajectory: relapse (resolved → ongoing)",
+    "note": "Past Medical History:\nHistory of depression. Depression is currently relapsing with worsening mood.\nHistory of atrial fibrillation. Atrial fibrillation has recurred and is ongoing.\nHypertension, under control.\n\nHistory of Present Illness:\nPatient presents with chest pain.\nShortness of breath is currently worsening.\n",
+    "expected": [
+      {"keyword": "depression",          "status": "ongoing",   "note": "Trajectory relapse: history of → currently relapsing"},
+      {"keyword": "atrial fibrillation", "status": "ongoing",   "note": "Trajectory relapse: history of → recurred and ongoing"},
+      {"keyword": "hypertension",        "status": "resolved",  "note": "PMH prior override (under control = low-confidence → section prior)"},
+      {"keyword": "chest pain",          "status": "ongoing",   "note": "HPI presenting complaint"},
+      {"keyword": "shortness of breath", "status": "ongoing",   "note": "Currently worsening"}
+    ]
+  },
+  {
+    "id": "note_007",
+    "title": "HPI Clarification Note — Trajectory: clarification (ambiguous → definite)",
+    "note": "History of Present Illness:\nPossible sepsis on initial presentation. Sepsis is currently active with positive blood cultures.\nSuspected pneumonia on chest X-ray. Pneumonia is ongoing and confirmed on CT.\nCannot rule out pulmonary embolism. Pulmonary embolism has been ruled out on CT angiography.\n\nPast Medical History:\nHypertension, well-controlled.\n",
+    "expected": [
+      {"keyword": "sepsis",              "status": "ongoing",   "note": "Trajectory clarification: possible → currently active"},
+      {"keyword": "pneumonia",           "status": "ongoing",   "note": "Trajectory clarification: suspected → confirmed ongoing"},
+      {"keyword": "pulmonary embolism",  "status": "negated",   "note": "Ruled out on imaging"},
+      {"keyword": "hypertension",        "status": "ongoing",   "note": "Well-controlled = ongoing active management"}
+    ]
   }
 ]

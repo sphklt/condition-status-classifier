@@ -168,7 +168,7 @@ class TestEvaluateTriage:
 
     def test_summary_n_matches_dataset(self):
         result = evaluate_triage("data/clinical_phrases.csv")
-        assert result["summary"]["n"] == 127
+        assert result["summary"]["n"] == 159
 
     def test_metrics_in_range(self):
         result = evaluate_triage("data/clinical_phrases.csv",

@@ -135,7 +135,7 @@ def run() -> None:
             print(f"  {comp:<12}  {val:<22}  {cnt:>5}")
 
     # ── Step 2: Accuracy and calibration ─────────────────────────────────────
-    _header("Step 2 — Accuracy and calibration (127-phrase evaluation set)")
+    _header(f"Step 2 — Accuracy and calibration ({len(texts)}-phrase evaluation set)")
     print(f"""
   {'Metric':<28}  {'Without TAM':>12}  {'With TAM':>10}  {'Δ':>8}
   {'─'*28}  {'─'*12}  {'─'*10}  {'─'*8}
@@ -203,12 +203,14 @@ def run() -> None:
     # ── Step 6: Key findings ──────────────────────────────────────────────────
     _header("Step 6 — Key findings")
     print(f"""
-  1. TAM fires on {len(tam_fired)}/127 ({len(tam_fired)/127:.0%}) phrases — conservative coverage by design.
+  1. TAM fires on {len(tam_fired)}/{len(texts)} ({len(tam_fired)/len(texts):.0%}) phrases — conservative coverage by design.
      Patterns are narrow (specific clinical verb constructions) to prevent
      false positives in negation contexts ("had no fever" stays negated).
 
-  2. Accuracy improves {acc_wo:.1%} → {acc_w:.1%} (+{(acc_w - acc_wo)*100:.1f}pp) and ECE improves
-     {ece_wo:.3f} → {ece_w:.3f} ({(ece_w - ece_wo)/ece_wo*100:+.0f}%) with zero predictions hurt.
+  2. Accuracy improves {acc_wo:.1%} → {acc_w:.1%} (+{(acc_w - acc_wo)*100:.1f}pp) with zero predictions hurt.
+     ECE changes {ece_wo:.3f} → {ece_w:.3f}: TAM increases confidence on new TAM-sensitive
+     phrases; the calibrator (fitted on the original 127-phrase set) does not re-calibrate
+     for the expanded distribution, so higher confidence → higher ECE even when correct.
 
   3. Mean entropy decreases {ent_wo:.4f} → {ent_w:.4f} bits: TAM provides directional
      evidence that sharpens the posterior for unambiguous constructions

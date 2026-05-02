@@ -17,9 +17,11 @@ would bleed the negation cue "No" into the diabetes context. The sentence-aware
 window eliminates this by classifying each entity within its own sentence only.
 """
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass, field
-
+from typing import Optional
 
 from src.section_detector import detect_sections, NoteSection
 from src.ner import extract_entities, active_ner_method
@@ -27,6 +29,7 @@ from src.classifier import classify_condition_status
 from src.normalizer import normalize
 from src.sentence_splitter import split_sentences, find_sentence_context
 from src.coref import apply_pronoun_coref
+from src.trajectory import StatusTrajectory, build_trajectory
 from src.dep_parser import (
     dep_parser_available,
     check_negation_scope,
@@ -55,6 +58,7 @@ class ConditionResult:
     context: str            # text window that was classified
     reason: str             # human-readable explanation
     overridden_by_prior: bool = False  # True when section prior took over
+    trajectory: Optional[StatusTrajectory] = None  # set when 2+ mentions found
 
 
 @dataclass
@@ -259,6 +263,18 @@ def process_note(note_text: str) -> PipelineResult:
         # most recently classified entity if a pronoun + confident signal
         # is found.
         apply_pronoun_coref(entity_positions, section_results, sentences, classify_condition_status)
+
+        # ── Step 7: trajectory refinement ─────────────────────────────────
+        # For conditions mentioned in multiple sentences within this section,
+        # reconcile the trajectory using time-decayed log-evidence accumulation.
+        # Single-mention entities are unaffected (equivalent to prior result).
+        for cr in section_results:
+            traj = build_trajectory(cr.condition, sentences, classify_condition_status)
+            if len(traj.points) >= 2:
+                cr.status = traj.final_status
+                cr.confidence = traj.final_confidence
+                cr.reason = f"Trajectory: {traj.reason}"
+                cr.trajectory = traj
 
         raw_results.extend(section_results)
 

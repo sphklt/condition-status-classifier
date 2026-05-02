@@ -1,128 +1,160 @@
 text,condition,gold_status,explanation
-"The patient has asthma",asthma,ongoing,"Condition is currently present"
-"Asthma better today",asthma,ongoing,"Better means improved but not resolved"
-"Asthma resolved after treatment",asthma,resolved,"Explicit resolved cue"
-"History of asthma",asthma,resolved,"History of suggests past condition"
-"No evidence of pneumonia",pneumonia,negated,"No evidence of negates condition"
-"Patient denies chest pain",chest pain,negated,"Denies is a negation cue"
-"Fever has resolved",fever,resolved,"Resolved cue"
-"Persistent cough for 2 weeks",cough,ongoing,"Persistent indicates ongoing"
-"Diabetes is stable",diabetes,ongoing,"Stable chronic disease is still active"
-"Previous fracture of left arm",fracture,resolved,"Previous indicates past condition"
-"Possible pneumonia",pneumonia,ambiguous,"Possible indicates uncertainty"
-"Rule out sepsis",sepsis,ambiguous,"Rule out means uncertain diagnosis"
-"Seizures controlled on medication",seizures,ongoing,"Controlled means managed but still active"
-"No longer has headache",headache,resolved,"No longer indicates resolved — NOT negated"
-"Negative for abdominal pain",abdominal pain,negated,"Negative for means condition absent"
-"h/o diabetes",diabetes,resolved,"h/o is clinical shorthand for history of"
-"c/o chest pain",chest pain,ongoing,"c/o means complains of — active symptom"
-"s/p appendectomy",appendectomy,resolved,"s/p means status post — past procedure"
-"Fever -ve",fever,negated,"-ve is shorthand for negative"
-"HTN well-controlled",hypertension,ongoing,"Well-controlled means managed but still present"
-"Patient has no fever",fever,negated,"has no is a compound negation cue"
-"No active infection",infection,negated,"no active is a compound negation cue"
-"History of asthma, currently worsening",asthma,ongoing,"Current worsening overrides historical framing"
-"DM diagnosed 3 years ago",diabetes,resolved,"3 years ago is a past temporal marker"
-"Chest pain since this morning",chest pain,ongoing,"Since this morning is a present temporal marker"
-"Hypertension not improving on current regimen",hypertension,ongoing,"Not improving means condition persists"
-"No longer on insulin",insulin,resolved,"No longer indicates cessation"
-"Concern for pulmonary embolism",pulmonary embolism,ambiguous,"Concern for is an uncertainty cue"
-"Suspected pneumonia",pneumonia,ambiguous,"Suspected indicates diagnostic uncertainty"
-"Cough, no improvement noted",cough,ongoing,"No improvement means condition persists"
-"PMH: type 2 diabetes",diabetes,resolved,"Past medical history framing"
-"Patient denies any history of hypertension",hypertension,negated,"Denies is a strong negation"
-"Atrial fibrillation, previously in sinus rhythm",atrial fibrillation,ongoing,"Previously refers to past rhythm — afib still present"
-"Recovered from pneumonia last month",pneumonia,resolved,"Recovered + last month = past resolved"
-"Cannot rule out malignancy",malignancy,ambiguous,"Cannot rule out is uncertainty cue"
-"Rheumatoid arthritis in remission",rheumatoid arthritis,resolved,"In remission means not currently active"
-"Acute onset chest pain",chest pain,ongoing,"Acute presentation is clearly ongoing"
-"Prior MI five years ago",myocardial infarction,resolved,"Prior + five years ago = historical"
-"Presenting with shortness of breath",shortness of breath,ongoing,"Presenting with is a strong ongoing signal"
-"Patient has hypertension",hypertension,ongoing,"Direct statement of active condition"
-"Active asthma",asthma,ongoing,"Active explicitly signals ongoing"
-"Chronic back pain",back pain,ongoing,"Chronic means long-standing and present"
-"Recurring migraines",migraine,ongoing,"Recurring means condition keeps returning"
-"Worsening shortness of breath",shortness of breath,ongoing,"Worsening signals active deterioration"
-"Diabetes mellitus, currently on metformin",diabetes,ongoing,"Currently on medication means condition is active"
-"Hypertension, blood pressure elevated today",hypertension,ongoing,"Elevated today confirms active condition"
-"Fatigue ongoing for 3 weeks",fatigue,ongoing,"Ongoing explicitly stated"
-"Knee pain persisting despite rest",knee pain,ongoing,"Persisting despite treatment means active"
-"Depression currently managed with SSRIs",depression,ongoing,"Managed but still active"
-"Still having chest tightness",chest tightness,ongoing,"Still having confirms condition persists"
-"My anxiety has been bad lately",anxiety,ongoing,"Has been bad = active recently"
-"Headaches keep coming back",headache,ongoing,"Keep coming back = recurring active condition"
-"I've been having back pain for months",back pain,ongoing,"Duration marker confirms ongoing"
-"Cough won't go away",cough,ongoing,"Won't go away = persistent active condition"
-"Presenting with acute dyspnea",dyspnea,ongoing,"Presenting with is a strong present cue"
-"Seizures poorly controlled",seizures,ongoing,"Poorly controlled means condition is active and problematic"
-"CHF exacerbation",heart failure,ongoing,"Exacerbation means active worsening episode"
-"Uncontrolled hypertension",hypertension,ongoing,"Uncontrolled means active and not managed"
-"Progressing weakness in lower limbs",weakness,ongoing,"Progressing signals active deterioration"
-"History of depression, currently on antidepressants",depression,ongoing,"Currently on medication overrides history framing"
-"Prior stroke, now with recurrent symptoms",stroke,ongoing,"Now with recurrent symptoms confirms active"
-"Known asthmatic, currently wheezing",asthma,ongoing,"Currently wheezing is a present active signal"
-"Past DVT, now with leg swelling",deep vein thrombosis,ongoing,"Now with leg swelling signals active recurrence"
-"Previously treated hypertension, BP elevated today",hypertension,ongoing,"BP elevated today confirms active condition"
-"History of pneumonia",pneumonia,resolved,"History of suggests past condition"
-"Previous appendectomy",appendectomy,resolved,"Previous indicates past procedure"
-"Past episode of atrial fibrillation",atrial fibrillation,resolved,"Past episode = historical"
-"Formerly had migraines",migraine,resolved,"Formerly means no longer present"
-"Recovered from COVID-19",covid-19,resolved,"Recovered is an explicit resolved cue"
-"Pneumonia treated and cleared 3 months ago",pneumonia,resolved,"Cleared + time ago confirms resolved"
-"Depression in remission for 2 years",depression,resolved,"In remission = not currently active"
-"Fracture healed after surgery",fracture,resolved,"Healed is an explicit resolved cue"
-"Infection resolved with antibiotics",infection,resolved,"Resolved is an explicit resolved cue"
-"Asthma attack, now resolved",asthma,resolved,"Now resolved confirms condition ended"
-"Had a cold last week, all better now",cold,resolved,"All better now signals complete resolution"
-"My back pain is gone",back pain,resolved,"Gone is an explicit resolved cue"
-"The fever broke this morning",fever,resolved,"Fever broke means it ended"
-"Stomach bug cleared up",infection,resolved,"Cleared up signals resolution"
-"Knee pain went away after PT",knee pain,resolved,"Went away confirms resolution"
-"s/p CABG 5 years ago",coronary artery disease,resolved,"s/p means status post — past procedure"
-"Post-op day 3, wound healing well",wound,resolved,"Healing well signals positive resolution trajectory"
-"h/o MI in 2019",myocardial infarction,resolved,"h/o with year = historical"
-"PMH: colon cancer, surgically resected",colon cancer,resolved,"Past medical history framing"
-"Was hospitalised for pneumonia last year",pneumonia,resolved,"Last year is a past temporal marker"
-"h/o seizures",seizures,resolved,"h/o is clinical shorthand for history of"
-"PMHx: hypertension",hypertension,resolved,"Past medical history framing"
-"s/p hip replacement",hip replacement,resolved,"s/p means status post — past procedure"
-"h/o PE, on anticoagulation previously",pulmonary embolism,resolved,"h/o with previously confirms historical"
-"Prior h/o depression, off medications",depression,resolved,"Off medications suggests condition resolved"
-"No chest pain",chest pain,negated,"No is a negation cue"
-"No fever",fever,negated,"No is a negation cue"
-"Patient denies nausea",nausea,negated,"Denies is a negation cue"
-"No cough",cough,negated,"No is a negation cue"
-"No history of diabetes",diabetes,negated,"No history of negates prior diagnosis"
-"Denies any shortness of breath",shortness of breath,negated,"Denies any is a strong negation"
-"No signs of infection",infection,negated,"No signs of is a compound negation"
-"No known cardiac history",cardiac disease,negated,"No known negates condition history"
-"Without evidence of fracture",fracture,negated,"Without evidence of is a strong negation"
-"Lungs clear, no wheezing",wheezing,negated,"No in compound context negates wheezing"
-"CT scan negative for pulmonary embolism",pulmonary embolism,negated,"Negative for is an explicit negation cue"
-"Troponin negative",myocardial infarction,negated,"Negative lab result negates condition"
-"No acute distress",distress,negated,"No negates acute distress"
-"Cultures negative for growth",infection,negated,"Negative for growth means no infection found"
-"Imaging unremarkable",pathology,negated,"Unremarkable means no pathology detected"
-"No worsening of symptoms",symptoms,ongoing,"No worsening is a pseudo-negation — condition still present"
-"No deterioration noted",condition,ongoing,"No deterioration is pseudo-negation — condition persists unchanged"
-"No change from baseline",condition,ongoing,"No change means condition still present at prior level"
-"Possible diabetes",diabetes,ambiguous,"Possible indicates diagnostic uncertainty"
-"Suspected infection",infection,ambiguous,"Suspected indicates uncertainty"
-"Query hypertension",hypertension,ambiguous,"Query signals diagnostic uncertainty"
-"May have GERD",gastroesophageal reflux disease,ambiguous,"May have is an uncertainty cue"
-"Probable pneumonia",pneumonia,ambiguous,"Probable indicates uncertainty"
-"Cannot exclude malignancy",malignancy,ambiguous,"Cannot exclude is a strong uncertainty cue"
-"Symptoms may represent early heart failure",heart failure,ambiguous,"May represent is an uncertainty cue"
-"Differential includes PE",pulmonary embolism,ambiguous,"Differential includes signals uncertainty"
-"Working diagnosis of sepsis",sepsis,ambiguous,"Working diagnosis means not yet confirmed"
-"Clinical picture consistent with asthma",asthma,ambiguous,"Consistent with signals uncertainty"
-"I think I might have anxiety",anxiety,ambiguous,"I think I might is a hedged uncertainty expression"
-"Not sure if this is arthritis",arthritis,ambiguous,"Not sure signals uncertainty"
-"Could be a migraine",migraine,ambiguous,"Could be is an uncertainty cue"
-"Possibly related to stress",stress,ambiguous,"Possibly is an uncertainty cue"
-"I feel like something is wrong with my heart",cardiac disease,ambiguous,"I feel like is a hedged uncertain expression"
-"Findings suggestive of lymphoma",lymphoma,ambiguous,"Suggestive of is an uncertainty cue"
-"Atypical presentation, etiology unclear",condition,ambiguous,"Etiology unclear signals diagnostic uncertainty"
-"Rule out endocarditis",endocarditis,ambiguous,"Rule out means uncertain diagnosis"
-"Indeterminate pulmonary nodule",pulmonary nodule,ambiguous,"Indeterminate signals uncertainty"
-"Equivocal stress test",cardiac disease,ambiguous,"Equivocal means result is uncertain"
+The patient has asthma,asthma,ongoing,Condition is currently present
+Asthma better today,asthma,ongoing,Better means improved but not resolved
+Asthma resolved after treatment,asthma,resolved,Explicit resolved cue
+History of asthma,asthma,resolved,History of suggests past condition
+No evidence of pneumonia,pneumonia,negated,No evidence of negates condition
+Patient denies chest pain,chest pain,negated,Denies is a negation cue
+Fever has resolved,fever,resolved,Resolved cue
+Persistent cough for 2 weeks,cough,ongoing,Persistent indicates ongoing
+Diabetes is stable,diabetes,ongoing,Stable chronic disease is still active
+Previous fracture of left arm,fracture,resolved,Previous indicates past condition
+Possible pneumonia,pneumonia,ambiguous,Possible indicates uncertainty
+Rule out sepsis,sepsis,ambiguous,Rule out means uncertain diagnosis
+Seizures controlled on medication,seizures,ongoing,Controlled means managed but still active
+No longer has headache,headache,resolved,No longer indicates resolved — NOT negated
+Negative for abdominal pain,abdominal pain,negated,Negative for means condition absent
+h/o diabetes,diabetes,resolved,h/o is clinical shorthand for history of
+c/o chest pain,chest pain,ongoing,c/o means complains of — active symptom
+s/p appendectomy,appendectomy,resolved,s/p means status post — past procedure
+Fever -ve,fever,negated,-ve is shorthand for negative
+HTN well-controlled,hypertension,ongoing,Well-controlled means managed but still present
+Patient has no fever,fever,negated,has no is a compound negation cue
+No active infection,infection,negated,no active is a compound negation cue
+"History of asthma, currently worsening",asthma,ongoing,Current worsening overrides historical framing
+DM diagnosed 3 years ago,diabetes,resolved,3 years ago is a past temporal marker
+Chest pain since this morning,chest pain,ongoing,Since this morning is a present temporal marker
+Hypertension not improving on current regimen,hypertension,ongoing,Not improving means condition persists
+No longer on insulin,insulin,resolved,No longer indicates cessation
+Concern for pulmonary embolism,pulmonary embolism,ambiguous,Concern for is an uncertainty cue
+Suspected pneumonia,pneumonia,ambiguous,Suspected indicates diagnostic uncertainty
+"Cough, no improvement noted",cough,ongoing,No improvement means condition persists
+PMH: type 2 diabetes,diabetes,resolved,Past medical history framing
+Patient denies any history of hypertension,hypertension,negated,Denies is a strong negation
+"Atrial fibrillation, previously in sinus rhythm",atrial fibrillation,ongoing,Previously refers to past rhythm — afib still present
+Recovered from pneumonia last month,pneumonia,resolved,Recovered + last month = past resolved
+Cannot rule out malignancy,malignancy,ambiguous,Cannot rule out is uncertainty cue
+Rheumatoid arthritis in remission,rheumatoid arthritis,resolved,In remission means not currently active
+Acute onset chest pain,chest pain,ongoing,Acute presentation is clearly ongoing
+Prior MI five years ago,myocardial infarction,resolved,Prior + five years ago = historical
+Presenting with shortness of breath,shortness of breath,ongoing,Presenting with is a strong ongoing signal
+Patient has hypertension,hypertension,ongoing,Direct statement of active condition
+Active asthma,asthma,ongoing,Active explicitly signals ongoing
+Chronic back pain,back pain,ongoing,Chronic means long-standing and present
+Recurring migraines,migraine,ongoing,Recurring means condition keeps returning
+Worsening shortness of breath,shortness of breath,ongoing,Worsening signals active deterioration
+"Diabetes mellitus, currently on metformin",diabetes,ongoing,Currently on medication means condition is active
+"Hypertension, blood pressure elevated today",hypertension,ongoing,Elevated today confirms active condition
+Fatigue ongoing for 3 weeks,fatigue,ongoing,Ongoing explicitly stated
+Knee pain persisting despite rest,knee pain,ongoing,Persisting despite treatment means active
+Depression currently managed with SSRIs,depression,ongoing,Managed but still active
+Still having chest tightness,chest tightness,ongoing,Still having confirms condition persists
+My anxiety has been bad lately,anxiety,ongoing,Has been bad = active recently
+Headaches keep coming back,headache,ongoing,Keep coming back = recurring active condition
+I've been having back pain for months,back pain,ongoing,Duration marker confirms ongoing
+Cough won't go away,cough,ongoing,Won't go away = persistent active condition
+Presenting with acute dyspnea,dyspnea,ongoing,Presenting with is a strong present cue
+Seizures poorly controlled,seizures,ongoing,Poorly controlled means condition is active and problematic
+CHF exacerbation,heart failure,ongoing,Exacerbation means active worsening episode
+Uncontrolled hypertension,hypertension,ongoing,Uncontrolled means active and not managed
+Progressing weakness in lower limbs,weakness,ongoing,Progressing signals active deterioration
+"History of depression, currently on antidepressants",depression,ongoing,Currently on medication overrides history framing
+"Prior stroke, now with recurrent symptoms",stroke,ongoing,Now with recurrent symptoms confirms active
+"Known asthmatic, currently wheezing",asthma,ongoing,Currently wheezing is a present active signal
+"Past DVT, now with leg swelling",deep vein thrombosis,ongoing,Now with leg swelling signals active recurrence
+"Previously treated hypertension, BP elevated today",hypertension,ongoing,BP elevated today confirms active condition
+History of pneumonia,pneumonia,resolved,History of suggests past condition
+Previous appendectomy,appendectomy,resolved,Previous indicates past procedure
+Past episode of atrial fibrillation,atrial fibrillation,resolved,Past episode = historical
+Formerly had migraines,migraine,resolved,Formerly means no longer present
+Recovered from COVID-19,covid-19,resolved,Recovered is an explicit resolved cue
+Pneumonia treated and cleared 3 months ago,pneumonia,resolved,Cleared + time ago confirms resolved
+Depression in remission for 2 years,depression,resolved,In remission = not currently active
+Fracture healed after surgery,fracture,resolved,Healed is an explicit resolved cue
+Infection resolved with antibiotics,infection,resolved,Resolved is an explicit resolved cue
+"Asthma attack, now resolved",asthma,resolved,Now resolved confirms condition ended
+"Had a cold last week, all better now",cold,resolved,All better now signals complete resolution
+My back pain is gone,back pain,resolved,Gone is an explicit resolved cue
+The fever broke this morning,fever,resolved,Fever broke means it ended
+Stomach bug cleared up,infection,resolved,Cleared up signals resolution
+Knee pain went away after PT,knee pain,resolved,Went away confirms resolution
+s/p CABG 5 years ago,coronary artery disease,resolved,s/p means status post — past procedure
+"Post-op day 3, wound healing well",wound,resolved,Healing well signals positive resolution trajectory
+h/o MI in 2019,myocardial infarction,resolved,h/o with year = historical
+"PMH: colon cancer, surgically resected",colon cancer,resolved,Past medical history framing
+Was hospitalised for pneumonia last year,pneumonia,resolved,Last year is a past temporal marker
+h/o seizures,seizures,resolved,h/o is clinical shorthand for history of
+PMHx: hypertension,hypertension,resolved,Past medical history framing
+s/p hip replacement,hip replacement,resolved,s/p means status post — past procedure
+"h/o PE, on anticoagulation previously",pulmonary embolism,resolved,h/o with previously confirms historical
+"Prior h/o depression, off medications",depression,resolved,Off medications suggests condition resolved
+No chest pain,chest pain,negated,No is a negation cue
+No fever,fever,negated,No is a negation cue
+Patient denies nausea,nausea,negated,Denies is a negation cue
+No cough,cough,negated,No is a negation cue
+No history of diabetes,diabetes,negated,No history of negates prior diagnosis
+Denies any shortness of breath,shortness of breath,negated,Denies any is a strong negation
+No signs of infection,infection,negated,No signs of is a compound negation
+No known cardiac history,cardiac disease,negated,No known negates condition history
+Without evidence of fracture,fracture,negated,Without evidence of is a strong negation
+"Lungs clear, no wheezing",wheezing,negated,No in compound context negates wheezing
+CT scan negative for pulmonary embolism,pulmonary embolism,negated,Negative for is an explicit negation cue
+Troponin negative,myocardial infarction,negated,Negative lab result negates condition
+No acute distress,distress,negated,No negates acute distress
+Cultures negative for growth,infection,negated,Negative for growth means no infection found
+Imaging unremarkable,pathology,negated,Unremarkable means no pathology detected
+No worsening of symptoms,symptoms,ongoing,No worsening is a pseudo-negation — condition still present
+No deterioration noted,condition,ongoing,No deterioration is pseudo-negation — condition persists unchanged
+No change from baseline,condition,ongoing,No change means condition still present at prior level
+Possible diabetes,diabetes,ambiguous,Possible indicates diagnostic uncertainty
+Suspected infection,infection,ambiguous,Suspected indicates uncertainty
+Query hypertension,hypertension,ambiguous,Query signals diagnostic uncertainty
+May have GERD,gastroesophageal reflux disease,ambiguous,May have is an uncertainty cue
+Probable pneumonia,pneumonia,ambiguous,Probable indicates uncertainty
+Cannot exclude malignancy,malignancy,ambiguous,Cannot exclude is a strong uncertainty cue
+Symptoms may represent early heart failure,heart failure,ambiguous,May represent is an uncertainty cue
+Differential includes PE,pulmonary embolism,ambiguous,Differential includes signals uncertainty
+Working diagnosis of sepsis,sepsis,ambiguous,Working diagnosis means not yet confirmed
+Clinical picture consistent with asthma,asthma,ambiguous,Consistent with signals uncertainty
+I think I might have anxiety,anxiety,ambiguous,I think I might is a hedged uncertainty expression
+Not sure if this is arthritis,arthritis,ambiguous,Not sure signals uncertainty
+Could be a migraine,migraine,ambiguous,Could be is an uncertainty cue
+Possibly related to stress,stress,ambiguous,Possibly is an uncertainty cue
+I feel like something is wrong with my heart,cardiac disease,ambiguous,I feel like is a hedged uncertain expression
+Findings suggestive of lymphoma,lymphoma,ambiguous,Suggestive of is an uncertainty cue
+"Atypical presentation, etiology unclear",condition,ambiguous,Etiology unclear signals diagnostic uncertainty
+Rule out endocarditis,endocarditis,ambiguous,Rule out means uncertain diagnosis
+Indeterminate pulmonary nodule,pulmonary nodule,ambiguous,Indeterminate signals uncertainty
+Equivocal stress test,cardiac disease,ambiguous,Equivocal means result is uncertain
+Chest pain might indicate a cardiac event,chest pain,ambiguous,"Epistemic modal: diagnostic uncertainty, not confirmed ongoing"
+Dyspnea could represent pulmonary hypertension,dyspnea,ambiguous,"Could represent: diagnostic hypothesis, not confirmed"
+Elevated troponin may indicate myocardial injury,troponin,ambiguous,May indicate: uncertain diagnostic inference
+Findings might suggest malignancy,malignancy,ambiguous,"Might suggest: uncertain, not confirmed finding"
+Fever may represent occult infection,fever,ambiguous,May represent: diagnostic uncertainty
+Weight loss might indicate underlying malignancy,weight loss,ambiguous,Might indicate: symptom points to uncertain diagnosis
+Abdominal pain may represent appendicitis,abdominal pain,ambiguous,May represent: unconfirmed differential
+Fatigue could indicate anemia or hypothyroidism,fatigue,ambiguous,Could indicate: multiple uncertain differentials
+Back pain might be discogenic in origin,back pain,ambiguous,Might be: uncertain aetiology
+Palpitations may indicate arrhythmia,palpitations,ambiguous,May indicate: uncertain cardiac cause
+The cough might represent post-nasal drip,cough,ambiguous,Might represent: uncertain aetiology
+Leg swelling could indicate deep vein thrombosis,leg swelling,ambiguous,Could indicate: unconfirmed diagnosis
+Confusion may represent early encephalopathy,confusion,ambiguous,May represent: uncertain neurological cause
+Nausea might be medication-induced,nausea,ambiguous,Might be: uncertain causation
+Joint pain may indicate inflammatory arthritis,joint pain,ambiguous,May indicate: uncertain diagnosis
+Chest pain may be recurring,chest pain,ambiguous,"May be: uncertain recurrence, not confirmed"
+The abscess had drained spontaneously,abscess,resolved,Past perfect: drainage completed before the current encounter
+Atrial fibrillation had converted to sinus rhythm,atrial fibrillation,resolved,Past perfect: conversion completed prior to reference point
+Arrhythmia had converted spontaneously,arrhythmia,resolved,Past perfect: spontaneous resolution completed
+Cellulitis had responded to antibiotics before discharge,cellulitis,resolved,Past perfect: response completed before discharge
+Headache could be tension-type or migrainous,headache,ambiguous,"Epistemic: differential diagnosis, genuinely uncertain"
+The effusion had resolved on follow-up imaging,effusion,resolved,Past perfect + resolved cue: clearly historical
+The fracture had healed well,fracture,resolved,Past perfect: healing completed
+The lesion had resolved without intervention,lesion,resolved,Past perfect + resolved cue: clearly historical
+Records show hypertension,hypertension,resolved,Record attribution: no other resolved cue — attribution provides the resolved signal
+Per records hypertension,hypertension,resolved,Per records: fragment with record attribution only
+Per chart asthma,asthma,resolved,Per chart: terse clinical notation with record attribution
+Medical records document diabetes mellitus,diabetes mellitus,resolved,Records document: record attribution without history-of cue
+Records indicate migraine,migraine,resolved,Records indicate: record attribution only
+Per EHR atrial fibrillation,atrial fibrillation,resolved,Per EHR: record attribution from electronic health record reference
+Records show depression,depression,resolved,Records show: record attribution with no explicit resolved keyword
+Medical records document prior seizures,seizures,resolved,Records document: prior in record context confirms historical

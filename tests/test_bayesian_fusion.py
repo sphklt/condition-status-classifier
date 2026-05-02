@@ -189,7 +189,7 @@ class TestEvaluateFusion:
 
     def test_n_matches_dataset(self):
         result = evaluate_fusion("data/clinical_phrases.csv")
-        assert result["n"] == 127
+        assert result["n"] == 159
 
     def test_accuracy_in_range(self):
         result = evaluate_fusion("data/clinical_phrases.csv")

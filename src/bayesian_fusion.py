@@ -38,6 +38,7 @@ import re
 from src.calibration import calibrate
 from src.normalizer import normalize
 from src.tam import TAMSignature, extract_tam, tam_to_llr
+from src.attribution import AttributionSignature, extract_attribution, attribution_to_llr
 from src.rules import (
     AMBIGUOUS_CUES,
     NEGATION_CUES,
@@ -202,6 +203,15 @@ def _fuse_core(text_lower: str, section: str = "unknown") -> dict:
         for l in LABELS:
             log_scores[l] += tam_llr[l]
 
+    # ── Attribution ───────────────────────────────────────────────────────────
+    # WHO is asserting the status (patient, family, record, clinician hedge)
+    # modulates confidence without overriding strong cues.
+    attr_sig = extract_attribution(text_lower)
+    if attr_sig.has_signal():
+        attr_llr = attribution_to_llr(attr_sig, LABELS)
+        for l in LABELS:
+            log_scores[l] += attr_llr[l]
+
     # ── Posterior ─────────────────────────────────────────────────────────────
     posterior  = _softmax(log_scores)
     map_label  = max(posterior, key=posterior.get)
@@ -224,6 +234,7 @@ def _fuse_core(text_lower: str, section: str = "unknown") -> dict:
                 "modal":          tam_sig.modal,
                 "modal_strength": round(tam_sig.modal_strength, 3),
             } if tam_sig.has_signal() else None,
+            "attribution": attr_sig.source if attr_sig.has_signal() else None,
         },
     }
 

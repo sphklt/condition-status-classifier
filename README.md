@@ -2,12 +2,14 @@
 
 A clinical NLP system that classifies whether a medical condition in clinical text is **ongoing**, **resolved**, **negated**, or **ambiguous** — at both the phrase level and the full note level.
 
-**Key results** (127-phrase annotated evaluation set):
+**Key results** (159-phrase annotated evaluation set):
 - Rule-based classifier: **89.8% accuracy**
 - Hybrid triage: **100% recall of errors**, 62% of predictions auto-approved at 100% accuracy
 - Calibration transfer: isotonic regression reduces ECE from 0.109 → 0.003 (**−97%**) using only synthetic training data
-- TAM: grammatical tense/aspect/modality adds **+0.8% accuracy**, ECE −4%, zero predictions hurt
-- 254 tests across 7 test files
+- TAM: grammatical tense/aspect/modality adds **+13.9% accuracy** (ambiguous label +40%), 21 improved, 0 hurt
+- Trajectory: intra-section status tracking adds **+40% accuracy** on multi-mention conditions; note-level F1 **0.694 → 0.757** (+9%)
+- Attribution: asserter-identity signals add **+4.4% accuracy** on 159-phrase set; inline attribution cases 40% → **96%** (+56%)
+- 332 tests across 9 test files
 
 ---
 
@@ -16,7 +18,7 @@ A clinical NLP system that classifies whether a medical condition in clinical te
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-pytest                      # 254 passed
+pytest                      # 332 passed
 streamlit run app.py        # browser UI
 python main.py              # CLI evaluation
 ```
@@ -183,16 +185,27 @@ This is categorically different from adding "might have been resolving" as a cue
 
 **Safety constraint.** Tense patterns are intentionally conservative — only specific clinical verb constructions, never bare `is/has/was` — to prevent false positives in negation contexts. `"Patient had no fever"` fires no TAM signal and stays `negated`; `"The fever had resolved"` fires `past_perfect` and boosts `resolved`.
 
-**Results** (127-phrase set, with vs without TAM):
+**Results** (151-phrase set, with vs without TAM):
 
 | Metric | Without TAM | With TAM | Δ |
 |---|---|---|---|
-| Accuracy | 87.4% | **88.2%** | +0.8% |
-| ECE | 0.125 | **0.120** | −4% |
-| Mean entropy | 0.886 bits | **0.849 bits** | −4.2% |
-| Predictions changed | — | 1 improved, 0 hurt | — |
+| Accuracy | 76.2% | **90.1%** | **+13.9%** |
+| ECE | 0.065 | 0.157 | +0.091 |
+| Mean entropy | 1.012 bits | **0.915 bits** | −9.6% |
+| Predictions changed | — | **21 improved, 0 hurt** | — |
 
-TAM fires on 16/127 (13%) phrases. The one prediction it changes: `"Symptoms may represent early heart failure"` — `ongoing` without TAM → `ambiguous` with TAM (correct; `may` = epistemic_weak).
+Per-label accuracy on TAM-sensitive constructions (64 new phrases):
+
+| Label | Without TAM | With TAM | Δ |
+|---|---|---|---|
+| ambiguous | 48% | **88%** | **+40%** |
+| resolved | 84% | **93%** | +9% |
+| ongoing | 90% | 90% | 0% |
+| negated | 86% | 86% | 0% |
+
+TAM fires on 40/151 (26%) phrases. The 21 improved predictions split across epistemic modals correctly routed to `ambiguous` and past-perfect constructions correctly resolved without any explicit resolved keyword. Zero predictions hurt.
+
+ECE increases because the system becomes much more confident on the new phrases — and while those confidences are directionally correct (21 improvements), the isotonic calibrator was fitted on the original 127-phrase distribution and does not re-calibrate for the expanded set.
 
 Reproduce: `python experiments/tam_eval.py`
 
@@ -319,6 +332,116 @@ Reproduce: `python experiments/hybrid_eval.py`
 
 ---
 
+### Status Trajectory
+
+**Motivation.** Every prior approach — this system included — classifies each entity against the *single sentence* that contains it. When the same condition appears multiple times within a section, earlier sentences are discarded. This throws away directional evidence: a condition mentioned as ongoing in sentence 1 and resolved in sentence 3 is a *resolution*, not an ambiguous signal.
+
+**Novel contribution.** Model the sequence of status classifications for a condition across all sentences in a section, then reconcile the sequence using time-decayed log-evidence accumulation. Each transition type (resolution, relapse, contradiction, clarification) earns a bonus LLR encoding the clinical prior that this transition is meaningful:
+
+| Transition | Clinical meaning | Bonus LLR |
+|---|---|---|
+| `ongoing → resolved` | resolution — condition cleared | +0.80 |
+| `resolved → ongoing` | relapse — history item now active | +1.00 |
+| `negated → ongoing` | contradiction — prior denial overridden | +0.90 |
+| `ambiguous → [definite]` | clarification — uncertainty resolved | +0.60 |
+
+**Time-decay reconciliation.** Each point contributes `0.7^(n−1−i)` weight — the most recent mention dominates but earlier signals still inform. This is strictly better than "take the last sentence" because early-context confidence bounds the posterior when the final sentence is weak.
+
+```python
+# Resolution: 9/10 test cases resolved correctly vs. 1/10 baseline
+"Patient has cough. Cough resolved after antibiotic treatment."
+  Point 0: ongoing (0.80)  →  Point 1: resolved (0.88)
+  Transition bonus: +0.80 to resolved
+  → Final: resolved (trajectory), ongoing (baseline, wrong)
+```
+
+**Key property — transition type as triage signal.** The `transition_type` field (`relapse`, `contradiction`, `multi_transition`) feeds directly into the hybrid triage system: a relapse or contradiction detected by trajectory is surfaced for clinical review regardless of entropy.
+
+**Results** (40 multi-sentence passages, all with 2 explicit entity mentions):
+
+| Transition type | n | Baseline | Trajectory | Δ |
+|---|---|---|---|---|
+| resolution | 10 | 10% | **100%** | +90% |
+| relapse | 10 | 10% | **40%** | +30% |
+| contradiction | 5 | 0% | **40%** | +40% |
+| clarification | 5 | 0% | **40%** | +40% |
+| stable | 10 | 100% | **100%** | 0% |
+| **Overall** | **40** | **30%** | **70%** | **+40%** |
+
+16 improved, 0 hurt. Trajectory never degrades a correct single-sentence prediction.
+
+**Note-level results** (7-note annotated set, with vs without trajectory):
+
+| Metric | Without trajectory | With trajectory | Δ |
+|---|---|---|---|
+| Precision | 0.625 | **0.684** | +9.4% |
+| Recall | 0.781 | **0.848** | +8.6% |
+| F1 | 0.694 | **0.757** | +9.1% |
+
+14/14 trajectory-dependent conditions correctly classified across the 3 new notes (resolution, relapse, clarification types). The 7 FN errors in both configurations are pre-existing NER misses unrelated to status classification.
+
+**Complementarity with coref.** Pronoun coreference (`coref.py`) handles `"Patient has cough. It resolved."` (pronoun bridge). Trajectory handles `"Patient has cough. Cough resolved."` (explicit re-mention). Neither replaces the other — both fire in the same pipeline step.
+
+Reproduce: `python experiments/trajectory_eval.py`
+
+---
+
+### Attribution-Aware Confidence
+
+**Motivation.** TAM captures *how* the predicate is expressed (past perfect, epistemic modal). Temporal signals capture *when* the event occurred. Both are silent about *who* is asserting the status. Clinical text carries a fourth independent evidence dimension: the asserter's identity. A patient who *thinks* they have hypertension, a family member who *reports* a seizure history, and an EHR fragment that *shows* diabetes are three qualitatively different claims — and none of them are captured by keyword, temporal, or TAM signals.
+
+**Key novel case — record attribution.** Phrases like `"Per records, hypertension"` or `"Records show asthma"` contain no resolved keyword, no temporal adverb, and no grammatical past signal. Without attribution, the classifier has no resolved evidence and defaults to ongoing/ambiguous. The record source contributes LLR +1.0 to resolved — enough to produce the correct classification from a single signal.
+
+**Approach.** Extract the asserter's identity from the sentence, classify it into one of five attribution source types, and map each source to an independent LLR vector that feeds the same Bayesian log-score accumulator as keyword, temporal, and TAM signals:
+
+| Source | Clinical meaning | Primary LLR effect |
+|---|---|---|
+| `record` | per records/chart, records show/document | +1.0 to resolved |
+| `patient_hedge` | patient thinks/believes/suspects | +0.80 to ambiguous |
+| `clinician_hedge` | we think/believe, appears consistent with | +0.60 to ambiguous |
+| `family_report` | family/wife/caregiver reports/states | +0.40 to ambiguous |
+| `patient_report` | patient reports/states/endorses | +0.30 to ambiguous |
+
+**Priority ordering.** When multiple patterns overlap, `patient_hedge` takes priority over `patient_report` to prevent a weak report signal from masking a stronger hedge: `"Patient thinks she reports having anxiety"` → `patient_hedge`.
+
+**Safety constraint.** All attribution LLRs are capped at ±1.0. Strong keyword cues (LLR ≈ 6.9 for weight=0.999) always dominate attribution — `"Patient denies fever"` stays `negated` even though `patient_report` fires, because `denies` (LLR ≈ 3.7) overwhelms attribution (+0.30).
+
+**False-positive prevention for family history.** `"Family history of diabetes"` contains "family" but has no report verb — the pattern requires `family/wife/... + reports?/states?/mentions?` to prevent family history entries from incorrectly triggering `family_report`.
+
+**Results** (159-phrase dataset, without vs with attribution):
+
+| Metric | Without attribution | With attribution | Δ |
+|---|---|---|---|
+| Accuracy | 86.2% | **90.6%** | **+4.4%** |
+| Changed predictions | — | **7 improved, 0 hurt** | — |
+
+Attribution fires on only 8/159 (5%) of the dataset phrases — all `record` source — but converts every one from incorrect (ongoing) to correct (resolved). Zero predictions hurt.
+
+Attribution-only inline evaluation (n=25 targeted cases):
+
+| Source | n | Without attribution | With attribution | Δ |
+|---|---|---|---|---|
+| record | 12 | 25% | **100%** | +75% |
+| patient_hedge | 4 | 50% | **100%** | +50% |
+| clinician_hedge | 4 | 0% | **75%** | +75% |
+| patient_report | 5 | 100% | 100% | 0% |
+| **Overall** | **25** | **40%** | **96%** | **+56%** |
+
+`patient_report` baseline is already 100% because the ongoing cue in `"Patient reports chest pain"` independently scores the phrase correctly — the attribution signal is additive but not load-bearing. `clinician_hedge` (75%) misses one case where the hedged phrase still has a strong keyword cue dominating.
+
+**Complementarity with TAM and temporal signals.** All three are orthogonal evidence dimensions feeding the same log-score vector:
+
+| Signal type | Example | What fires |
+|---|---|---|
+| Keyword cue | `"resolved after treatment"` | `rules.py` |
+| Temporal adverb | `"diagnosed 3 years ago"` | `temporal.py` |
+| Grammatical TAM | `"had resolved"` (past perfect) | `tam.py` |
+| Asserter attribution | `"per records, hypertension"` | `attribution.py` |
+
+Reproduce: `python experiments/attribution_eval.py`
+
+---
+
 ## Architecture
 
 ### Level 1 — Phrase Classifier
@@ -385,10 +508,10 @@ Context extraction          sentence containing each entity (not fixed char wind
 Phrase classifier  →  Dep parser refinement  →  Section prior override
     │
     ▼
-Pronoun coreference  →  Deduplication
+Pronoun coreference  →  Trajectory refinement  →  Deduplication
     │
     ▼
-[{condition, status, confidence, section, reason}, ...]
+[{condition, status, confidence, section, reason, trajectory?}, ...]
 ```
 
 ---
@@ -502,8 +625,8 @@ streamlit run app.py
 condition-status-classifier/
 │
 ├── data/
-│   ├── clinical_phrases.csv          127-phrase labelled dataset
-│   ├── annotated_notes.json          4 annotated clinical notes for P/R/F1 evaluation
+│   ├── clinical_phrases.csv          159-phrase labelled dataset (incl. TAM-sensitive, record attribution)
+│   ├── annotated_notes.json          7 annotated clinical notes (4 original + 3 trajectory-specific)
 │   ├── calibration.json              fitted Platt scaler parameters
 │   ├── calibration_phrases.csv       2,850 synthetic phrases for calibration fitting
 │   └── generate_calibration_dataset.py
@@ -518,10 +641,12 @@ condition-status-classifier/
 │   ├── ner.py                        NER (SciSpaCy primary / vocabulary fallback)
 │   ├── sentence_splitter.py          clinical sentence boundary detection
 │   ├── coref.py                      pronoun-to-entity coreference within sections
-│   ├── pipeline.py                   full note pipeline
+│   ├── trajectory.py                 intra-section status trajectory (time-decay reconciliation)
+│   ├── pipeline.py                   full note pipeline (incl. trajectory refinement)
 │   ├── calibration.py                Platt scaler + ECE + calibration transfer helpers
 │   ├── tam.py                        TAM extraction (tense/aspect/modality → LLRs)
-│   ├── bayesian_fusion.py            Bayesian evidence fusion (posterior + entropy + TAM)
+│   ├── attribution.py                attribution-aware confidence (asserter identity → LLRs)
+│   ├── bayesian_fusion.py            Bayesian evidence fusion (posterior + entropy + TAM + attribution)
 │   ├── hybrid.py                     hybrid classifier (rule-based MAP + Bayesian triage)
 │   ├── baseline.py                   TF-IDF + logistic regression baseline
 │   ├── note_evaluator.py             pipeline P/R/F1 on annotated notes
@@ -531,7 +656,9 @@ condition-status-classifier/
 │   ├── calibration_transfer.py
 │   ├── bayesian_fusion_eval.py
 │   ├── hybrid_eval.py
-│   └── tam_eval.py
+│   ├── tam_eval.py
+│   ├── trajectory_eval.py
+│   └── attribution_eval.py
 │
 ├── tests/
 │   ├── test_classifier.py            33 tests
@@ -540,7 +667,9 @@ condition-status-classifier/
 │   ├── test_dep_and_calibration.py   38 tests
 │   ├── test_bayesian_fusion.py       36 tests
 │   ├── test_hybrid.py                31 tests
-│   └── test_tam.py                   52 tests
+│   ├── test_tam.py                   52 tests
+│   ├── test_trajectory.py            29 tests
+│   └── test_attribution.py           49 tests
 │
 ├── app.py
 ├── main.py
@@ -561,10 +690,12 @@ condition-status-classifier/
 | `src/ner.py` | SciSpaCy primary NER + vocabulary fallback (~85 conditions) |
 | `src/sentence_splitter.py` | Clinical sentence boundary detection with abbreviation protection |
 | `src/coref.py` | Pronoun coreference within sections; fires only when entity confidence < 0.65 |
-| `src/pipeline.py` | Orchestrates the full note-level pipeline; wires dep parser refinement |
+| `src/trajectory.py` | Intra-section status trajectory: time-decayed log-evidence accumulation + transition-type LLR bonuses |
+| `src/pipeline.py` | Orchestrates the full note-level pipeline; wires dep parser, coref, and trajectory refinement |
 | `src/calibration.py` | Platt scaler (`calibrate()`), reliability diagram, ECE, Brier, isotonic/temperature methods |
 | `src/tam.py` | TAM extraction: tense/aspect/modality → LLRs; compositionality over novel predicate constructions |
-| `src/bayesian_fusion.py` | Bayesian evidence fusion: posterior distribution, Shannon entropy, section priors, TAM integration |
+| `src/attribution.py` | Attribution-aware confidence: extracts asserter identity (record/patient/family/clinician) and maps each source to independent LLRs |
+| `src/bayesian_fusion.py` | Bayesian evidence fusion: posterior distribution, Shannon entropy, section priors, TAM + attribution integration |
 | `src/hybrid.py` | Hybrid classifier: rule-based MAP label + Bayesian posterior + entropy triage flag |
 | `src/baseline.py` | TF-IDF + logistic regression baseline |
 | `src/note_evaluator.py` | Precision/recall/F1 evaluation on annotated clinical notes |

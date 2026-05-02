@@ -142,7 +142,7 @@ class TestCalibration:
 
     def test_n_total_matches_dataset(self):
         df = reliability_diagram("data/clinical_phrases.csv")
-        assert df.attrs["n_total"] == 127
+        assert df.attrs["n_total"] == 159
 
     def test_bin_counts_sum_to_total(self):
         df = reliability_diagram("data/clinical_phrases.csv")
@@ -160,9 +160,9 @@ class TestNoteEvaluator:
         assert "notes" in result
         assert "aggregate" in result
 
-    def test_evaluates_four_notes(self):
+    def test_evaluates_seven_notes(self):
         result = evaluate_notes("data/annotated_notes.json")
-        assert result["aggregate"]["n_notes"] == 4
+        assert result["aggregate"]["n_notes"] == 7
 
     def test_aggregate_metrics_in_range(self):
         result = evaluate_notes("data/annotated_notes.json")
