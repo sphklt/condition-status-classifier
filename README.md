@@ -53,6 +53,74 @@ Asthma better today  →  ongoing
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart TD
+    APP["Streamlit UI\napp.py\nPhrase · Note · Evaluate"]
+    CLI["CLI\nmain.py"]
+
+    subgraph PIPELINE["Full Note Pipeline — pipeline.py · process_note()"]
+        SD["① Section Detection\nsection_detector.py\nPMH · HPI · Assessment …\nstatus prior per section"]
+        NM["② Text Normalization\nnormalizer.py\nh/o · -ve · s/p …"]
+        NER["③ NER\nner.py"]
+        SS["④ Sentence Splitting\nsentence_splitter.py"]
+        CE["⑤ Sentence Context Extraction\nScope each entity to its own sentence"]
+        CL["⑥ Classify\nclassifier.py"]
+        DP["⑦ Dep-Parse Refinement\ndep_parser.py\nnegation scope · list negation"]
+        SP["⑧ Section Prior Override\nconf < 0.55 → section prior wins"]
+        CO["⑨ Pronoun Coreference\ncoref.py\n'It resolved.' → prior entity"]
+        TR["⑩ Trajectory Refinement\ntrajectory.py\ntime-decayed multi-sentence tracking"]
+        DD["Deduplication\nFirst mention per condition"]
+    end
+
+    subgraph NER_M["NER Methods — ner.py"]
+        SC["SciSpaCy\nen_ner_bc5cdr_md\nprimary"]
+        VM["Vocabulary Matcher\n~85 conditions\nzero-dep fallback"]
+    end
+
+    subgraph RULE_CLF["Rule-Based Classifier — classifier.py"]
+        PN["Pseudo-Negation Masking\n'no longer' · 'not only' …"]
+        CUE["Weighted Cue Matching\nNegation · Resolved · Ongoing · Ambiguous"]
+        TE["Temporal Signal\ntemporal.py\n'3 yrs ago' → resolved · 'today' → ongoing"]
+        CA["Clause-Aware Override\nFinal clause after But / However wins"]
+        CB["Calibration\ncalibration.py · Platt scaling"]
+    end
+
+    subgraph BAYES_CLF["Bayesian Fusion — bayesian_fusion.py"]
+        LP["Section-Conditional Log-Priors\nPMH: P(resolved)=0.55 · HPI: P(ongoing)=0.50"]
+        BF["Bayes-Factor Cue Updates\nLog-likelihood ratios from rules.py"]
+        TAM["TAM Signal\ntam.py · Tense · Aspect · Modality\nCompositional grammatical evidence"]
+        AT["Attribution Signal\nattribution.py · Patient · Record · Hedge"]
+        SM["Softmax → Posterior Distribution\n+ Shannon Entropy (0–2 bits)"]
+    end
+
+    HYB["Hybrid Classifier — hybrid.py\nRule-based status + Bayesian uncertainty\nTriage flag: entropy > 1.2 bits or system disagreement"]
+
+    subgraph OUTPUT["Output"]
+        PRES["PipelineResult\nconditions · sections_found · ner_method · warnings"]
+        RES["ConditionResult per entity\ncondition · status · confidence · section\ncontext · reason · trajectory"]
+        TF["Triage Flag\nHigh-uncertainty predictions\nflagged for human review"]
+    end
+
+    APP -->|full note| PIPELINE
+    APP -->|single phrase| HYB
+    CLI -->|evaluate dataset| PIPELINE
+
+    SD --> NM --> NER --> SS --> CE --> CL --> DP --> SP --> CO --> TR --> DD
+
+    NER --> NER_M
+
+    CL --> RULE_CLF
+    HYB --> RULE_CLF
+    HYB --> BAYES_CLF
+    HYB --> TF
+
+    DD --> PRES --> RES
+```
+
+---
+
 ## How It Works
 
 ### 1. Pseudo-negation filtering
